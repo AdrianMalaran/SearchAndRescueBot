@@ -3,49 +3,54 @@ using namespace std;
 const int MAX_QUEUE_SIZE = 100;
 
 template<class T>
-class Stack {
+class Queue {
   public:
-    Stack () :front_index(0), rear_index(-1), size(0) {};
+    Queue () :m_front_index(0), m_rear_index(-1), m_size(0) {};
 
-    Stack (T in[]) : contents(in) {};
+    Queue (T in[]) : contents(in) {};
 
     void push(T input) {
-        if (size >= MAX_QUEUE_SIZE) {
+        if (m_size >= MAX_QUEUE_SIZE) {
             return;
         }
 
-        rear_index ++;
-        contents[rear_index] = input;
-        size ++;
+        m_rear_index ++;
+        contents[m_rear_index] = input;
+        m_size ++;
     }
 
     T front() {
         if (empty())
             return T();
         else
-            return contents[front_index % MAX_QUEUE_SIZE];
+            return contents[m_front_index % MAX_QUEUE_SIZE];
     }
 
     void pop() {
         if (empty())
             return;
 
-        contents[front_index % MAX_QUEUE_SIZE] = {};
-        front_index ++;
+        contents[m_front_index % MAX_QUEUE_SIZE] = {};
+        m_front_index ++;
+        m_size --;
         return;
     }
 
+    int size() {
+        return m_size;
+    }
+
     bool empty() {
-        return size <= 0;
+        return m_size <= 0;
     }
 
 private:
     T contents[MAX_QUEUE_SIZE];
 
-    int front_index;
+    int m_front_index;
 
-    int rear_index;
+    int m_rear_index;
 
-    int size;
+    int m_size;
 
 };

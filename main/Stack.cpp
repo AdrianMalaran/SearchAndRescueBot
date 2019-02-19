@@ -5,21 +5,21 @@ const int MAX_STACK_SIZE = 100;
 template<class T>
 class Stack {
   public:
-    Stack () : top_element_index(-1), size(0) {
+    Stack () : top_element_index(-1), m_size(0) {
         // T contents[MAX_STACK_SIZE] = {T()};
     };
 
     Stack (T in[]) : contents(in) {};
 
     void push(T input) {
-        if (size >= MAX_STACK_SIZE) {
+        if (m_size >= MAX_STACK_SIZE) {
             // printf("No more room");
             return;
         }
 
         top_element_index ++;
         contents[top_element_index] = input;
-        size ++;
+        m_size ++;
     }
 
     T top() {
@@ -34,11 +34,15 @@ class Stack {
 
         contents[top_element_index] = {};
         top_element_index --;
-        size --;
+        m_size --;
     }
 
     bool empty() {
-        return size <= 0;
+        return m_size <= 0;
+    }
+
+    int size() {
+        return m_size;
     }
 
 private:
@@ -46,7 +50,7 @@ private:
 
     int top_element_index;
 
-    int size;
+    int m_size;
 
 
 };

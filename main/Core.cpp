@@ -1,5 +1,7 @@
+/* GLOBAL CONSTANTS */
 const int GLOBAL_ROW = 6;
 const int GLOBAL_COL = 6;
+const int FLT_MAX = -2;
 
 /* Data Structures */
 struct Coord {
@@ -8,6 +10,16 @@ struct Coord {
 
   Coord () : row(0), col(0) {};
   Coord (int row0, int col0) : row(row0), col(col0) {};
+
+  bool operator == (Coord c) {
+      return (row == c.row && col == c.col);
+  }
+};
+
+struct Score {
+    double f;
+    double h;
+    double g;
 };
 
 struct CoordScore {
@@ -42,4 +54,4 @@ public:
         // (2) Test Path Planning
         // (3) Calibrate sensors
     }
-}
+};
