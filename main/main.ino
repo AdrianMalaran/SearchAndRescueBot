@@ -55,12 +55,18 @@ public:
             { 0, 1, 0, 0, 0, 0}, // 0
             { 0, 1, 1, 1, 1, 0}, // 1
             { 0, 0, 0, 0, 0, 0}, // 2
-            { 0, 0, 0, 0, 0, 0}, // 3
-            { 0, 0, 0, 0, 0, 0}, // 4
+            { 1, 0, 1, 0, 1, 0}, // 3
+            { 0, 1, 0, 1, 0, 0}, // 4
             { 0, 0, 0, 0, 0, 0}  // 5
         };
         // Immediate Path is Blocked
         TestPathPlanning(testGrid2, Coord(0,2), Coord(0,0));
+        TestPathPlanning(testGrid2, Coord(0,2), Coord(5,0));
+        TestPathPlanning(testGrid2, Coord(4,2), Coord(0,0));
+        TestPathPlanning(testGrid2, Coord(4,0), Coord(0,2));
+
+        // At Destination
+        TestPathPlanning(testGrid2, Coord(0,0), Coord(0,0));
 
         int testGrid3[GLOBAL_ROW][GLOBAL_COL] =
         {
@@ -69,8 +75,8 @@ public:
             { 0, 0, 1, 1, 1, 0}, // 1
             { 0, 0, 0, 0, 0, 0}, // 2
             { 0, 0, 0, 0, 0, 0}, // 3
-            { 0, 0, 0, 0, 0, 0}, // 4
-            { 0, 0, 0, 0, 0, 0}  // 5
+            { 0, 0, 0, 0, 1, 1}, // 4
+            { 0, 0, 0, 0, 1, 0}  // 5
         };
         // No Path
         TestPathPlanning(testGrid3, Coord(0,2), Coord(5,5));

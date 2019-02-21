@@ -109,18 +109,21 @@ inline Stack<Coord> AStarSearch(int grid[][GLOBAL_COL], Coord start, Coord dest)
     Stack<Coord> path;
 
     if (!isValid(start.row, start.col)) {
-//        printMessage("Source is invalid\n");
+        // TODO: How should we handle this
+        // printMessage("Source is invalid\n");
         return path;
     }
 
     if (!isUnblocked(grid, start.row, start.col) ||
       !isUnblocked(grid, dest.row, dest.col)) {
-  //      printMessage("Source is blocked!\n");
+        // TODO: How should we handle this
+        // printMessage("Source is blocked!\n");
         return path;
     }
 
     if (isDestination(start.row, start.col, dest)) {
-    //    printMessage("Already at Destination");
+        // TODO: How should we handle this
+        // printMessage("Already at Destination");
         path.push(start);
         return path;
     }
@@ -162,9 +165,6 @@ inline Stack<Coord> AStarSearch(int grid[][GLOBAL_COL], Coord start, Coord dest)
         closedList[row][col] = true;
         Score newScore;
 
-        // Serial.print("Current Point: ");
-        // printCoord(p.coord);
-
         /* Analyze Children */
         if (analyzeAdjacentCell(path, newScore, p.coord, Coord(row - 1, col), dest, closedList, openList, cellDetails, grid) || // North
             analyzeAdjacentCell(path, newScore, p.coord, Coord(row + 1, col), dest, closedList, openList, cellDetails, grid) || // South
@@ -174,6 +174,7 @@ inline Stack<Coord> AStarSearch(int grid[][GLOBAL_COL], Coord start, Coord dest)
     }
 
     // ERROR CODE
+    // TODO: How should we handle this
     path.push(Coord(-1, -1));
     return path;
 }
