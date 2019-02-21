@@ -52,5 +52,4 @@ private:
 
     int m_size;
 
-
 };
