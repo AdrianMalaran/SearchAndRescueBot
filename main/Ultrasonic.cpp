@@ -1,9 +1,6 @@
-#include "Arduino.h"
 #include "Ultrasonic.h"
 
-const int temp = 20;
-long duration;
-float distance, compensatedDistance, speedOfSound = 331.3 + 0.606 * temp;
+float distance, duration;
 
 Ultrasonic::Ultrasonic(int trigPin, int echoPin) {
 	pinMode(trigPin, OUTPUT);
@@ -27,7 +24,6 @@ float Ultrasonic::getDistance() {
 
   // Calculating the distance
   distance = duration * 0.0343 / 2;
-  compensatedDistance = (duration / 20000.0) * speedOfSound;
 
-  return compensatedDistance;
+  return distance;
 }

@@ -1,7 +1,12 @@
 #include "PathPlanning.cpp"
 #include "Ultrasonic.h"
+#include "Flame.h"
 
+// ultrasonic(trigPin, outPin)
 Ultrasonic ultrasonic(9,10);
+
+// flame(digitalPin, analogPin)
+Flame flame(2, 0);
 
 /* Print Functions */
 void printCoord(Coord coord) {
@@ -89,14 +94,18 @@ public:
 int BAUD_RATE = 9600;
 
 void setup() {
-  Serial.begin(BAUD_RATE);
-  Serial.println("Initializing...");
+    Serial.begin(BAUD_RATE);
+    Serial.println("Initializing...");
 
-  Tests::TestPathPlanning();
+    Tests::TestPathPlanning();
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  Serial.print("Distance: ");
-  Serial.println(ultrasonic.getDistance(), 1);
+    Serial.print("Distance: ");
+    Serial.println(ultrasonic.getDistance(), 1);
+
+    Serial.print(", isFire: ");
+    Serial.print(flame.isFire());
+    Serial.print(" Magnitude: ");
+    Serial.println(flame.getFireMagnitude());
 }
