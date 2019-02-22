@@ -1,4 +1,7 @@
 #include "PathPlanning.cpp"
+#include "Ultrasonic.h"
+
+Ultrasonic ultrasonic(9,10);
 
 /* Print Functions */
 void printCoord(Coord coord) {
@@ -94,5 +97,6 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-
+  Serial.print("Distance: ");
+  Serial.println(ultrasonic.getDistance(), 1);
 }
