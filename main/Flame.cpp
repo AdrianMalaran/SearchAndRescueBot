@@ -1,20 +1,20 @@
 #include "Flame.h"
 
-Flame::Flame(int digitalPin) {
-	pinMode(digitalPin, INPUT);
-	_digitalPin = digitalPin;
+Flame::Flame(int digital_pin) {
+	pinMode(digital_pin, INPUT);
+	m_digital_pin = digital_pin;
 }
 
-Flame::Flame(int digitalPin, int analogPin) {
-  pinMode(digitalPin, INPUT);
-  _digitalPin = digitalPin;
-  _analogPin = analogPin;
+Flame::Flame(int digital_pin, int analog_pin) {
+	pinMode(digital_pin, INPUT);
+	m_digital_pin = digital_pin;
+	m_analog_pin = analog_pin;
 }
 
 bool Flame::isFire() {
-  return digitalRead(_digitalPin) == LOW ? true : false;
+	return digitalRead(m_digital_pin) == LOW ? true : false;
 }
 
 float Flame::getFireMagnitude() {
-  return analogRead(_analogPin);
+	return analogRead(m_analog_pin);
 }

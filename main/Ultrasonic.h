@@ -5,11 +5,11 @@
 
 class Ultrasonic {
 	public:
-		Ultrasonic(int trigPin, int echoPin);
+		Ultrasonic(int trig_pin, int echo_pin);
 		float getDistance();
     private:
-		int _trigPin;
-		int _echoPin;
+		int m_trig_pin;
+		int m_echo_pin;
 };
 
 #endif

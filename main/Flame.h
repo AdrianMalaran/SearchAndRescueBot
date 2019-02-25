@@ -5,13 +5,13 @@
 
 class Flame {
 	public:
-		Flame(int digitalPin);
-		Flame(int digitalPin, int analogPin);
+		Flame(int digital_pin);
+		Flame(int digital_pin, int analog_pin);
 		bool isFire();
 		float getFireMagnitude();
     private:
-		int _digitalPin;
-		int _analogPin;
+		int m_digital_pin;
+		int m_analog_pin;
 };
 
 #endif
