@@ -1,12 +1,16 @@
 #include "PathPlanning.cpp"
 #include "Ultrasonic.h"
 #include "Flame.h"
+#include "MotorPair.h"
 
 // ultrasonic(trigPin, outPin)
 Ultrasonic ultrasonic(9,10);
 
 // flame(digitalPin, analogPin)
 Flame flame(2, 0);
+
+// motorPair(enableA, input1-A, input2-A, enableB, input3-B, input4-B)
+MotorPair motorPair(1, 3, 4, 2, 5, 6);
 
 /* Print Functions */
 void printCoord(Coord coord) {
