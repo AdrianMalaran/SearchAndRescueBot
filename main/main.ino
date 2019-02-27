@@ -3,6 +3,9 @@
 #include "Flame.h"
 #include "MotorPair.h"
 
+#include <avr/interrupt.h>
+#include <avr/sleep.h>
+
 // ultrasonic(trigPin, outPin)
 Ultrasonic ultrasonic(9,10);
 
@@ -95,21 +98,53 @@ public:
     }
 };
 
+void stopProgram() {
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    cli();  // Disable interrupts
+    sleep_mode();
+}
+
+void demo() {
+    // Move forwards until the device is within 10cm
+    while(ultrasonic.getDistance() > 10) {
+        motorPair.moveForwards();
+    }
+
+    // Turn the robot right
+    motorPair.turnRight();
+
+    // Move forwards until the device detects fire
+    while(!flame.isFire()) {
+        motorPair.moveForwards();
+    }
+
+    // Stop the device
+    motorPair.stop();
+
+    Serial.println("test");
+    stopProgram();
+}
+
 int BAUD_RATE = 9600;
 
 void setup() {
     Serial.begin(BAUD_RATE);
-    Serial.println("Initializing...");
 
+    Serial.println("Running Tests");
     Tests::TestPathPlanning();
+
+    Serial.print("getDistance: ");
+    Serial.println(ultrasonic.getDistance(), 1);
+
+    Serial.print("isFire: ");
+    Serial.print(flame.isFire());
+    Serial.print(", getFireMagnitude: ");
+    Serial.println(flame.getFireMagnitude());
+
+    Serial.println("Initializing...");
 }
 
 void loop() {
-    Serial.print("Distance: ");
-    Serial.println(ultrasonic.getDistance(), 1);
-
-    Serial.print(", isFire: ");
-    Serial.print(flame.isFire());
-    Serial.print(" Magnitude: ");
-    Serial.println(flame.getFireMagnitude());
+    // Run demo code
+    demo();
 }
