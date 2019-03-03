@@ -13,7 +13,7 @@ Ultrasonic ultrasonic(9,10);
 Flame flame(2, 0);
 
 // motorPair(enableA, input1-A, input2-A, enableB, input3-B, input4-B)
-MotorPair motorPair(1, 3, 4, 2, 5, 6);
+MotorPair motorPair(9, 3, 4, 10, 5, 6);
 
 /* Print Functions */
 void printCoord(Coord coord) {
@@ -127,10 +127,6 @@ void demo() {
 
 int BAUD_RATE = 9600;
 
-#define enA 9
-#define in1 6
-#define in2 7
-
 void setup() {
     Serial.begin(BAUD_RATE);
 
@@ -147,20 +143,10 @@ void setup() {
 
     Serial.println("Initializing...");
 
-    // setup
-    pinMode(enA, OUTPUT);
-      pinMode(in1, OUTPUT);
-      pinMode(in2, OUTPUT);
-      // Set initial rotation direction
-      digitalWrite(in1, LOW);
-      digitalWrite(in2, HIGH);
 }
 
 void loop() {
-    // Run demo code
-    // demo();
-    analogWrite(enA, 125);
-    delay(20);
+    motorPair.moveForwards();
 
 
 }
