@@ -15,6 +15,6 @@ bool Flame::isFire() {
 	return digitalRead(m_digital_pin) == LOW ? true : false;
 }
 
-float Flame::getFireMagnitude() {
-	return analogRead(m_analog_pin);
+int Flame::getFireMagnitude() {
+	return map(analogRead(m_analog_pin), 1024, 0, 0, 100);
 }

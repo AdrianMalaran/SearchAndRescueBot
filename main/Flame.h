@@ -8,7 +8,7 @@ class Flame {
 		Flame(int digital_pin);
 		Flame(int digital_pin, int analog_pin);
 		bool isFire();
-		float getFireMagnitude();
+		int getFireMagnitude();
     private:
 		int m_digital_pin;
 		int m_analog_pin;
