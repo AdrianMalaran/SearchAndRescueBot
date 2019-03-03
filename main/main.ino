@@ -7,10 +7,10 @@
 #include <avr/sleep.h>
 
 // ultrasonic(trigPin, outPin)
-Ultrasonic ultrasonic(9,10);
+Ultrasonic ultrasonic(52,53);
 
 // flame(digitalPin, analogPin)
-Flame flame(2, 0);
+Flame flame(27, 9);
 
 // motorPair(enableA, input1-A, input2-A, enableB, input3-B, input4-B)
 MotorPair motorPair(9, 3, 4, 10, 5, 6);
@@ -106,7 +106,7 @@ void stopProgram() {
 
 void demo() {
     // Move forwards until the device is within 10cm
-    while(ultrasonic.getDistance() > 10) {
+    while(ultrasonic.getDistance() > 15) {
         motorPair.moveForwards();
     }
 
@@ -143,10 +143,23 @@ void setup() {
 
     Serial.println("Initializing...");
 
+    // LED pin for testing
+    pinMode(13, OUTPUT);
+
 }
 
 void loop() {
-    motorPair.moveForwards();
+   // motorPair.moveForwards();
 
+    while(ultrasonic.getDistance() > 15) {};
 
+    digitalWrite(13, HIGH);
+    delay(1000);
+    digitalWrite(13, LOW);
+
+    while(flame.getFireMagnitude() < 75) {};
+
+    digitalWrite(13, HIGH);
+    delay(1000);
+    digitalWrite(13, LOW);
 }
