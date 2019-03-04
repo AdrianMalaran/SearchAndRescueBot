@@ -6,6 +6,8 @@
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
 
+#define LEDPin 13
+
 // ultrasonic(trigPin, outPin)
 Ultrasonic ultrasonic(52,53);
 
@@ -104,24 +106,47 @@ void stopProgram() {
     sleep_mode();
 }
 
-void demo() {
-    // Move forwards until the device is within 10cm
+// Motors
+void demoWithMotors() {
+    // move forwards until the device is within 15cm
     while(ultrasonic.getDistance() > 15) {
         motorPair.moveForwards();
     }
 
-    // Turn the robot right
+    // turn the robot right
     motorPair.turnRight();
 
-    // Move forwards until the device detects fire
-    while(!flame.isFire()) {
+    // move forwards until the device detects fire
+    while(flame.getFireMagnitude() < 25) {
         motorPair.moveForwards();
     }
 
-    // Stop the device
+    // move backwards 1 duration
+    motorPair.moveBackwards();
+
+    // stop the device
     motorPair.stop();
 
-    Serial.println("test");
+    stopProgram();
+}
+
+// No motors
+void demoNoMotors() {
+    // wait for range detection
+    while(ultrasonic.getDistance() > 15) {}
+
+    digitalWrite(LEDPin, HIGH);
+    delay(1000);
+    digitalWrite(LEDPin, LOW);
+
+
+    // wait for fire detection
+    while(flame.getFireMagnitude() < 25) {};
+
+    digitalWrite(LEDPin, HIGH);
+    delay(1000);
+    digitalWrite(LEDPin, LOW);
+
     stopProgram();
 }
 
@@ -133,33 +158,10 @@ void setup() {
     Serial.println("Running Tests");
     Tests::TestPathPlanning();
 
-    Serial.print("getDistance: ");
-    Serial.println(ultrasonic.getDistance(), 1);
-
-    Serial.print("isFire: ");
-    Serial.print(flame.isFire());
-    Serial.print(", getFireMagnitude: ");
-    Serial.println(flame.getFireMagnitude());
-
-    Serial.println("Initializing...");
-
     // LED pin for testing
-    pinMode(13, OUTPUT);
-
+    pinMode(LEDPin, OUTPUT);
 }
 
 void loop() {
-   // motorPair.moveForwards();
-
-    while(ultrasonic.getDistance() > 15) {};
-
-    digitalWrite(13, HIGH);
-    delay(1000);
-    digitalWrite(13, LOW);
-
-    while(flame.getFireMagnitude() < 75) {};
-
-    digitalWrite(13, HIGH);
-    delay(1000);
-    digitalWrite(13, LOW);
+    demoWithMotors();
 }
