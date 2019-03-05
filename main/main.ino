@@ -107,7 +107,7 @@ void stopProgram() {
 }
 
 // Motors
-void demoWithMotors() {
+void demo() {
     // move forwards until the device is within 15cm
     while(ultrasonic.getDistance() > 15) {
         motorPair.moveForwards();
@@ -130,26 +130,6 @@ void demoWithMotors() {
     stopProgram();
 }
 
-// No motors
-void demoNoMotors() {
-    // wait for range detection
-    while(ultrasonic.getDistance() > 15) {}
-
-    digitalWrite(LEDPin, HIGH);
-    delay(1000);
-    digitalWrite(LEDPin, LOW);
-
-
-    // wait for fire detection
-    while(flame.getFireMagnitude() < 25) {};
-
-    digitalWrite(LEDPin, HIGH);
-    delay(1000);
-    digitalWrite(LEDPin, LOW);
-
-    stopProgram();
-}
-
 int BAUD_RATE = 9600;
 
 void setup() {
@@ -163,5 +143,4 @@ void setup() {
 }
 
 void loop() {
-    demoWithMotors();
 }
