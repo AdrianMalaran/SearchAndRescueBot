@@ -2,11 +2,19 @@
 #include "Ultrasonic.h"
 #include "Flame.h"
 #include "MotorPair.h"
+#include "ColorSoft.h"
 
+#include <Wire.h>
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
 
 #define LEDPin 13
+
+#define SDApin 22
+#define SCLpin 23
+
+// color(0xC0, 0x00, 22, 23)
+ColorSoft color(COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X, SDApin, SCLpin);
 
 // ultrasonic(trigPin, outPin)
 Ultrasonic ultrasonic(52,53);
@@ -14,8 +22,8 @@ Ultrasonic ultrasonic(52,53);
 // flame(digitalPin, analogPin)
 Flame flame(27, 9);
 
-// motorPair(enableA, input1-A, input2-A, enableB, input3-B, input4-B)
-MotorPair motorPair(9, 3, 4, 10, 5, 6);
+// motor_pair(enableA, input1-A, input2-A, enableB, input3-B, input4-B)
+MotorPair motor_pair(9, 3, 4, 10, 5, 6);
 
 /* Print Functions */
 void printCoord(Coord coord) {
@@ -110,22 +118,22 @@ void stopProgram() {
 void demo() {
     // move forwards until the device is within 15cm
     while(ultrasonic.getDistance() > 15) {
-        motorPair.moveForwards();
+        motor_pair.moveForwards();
     }
 
     // turn the robot right
-    motorPair.turnRight();
+    motor_pair.turnRight();
 
     // move forwards until the device detects fire
     while(flame.getFireMagnitude() < 25) {
-        motorPair.moveForwards();
+        motor_pair.moveForwards();
     }
 
     // move backwards 1 duration
-    motorPair.moveBackwards();
+    motor_pair.moveBackwards();
 
     // stop the device
-    motorPair.stop();
+    motor_pair.stop();
 
     stopProgram();
 }
@@ -143,4 +151,9 @@ void setup() {
 }
 
 void loop() {
+  uint16_t r, g, b, c;
+  color.getRawData(&r, &g, &b, &c);
+  Serial.print("R: "); Serial.print(r, DEC); Serial.print(" ");
+  Serial.print("G: "); Serial.print(g, DEC); Serial.print(" ");
+  Serial.print("B: "); Serial.print(b, DEC); Serial.println(" ");
 }
