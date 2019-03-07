@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "SoftwareWire.h"
+#include "utilities/SoftwareWire.h"
 #include "ColorSoft.h"
 
 /*========================================================================*/

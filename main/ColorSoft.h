@@ -36,7 +36,7 @@
 #ifndef _ColorSoft_H
 #define _ColorSoft_H
 
-#include "SoftwareWire.h"
+#include "utilities/SoftwareWire.h"
 
 #include <Arduino.h>
 #include <Wire.h>
