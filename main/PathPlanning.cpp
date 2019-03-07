@@ -166,10 +166,14 @@ inline Stack<Coord> AStarSearch(int grid[][GLOBAL_COL], Coord start, Coord dest)
         Score newScore;
 
         /* Analyze Children */
-        if (analyzeAdjacentCell(path, newScore, p.coord, Coord(row - 1, col), dest, closedList, openList, cellDetails, grid) || // North
-            analyzeAdjacentCell(path, newScore, p.coord, Coord(row + 1, col), dest, closedList, openList, cellDetails, grid) || // South
-            analyzeAdjacentCell(path, newScore, p.coord, Coord(row, col + 1), dest, closedList, openList, cellDetails, grid) || // East
-            analyzeAdjacentCell(path, newScore, p.coord, Coord(row, col - 1), dest, closedList, openList, cellDetails, grid)) // West
+        if (analyzeAdjacentCell(path, newScore, p.coord, Coord(row - 1, col),
+                dest, closedList, openList, cellDetails, grid) || // North
+            analyzeAdjacentCell(path, newScore, p.coord, Coord(row + 1, col),
+                dest, closedList, openList, cellDetails, grid) || // South
+            analyzeAdjacentCell(path, newScore, p.coord, Coord(row, col + 1),
+                dest, closedList, openList, cellDetails, grid) || // East
+            analyzeAdjacentCell(path, newScore, p.coord, Coord(row, col - 1),
+                dest, closedList, openList, cellDetails, grid)) // West
             return path;
     }
 
@@ -177,4 +181,85 @@ inline Stack<Coord> AStarSearch(int grid[][GLOBAL_COL], Coord start, Coord dest)
     // TODO: How should we handle this
     path.push(Coord(-1, -1));
     return path;
+}
+
+/* Trajectory Generation */
+
+inline void addReorientation(Queue<Instruction>& instructions,
+                      Orientation curr_orientation,
+                      Orientation new_orientation) {
+    if (curr_orientation == new_orientation)
+        return;
+
+    int diff = curr_orientation - new_orientation;
+    if (fabs(diff) == 2) {
+        // Opposite direction
+        // TODO: Consider having another maneuver called: turn around
+        // TODO: This is so ugly, redo this shit
+        instructions.push(ROTATE_RIGHT);
+        instructions.push(ROTATE_RIGHT);
+    } else {
+        if (curr_orientation == NORTH) {
+            if (new_orientation == EAST)
+                instructions.push(ROTATE_RIGHT);
+            if (new_orientation == WEST)
+                instructions.push(ROTATE_LEFT);
+        }
+        else if (curr_orientation == EAST) {
+            if (new_orientation == SOUTH)
+                instructions.push(ROTATE_RIGHT);
+            if (new_orientation == NORTH)
+                instructions.push(ROTATE_LEFT);
+        }
+        else if (curr_orientation == SOUTH) {
+            if (new_orientation == WEST)
+                instructions.push(ROTATE_RIGHT);
+            if (new_orientation == EAST)
+                instructions.push(ROTATE_LEFT);
+        }
+        else { // West
+            if (new_orientation == NORTH)
+                instructions.push(ROTATE_RIGHT);
+            if (new_orientation == SOUTH)
+                instructions.push(ROTATE_LEFT);
+        }
+    }
+}
+
+inline Orientation convertAngleToOrientation(double angle) {
+    return NORTH;
+}
+
+// Executes main batch of movement functions necessary for travelling
+// between two location blocks
+// By the end of this function, the robot should be at the destination location
+inline void executeInstructions(Queue<Instruction> instructions) {
+    // Validate instructions
+    if (instructions.empty())
+        return;
+
+    while (!instructions.empty()) {
+        Instruction ins = instructions.front();
+        instructions.pop();
+
+        if (ins == MOVE_FORWARD) {
+            // Map -> moveForward()
+        }
+        else if (ins == MOVE_BACKWARD) {
+            // Map -> moveBackward()
+        }
+        else if (ins == ROTATE_RIGHT) {
+            // Map -> turnRight()
+        }
+        else if (ins == ROTATE_LEFT) {
+            // Map -> turnLeft()
+        }
+    }
+}
+
+/* EXPLORE MODE */
+
+inline void detectAdjacentBlock() {
+    // Use motor encoders ??
+    // Detect adjacent block that are undiscovered
 }

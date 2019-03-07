@@ -42,16 +42,59 @@ struct Cell {
   double h;
 };
 
+enum BLOCK_TYPE {
+    P = 0, // Particle Board
+    U = 1, // Unknown
+    W = 2, // Water
+    S = 3, // Sand
+    G = 5, // Gravel
+    X = 6, // Locations of interest
+};
+
+enum Instruction {
+    MOVE_FORWARD = 0, // 0
+    MOVE_BACKWARD = 1, // 1
+    ROTATE_RIGHT = 2, // 2
+    ROTATE_LEFT = 3 // 3
+};
+
+enum Orientation {
+    NORTH,
+    EAST,
+    SOUTH,
+    WEST
+};
+
+// Starting Map:
+//     //0, 1, 2, 3, 4, 5
+//     { U, U, U, U, U, U}, // 0
+//     { U, U, U, U, U, U}, // 1
+//     { U, U, U, U, U, U}, // 2
+//     { U, U, U, U, U, U}, // 3
+//     { U, U, U, U, U, U}, // 4
+//     { U, U, U, P, U, U}  // 5
+
 /* Core Class */
 class Core {
-public:
-    // Member Variables
-    int globalMap[GLOBAL_ROW][GLOBAL_COL];
+    public:
+        void InitRobot() {
+            // (1) Initialize map;
+            // (2) Test Path Planning
+            // (3) Calibrate sensors
 
-    // Member Functions
-    static void InitRobot() {
-        // (1) Initialize map;
-        // (2) Test Path Planning
-        // (3) Calibrate sensors
-    }
+            // Set start coord
+            start_coord = Coord(4, 5);
+
+            // Initialize Start Map
+            for (int i = 0; i < GLOBAL_ROW; i ++) {
+                for (int j = 0; j < GLOBAL_COL; j++) {
+                    global_map[i][j] = U;
+                }
+            }
+
+            global_map[start_coord.row][start_coord.col] = P;
+        }
+    private:
+        BLOCK_TYPE global_map[GLOBAL_ROW][GLOBAL_COL];
+        Coord start_coord;
 };

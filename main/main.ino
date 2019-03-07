@@ -41,6 +41,80 @@ void printCoord(Coord coord) {
     Serial.print(coord.col); Serial.print(") ");
 }
 
+/* Inter coordinate planner: moving from 1 coord to another */
+inline Queue<Instruction> generateTrajectories(Stack<Coord> path, Orientation start_ori, Orientation finish_ori) {
+    // Convert starting pose to a list of instructions to end pose
+    Queue<Instruction> instructions;
+
+    // Return empty instructions if non-valid path
+    if (path.size() <= 1)
+        return instructions;
+
+    // Assume a starting orientation
+    // This will be done by converting the raw values of the orientation
+    Orientation curr_orientation = start_ori; // Convert Angle to orientation
+    Orientation end_pose = finish_ori; //TODO: Incorporate into code
+
+    Coord curr_coord = path.top(); // Starting coordinate
+    path.pop();
+
+    while (!path.empty()) {
+        Coord next_coord = path.top();
+        path.pop();
+
+        // Check direction to go based off of last block
+        int diff_row = next_coord.row - curr_coord.row;
+        int diff_col = next_coord.col - curr_coord.col;
+
+        Serial.print("diff_row: ");
+        Serial.print(diff_row);
+
+        Serial.print(" diff_col: ");
+        Serial.print(diff_col);
+
+        Orientation new_orientation;
+        // Separate to another function: reorientDirection
+        if (diff_row > 0)
+            new_orientation = SOUTH;
+        else if (diff_row < 0)
+            new_orientation = NORTH;
+        else if (diff_col > 0)
+            new_orientation = EAST;
+        else if (diff_col < 0)
+            new_orientation = WEST;
+
+        Serial.print("New: ");
+        Serial.println(new_orientation);
+        addReorientation(instructions, curr_orientation, new_orientation);
+        instructions.push(MOVE_FORWARD);
+
+        curr_coord = next_coord;
+        curr_orientation = new_orientation;
+    }
+}
+
+void printOrientation(Orientation ori) {
+    if (ori == NORTH)
+        Serial.print("NORTH");
+    else if (ori == SOUTH)
+        Serial.print("SOUTH");
+    else if (ori == EAST)
+        Serial.print("EAST");
+    else if (ori == WEST)
+        Serial.print("WEST");
+}
+
+void printInstruction(Instruction ins) {
+    if (ins == MOVE_FORWARD)
+        Serial.print("FORWARD");
+    else if (ins == MOVE_BACKWARD)
+        Serial.print("BACK");
+    else if (ins == ROTATE_RIGHT)
+        Serial.print("RIGHT");
+    else if (ins == ROTATE_LEFT)
+        Serial.print("LEFT");
+}
+
 void printStack(Stack<Coord> stack) {
     Serial.print("Path Size: ");
     Serial.println(stack.size());
@@ -116,6 +190,60 @@ public:
         // No Path
         TestPathPlanning(testGrid3, Coord(0,2), Coord(5,5));
     }
+
+    static void TestTrajectoryGeneration() {
+        // Testing trajectory generation
+        Queue<Instruction> ins;
+
+        Orientation start = WEST;
+        Orientation finish = SOUTH;
+
+        addReorientation(ins, start, finish);
+
+        // Make into a function
+        printOrientation(start);
+        Serial.print(" -> ");
+        printOrientation(finish);
+        Serial.print(": ");
+        while (!ins.empty()) {
+            printInstruction(ins.front());
+            ins.pop();
+
+            if (ins.size())
+                Serial.print(" -> ");
+        }
+
+        Serial.println("");
+
+        Stack<Coord> path;
+        // path.push(Coord(3,4));
+        // path.push(Coord(2,4));
+        // path.push(Coord(2,3));
+        // path.push(Coord(2,2));
+        // path.push(Coord(2,1));
+        // path.push(Coord(3,1));
+        // path.push(Coord(3,0));
+        // path.push(Coord(2,0));
+        // path.push(Coord(1,0));
+        // path.push(Coord(0,0));
+
+        path.push(Coord(3,3));
+        path.push(Coord(3,4));
+        path.push(Coord(4,4));
+        path.push(Coord(4,3));
+        path.push(Coord(3,3));
+
+        ins = generateTrajectories(path, start, finish);
+
+        Serial.println("New Path:");
+        while (!ins.empty()) {
+            printInstruction(ins.front());
+            ins.pop();
+
+            if (ins.size())
+                Serial.print(" -> ");
+        }
+    }
 };
 
 void stopProgram() {
@@ -154,7 +282,8 @@ void setup() {
     Serial.begin(BAUD_RATE);
 
     Serial.println("Running Tests");
-    Tests::TestPathPlanning();
+    // Tests::TestPathPlanning();
+    Tests::TestTrajectoryGeneration();
 
     // LED pin for testing
     pinMode(LEDPin, OUTPUT);
@@ -173,7 +302,7 @@ void setup() {
     uint8_t system = 0, gyro, accel, mag = 0;
     while(system == 0) {
         imu_sensor.getCalibration(&system, &gyro, &accel, &mag);
-        Serial.print("CALIBRATION: Sys="); Serial.print(system, DEC); Serial.print(" Gyro="); Serial.print(gyro, DEC); 
+        Serial.print("CALIBRATION: Sys="); Serial.print(system, DEC); Serial.print(" Gyro="); Serial.print(gyro, DEC);
         Serial.print(" Accel="); Serial.print(accel, DEC); Serial.print(" Mag="); Serial.println(mag, DEC);
         delay(100);
     }
