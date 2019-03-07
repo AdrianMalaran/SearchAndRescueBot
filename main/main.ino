@@ -7,10 +7,12 @@
 #include "Imu.h"
 #include "utilities/imumaths.h"
 
-#include <Adafruit_Sensor.h>
+#include "Adafruit_Sensor.h"
 #include <Wire.h>
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
+
+#include <PID_v1.h> // TODO: Implement
 
 #define LEDPin 13
 
@@ -323,8 +325,8 @@ void loop() {
   Serial.print("B2: "); Serial.print(b2, DEC); Serial.println(" ");
 */
 
-  imu::Vector<3> euler = imu_sensor.getEuler();
-  Serial.print("X: "); Serial.print(euler.x());
-  Serial.print(" Y: "); Serial.print(euler.y());
-  Serial.print(" Z: "); Serial.println(euler.z());
+  // imu::Vector<3> euler = imu_sensor.getEuler();
+  // Serial.print("X: "); Serial.print(euler.x());
+  // Serial.print(" Y: "); Serial.print(euler.y());
+  // Serial.print(" Z: "); Serial.println(euler.z());
 }
