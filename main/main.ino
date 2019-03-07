@@ -2,7 +2,8 @@
 #include "Ultrasonic.h"
 #include "Flame.h"
 #include "MotorPair.h"
-#include "ColorSoft.h"
+//#include "ColorSoft.h"
+#include "Color.h"
 
 #include <Wire.h>
 #include <avr/interrupt.h>
@@ -13,8 +14,11 @@
 #define SDApin 22
 #define SCLpin 23
 
-// color(0xC0, 0x00, 22, 23)
-ColorSoft color(COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X, SDApin, SCLpin);
+// color1(0xC0, 0x00, 22, 23)
+//ColorSoft color1(COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X, SDApin, SCLpin);
+
+// color2(0xC0, 0x00)
+ Color color2(COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X);
 
 // ultrasonic(trigPin, outPin)
 Ultrasonic ultrasonic(52,53);
@@ -151,9 +155,15 @@ void setup() {
 }
 
 void loop() {
-  uint16_t r, g, b, c;
-  color.getRawData(&r, &g, &b, &c);
-  Serial.print("R: "); Serial.print(r, DEC); Serial.print(" ");
-  Serial.print("G: "); Serial.print(g, DEC); Serial.print(" ");
-  Serial.print("B: "); Serial.print(b, DEC); Serial.println(" ");
+  //uint16_t r, g, b, c;
+  //color1.getRawData(&r, &g, &b, &c);
+  //Serial.print("R: "); Serial.print(r, DEC); Serial.print(" ");
+  //Serial.print("G: "); Serial.print(g, DEC); Serial.print(" ");
+  //Serial.print("B: "); Serial.print(b, DEC); Serial.println(" ");
+
+  uint16_t r2, g2, b2, c2;
+  color2.getRawData(&r2, &g2, &b2, &c2);
+  Serial.print("R2: "); Serial.print(r2, DEC); Serial.print(" ");
+  Serial.print("G2: "); Serial.print(g2, DEC); Serial.print(" ");
+  Serial.print("B2: "); Serial.print(b2, DEC); Serial.println(" ");
 }
