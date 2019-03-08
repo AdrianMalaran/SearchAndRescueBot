@@ -45,6 +45,27 @@ void ColorSoft::enable() {
   write8(COLOR_SOFT_ENABLE, COLOR_SOFT_ENABLE_PON);
   delay(3);
   write8(COLOR_SOFT_ENABLE, COLOR_SOFT_ENABLE_PON | COLOR_SOFT_ENABLE_AEN);
+
+  switch (m_color_integration_time) {
+  case COLOR_SOFT_INTEGRATIONTIME_2_4MS:
+    delay(3);
+    break;
+  case COLOR_SOFT_INTEGRATIONTIME_24MS:
+    delay(24);
+    break;
+  case COLOR_SOFT_INTEGRATIONTIME_50MS:
+    delay(50);
+    break;
+  case COLOR_SOFT_INTEGRATIONTIME_101MS:
+    delay(101);
+    break;
+  case COLOR_SOFT_INTEGRATIONTIME_154MS:
+    delay(154);
+    break;
+  case COLOR_SOFT_INTEGRATIONTIME_700MS:
+    delay(700);
+    break;
+  }
 }
 
 ColorSoft::ColorSoft(color_soft_integration_time_t it, color_soft_gain_t gain, uint8_t sda_pin, uint8_t scl_pin) {

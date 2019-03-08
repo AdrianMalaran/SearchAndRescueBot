@@ -2,13 +2,12 @@
 #include "Ultrasonic.h"
 #include "Flame.h"
 #include "MotorPair.h"
-//#include "ColorSoft.h"
+#include "ColorSoft.h"
 #include "Color.h"
 #include "Imu.h"
 #include "utilities/imumaths.h"
-
 #include "Adafruit_Sensor.h"
-#include <Wire.h>
+
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
 
@@ -24,7 +23,7 @@
 Imu imu_sensor = Imu();
 
 // color1(0xC0, 0x00, 22, 23)
-//ColorSoft color1(COLOR_SOFT_INTEGRATIONTIME_154MS, COLOR_SOFT_GAIN_1X, SDApin, SCLpin);
+ColorSoft color1(COLOR_SOFT_INTEGRATIONTIME_154MS, COLOR_SOFT_GAIN_1X, SDApin, SCLpin);
 
 // color2(0xC0, 0x00)
 Color color2(COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X);

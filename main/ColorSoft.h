@@ -43,7 +43,7 @@ class ColorSoft {
  public:
   ColorSoft(color_soft_integration_time_t = COLOR_SOFT_INTEGRATIONTIME_2_4MS, color_soft_gain_t = COLOR_SOFT_GAIN_1X, uint8_t sda_pin = 30, uint8_t scl_pin = 31);
 
-  boolean begin(void);
+  boolean begin();
   void setIntegrationTime(color_soft_integration_time_t it);
   void setGain(color_soft_gain_t gain);
   void getRawData(uint16_t *r, uint16_t *g, uint16_t *b, uint16_t *c);
@@ -52,7 +52,7 @@ class ColorSoft {
   void write8 (uint8_t reg, uint32_t value);
   uint8_t read8 (uint8_t reg);
   uint16_t read16 (uint8_t reg);
-  void enable(void);
+  void enable();
 
  private:
   boolean m_color_initialised;
