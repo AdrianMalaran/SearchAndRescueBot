@@ -1,6 +1,8 @@
 #ifndef _Color_H_
 #define _Color_H_
 
+#include "SoftwareWire.h"
+
 #include <Arduino.h>
 #include <Wire.h>
 
@@ -35,12 +37,14 @@ typedef enum {
   COLOR_GAIN_60X               = 0x03    /**<  60x gain */
 } color_gain_t;
 
+////////   Green is SDA, Blue is SCL   ////////
+
 class Color {
 public:
   Color(color_integration_time_t = COLOR_INTEGRATIONTIME_2_4MS, color_gain_t = COLOR_GAIN_1X);
+  Color(uint8_t sda_pin, uint8_t scl_pin, color_integration_time_t = COLOR_INTEGRATIONTIME_2_4MS, color_gain_t = COLOR_GAIN_1X);
 
   boolean begin();
-
   void setIntegrationTime(color_integration_time_t it);
   void setGain(color_gain_t gain);
   void getRawData(uint16_t *r, uint16_t *g, uint16_t *b, uint16_t *c);
@@ -55,6 +59,11 @@ private:
   boolean m_color_initialised;
   color_gain_t m_color_gain;
   color_integration_time_t m_color_integration_time;
+
+  boolean m_is_soft;
+  uint8_t m_sda_pin;
+  uint8_t m_scl_pin;
+  SoftwareWire m_i2c;
   TwoWire *m_wire;
 
   float powf(const float x, const float y);

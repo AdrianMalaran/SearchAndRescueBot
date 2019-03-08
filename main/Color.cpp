@@ -1,6 +1,7 @@
-#include <math.h>
 #include <stdlib.h>
+#include <math.h>
 
+#include "SoftwareWire.h"
 #include "Color.h"
 
 float Color::powf(const float x, const float y) {
@@ -8,32 +9,59 @@ float Color::powf(const float x, const float y) {
 }
 
 void Color::write8(uint8_t reg, uint32_t value) {
-  m_wire->beginTransmission(COLOR_ADDRESS);
-  m_wire->write(COLOR_COMMAND_BIT | reg);
-  m_wire->write(value & 0xFF);
-  m_wire->endTransmission();
+  if(m_is_soft) {
+    m_i2c.beginTransmission(COLOR_ADDRESS);
+    m_i2c.write(COLOR_COMMAND_BIT | reg);
+    m_i2c.write(value & 0xFF);
+    m_i2c.endTransmission();
+  } else {
+    m_wire->beginTransmission(COLOR_ADDRESS);
+    m_wire->write(COLOR_COMMAND_BIT | reg);
+    m_wire->write(value & 0xFF);
+    m_wire->endTransmission();
+  }
 }
 
 uint8_t Color::read8(uint8_t reg) {
-  m_wire->beginTransmission(COLOR_ADDRESS);
-  m_wire->write(COLOR_COMMAND_BIT | reg);
-  m_wire->endTransmission();
-  m_wire->requestFrom(COLOR_ADDRESS, 1);
+  if(m_is_soft) {
+    m_i2c.beginTransmission(COLOR_ADDRESS);
+    m_i2c.write(COLOR_COMMAND_BIT | reg);
+    m_i2c.endTransmission();
+    m_i2c.requestFrom(COLOR_ADDRESS, 1);
 
-  return m_wire->read();
+    return m_i2c.read();
+  } else {
+    m_wire->beginTransmission(COLOR_ADDRESS);
+    m_wire->write(COLOR_COMMAND_BIT | reg);
+    m_wire->endTransmission();
+    m_wire->requestFrom(COLOR_ADDRESS, 1);
+
+    return m_wire->read();
+  }
 }
 
 uint16_t Color::read16(uint8_t reg) {
   uint16_t x; uint16_t t;
 
-  m_wire->beginTransmission(COLOR_ADDRESS);
-  m_wire->write(COLOR_COMMAND_BIT | reg);
-  m_wire->endTransmission();
+  if(m_is_soft) {
+    m_wire->beginTransmission(COLOR_ADDRESS);
+    m_wire->write(COLOR_COMMAND_BIT | reg);
+    m_wire->endTransmission();
 
-  m_wire->requestFrom(COLOR_ADDRESS, 2);
+    m_wire->requestFrom(COLOR_ADDRESS, 2);
 
-  t = m_wire->read();
-  x = m_wire->read();
+    t = m_wire->read();
+    x = m_wire->read();
+  } else {
+    m_i2c.beginTransmission(COLOR_ADDRESS);
+    m_i2c.write(COLOR_COMMAND_BIT | reg);
+    m_i2c.endTransmission();
+
+    m_i2c.requestFrom(COLOR_ADDRESS, 2);
+
+    t = m_i2c.read();
+    x = m_i2c.read();
+  }
 
   x <<= 8;
   x |= t;
@@ -68,6 +96,7 @@ void Color::enable() {
 }
 
 Color::Color(color_integration_time_t it, color_gain_t gain) {
+  m_is_soft = false;
   m_color_initialised = false;
   m_color_integration_time = it;
   m_color_gain = gain;
@@ -75,8 +104,20 @@ Color::Color(color_integration_time_t it, color_gain_t gain) {
   m_wire = &Wire;
 }
 
+Color::Color(uint8_t sda_pin, uint8_t scl_pin, color_integration_time_t it, color_gain_t gain) {
+  m_is_soft = true;
+  m_color_initialised = false;
+  m_color_integration_time = it;
+  m_color_gain = gain;
+
+  m_sda_pin = sda_pin;
+  m_scl_pin = scl_pin;
+
+  m_i2c = SoftwareWire(sda_pin, scl_pin);
+}
+
 boolean Color::begin() {
-  m_wire->begin();
+  m_is_soft ? m_i2c.begin() : m_wire->begin();
 
   uint8_t x = read8(COLOR_ID);
   if ((x != 0x44) && (x != 0x10)) {
@@ -116,8 +157,7 @@ void Color::getRawData(uint16_t *r, uint16_t *g, uint16_t *b, uint16_t *c) {
   *g = read16(COLOR_GDATAL);
   *b = read16(COLOR_BDATAL);
 
-  switch (m_color_integration_time)
-  {
+  switch (m_color_integration_time) {
     case COLOR_INTEGRATIONTIME_2_4MS:
       delay(3);
       break;
