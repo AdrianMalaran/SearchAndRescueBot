@@ -7,6 +7,7 @@
 using namespace std;
 
 //TODO: Add a check that determines if its a water block
+//TODO: Determine how to gracefully handle an invalid path
 inline bool isValid(int row, int col) {
   return row >= 0 && col >= 0 && row < GLOBAL_ROW && col < GLOBAL_COL;
 }
@@ -255,6 +256,53 @@ inline void executeInstructions(Queue<Instruction> instructions) {
             // Map -> turnLeft()
         }
     }
+}
+
+/* Inter coordinate planner: moving from 1 coord to another */
+inline Queue<Instruction> generateTrajectories(Stack<Coord> path, Orientation start_ori, Orientation finish_ori) {
+    // Convert starting pose to a list of instructions to end pose
+    Queue<Instruction> instructions;
+
+    // Return empty instructions if non-valid path
+    if (path.size() <= 1)
+        return instructions;
+
+    // Assume a starting orientation
+    // This will be done by converting the raw values of the orientation
+    Orientation curr_orientation = start_ori; // Convert Angle to orientation
+    Orientation end_pose = finish_ori; //TODO: Incorporate into code
+
+    Coord curr_coord = path.top(); // Starting coordinate
+    path.pop();
+
+    while (!path.empty()) {
+        Coord next_coord = path.top();
+        path.pop();
+
+        // Check direction to go based off of last block
+        int diff_row = next_coord.row - curr_coord.row;
+        int diff_col = next_coord.col - curr_coord.col;
+
+        Orientation new_orientation;
+        // Separate to another function: reorientDirection
+        if (diff_row > 0)
+            new_orientation = SOUTH;
+        else if (diff_row < 0)
+            new_orientation = NORTH;
+        else if (diff_col > 0)
+            new_orientation = EAST;
+        else if (diff_col < 0)
+            new_orientation = WEST;
+
+        addReorientation(instructions, curr_orientation, new_orientation);
+        instructions.push(MOVE_FORWARD);
+
+        curr_coord = next_coord;
+        curr_orientation = new_orientation;
+    }
+
+    //TODO: Rename consistent orientation or "ori"
+    addReorientation(instructions, curr_orientation, finish_ori);
 }
 
 /* EXPLORE MODE */

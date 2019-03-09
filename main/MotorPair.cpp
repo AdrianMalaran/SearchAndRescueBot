@@ -6,8 +6,8 @@
 //   each call is one tile of motion |
 //   pass a distance based value;
 //
-// Also do we need to deal with ramping to avoid
-// possible brownouts? Do we need to handle 
+// Also do we need to deal with ramping to astatic void
+// possible brownouts? Do we need to handle
 // ramping for turns?
 //
 // Code assumes A is left, B is right
@@ -16,7 +16,19 @@
 
 const int MAX_SPEED = 255, MIN_SPEED = 0;
 
-MotorPair::MotorPair(int enable_a, int input1, int input2, int enable_b, int input3, int input4) {
+// MotorPair motor_pair(9, 3, 4, 10, 5, 6);
+
+// Motor A
+const int enable_a = 9;
+const int input1 = 3;
+const int input2 = 4;
+
+// Motor B
+const int enable_b = 10;
+const int input3 = 5;
+const int input4 = 6;
+
+MotorPair::MotorPair() {
 	// Set motor A pins
 	pinMode(enable_a, OUTPUT);
 	pinMode(input1, OUTPUT);
@@ -26,95 +38,102 @@ MotorPair::MotorPair(int enable_a, int input1, int input2, int enable_b, int inp
 	pinMode(enable_b, OUTPUT);
 	pinMode(input3, OUTPUT);
 	pinMode(input4, OUTPUT);
-
-	// Set motor A member vars
-	m_enable_a = enable_a;
-	m_input1 = input1;
-	m_input2 = input2;
-
-	// Set motor B member vars
-	m_enable_b = enable_b;
-	m_input3 = input3;
-	m_input4 = input4;
 }
 
-void MotorPair::stop() {
-	analogWrite(m_enable_a, MIN_SPEED);
-	analogWrite(m_enable_b, MIN_SPEED);
+static void MotorPair::stop() {
+	analogWrite(enable_a, MIN_SPEED);
+	analogWrite(enable_b, MIN_SPEED);
 }
 
-void MotorPair::rampUp(int set_speed) {
+static void MotorPair::rampUp(int set_speed) {
 	for(int speed = MIN_SPEED; speed < set_speed; speed++) {
-		analogWrite(m_enable_a, speed);
-		analogWrite(m_enable_b, speed);
+		analogWrite(enable_a, speed);
+		analogWrite(enable_b, speed);
 	}
 }
 
-void MotorPair::rampDown(int curr_speed) {
+static void MotorPair::rampDown(int curr_speed) {
 	for(int speed = curr_speed; speed > MIN_SPEED; speed--) {
-		analogWrite(m_enable_a, speed);
-		analogWrite(m_enable_b, speed);
+		analogWrite(enable_a, speed);
+		analogWrite(enable_b, speed);
 	}
 }
 
-void MotorPair::moveForwards() {
-	digitalWrite(m_input1, LOW);
-	digitalWrite(m_input2, HIGH);
-	digitalWrite(m_input3, LOW);
-	digitalWrite(m_input4, HIGH);
+static void MotorPair::setMotorASpeed(int speed) {
+	if (speed > 0) {
+		digitalWrite(input1, LOW);
+		digitalWrite(input2, HIGH);
+	} else {
+		digitalWrite(input1, HIGH);
+		digitalWrite(input2, LOW);
+	}
+
+	// Continually Turn Motors
+	analogWrite(enable_a, fabs(speed));
+}
+
+static void MotorPair::setMotorBSpeed(int speed) {
+
+}
+
+static void MotorPair::moveForwards() {
+	digitalWrite(input1, LOW);
+	digitalWrite(input2, HIGH);
+	digitalWrite(input3, LOW);
+	digitalWrite(input4, HIGH);
 
 	rampUp(MAX_SPEED);
 
-	analogWrite(m_enable_a, MAX_SPEED);
-	analogWrite(m_enable_b, MAX_SPEED);
+	analogWrite(enable_a, MAX_SPEED);
+	analogWrite(enable_b, MAX_SPEED);
 	delay(1000);
 
 	rampDown(MAX_SPEED);
 	stop();
 }
 
-void MotorPair::moveBackwards() {
-	digitalWrite(m_input1, HIGH);
-	digitalWrite(m_input2, LOW);
-	digitalWrite(m_input3, HIGH);
-	digitalWrite(m_input4, LOW);
+static void MotorPair::moveBackwards() {
+	digitalWrite(input1, HIGH);
+	digitalWrite(input2, LOW);
+	digitalWrite(input3, HIGH);
+	digitalWrite(input4, LOW);
 
 	rampUp(MAX_SPEED);
 
-	analogWrite(m_enable_a, MAX_SPEED);
-	analogWrite(m_enable_b, MAX_SPEED);
+	analogWrite(enable_a, MAX_SPEED);
+	analogWrite(enable_b, MAX_SPEED);
 	delay(1000);
 
 	rampDown(MAX_SPEED);
 	stop();
 }
 
-void MotorPair::turnLeft() {
-	digitalWrite(m_input1, LOW);
-	digitalWrite(m_input2, HIGH);
-	digitalWrite(m_input3, HIGH);
-	digitalWrite(m_input4, LOW);
+static void MotorPair::turnLeft() {
+	digitalWrite(input1, LOW);
+	digitalWrite(input2, HIGH);
+	digitalWrite(input3, HIGH);
+	digitalWrite(input4, LOW);
 
 	rampUp(MAX_SPEED/2);
 
-	analogWrite(m_enable_a, MAX_SPEED/2);
-	analogWrite(m_enable_b, MAX_SPEED/2);
+	analogWrite(enable_a, MAX_SPEED/2);
+	analogWrite(enable_b, MAX_SPEED/2);
 	delay(500);
 
 	rampDown(MAX_SPEED/2);
 	stop();
 }
 
-void MotorPair::turnRight() {
-	digitalWrite(m_input1, HIGH);
-	digitalWrite(m_input2, LOW);
-	digitalWrite(m_input3, LOW);
-	digitalWrite(m_input4, HIGH);
+static void MotorPair::turnRight() {
+	digitalWrite(input1, HIGH);
+	digitalWrite(input2, LOW);
+	digitalWrite(input3, LOW);
+	digitalWrite(input4, HIGH);
 
 	rampUp(MAX_SPEED/2);
 
-	analogWrite(m_enable_a, MAX_SPEED/2);
-	analogWrite(m_enable_b, MAX_SPEED/2);
+	analogWrite(enable_a, MAX_SPEED/2);
+	analogWrite(enable_b, MAX_SPEED/2);
 	delay(500);
 
 	rampDown(MAX_SPEED/2);
