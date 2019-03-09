@@ -12,7 +12,7 @@
 #include <avr/sleep.h>
 
 // #include "Controller.cpp"
-#include <PID_v1.h>
+#include "PID_v1.h"
 
 #define LEDPin 13
 
@@ -38,9 +38,6 @@ Flame flame(27, 9);
 // CONTROLLER
 double input, output, set_point, Kp = 10;
 PID pid(&input, &output, &set_point, 2, 5, 1, DIRECT);
-
-// MotorPair::enableA, input1-A, input2-A, enableB, input3-B, input4-B)
-// MotorPair MotorPair::9, 3, 4, 10, 5, 6);
 
 void stopProgram() {
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);

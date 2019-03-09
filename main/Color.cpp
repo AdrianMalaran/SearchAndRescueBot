@@ -199,6 +199,55 @@ uint16_t Color::calculateColorTemperature(uint16_t r, uint16_t g, uint16_t b) {
   return (uint16_t)cct;
 }
 
+int Color::getTerrainColor() {
+  uint16_t r_tot, g_tot, b_tot;
+  uint16_t r, g, b, c;
+  for(int i = 0; i < 10; i++) {
+      getRawData(&r, &g, &b, &c);
+      r_tot+=r;
+      g_tot+=g;
+      b_tot+=b;
+  }
+  r_tot/=10;
+  g_tot/=10;
+  b_tot/=10;
+
+  // TODO: All of these values need to be calibrated
+  if (r_tot > 100 && r_tot < 200 && g_tot > 100 && g_tot < 200 && b_tot > 100 && b_tot < 200)
+    return 1; // Particle Board
+  else if (r_tot > 150 && r_tot < 200 && g_tot > 20 && g_tot < 100 && b_tot > 175 && b_tot < 250)
+    return 2; // Water
+  else if (r_tot > 100 && r_tot < 200 && g_tot > 100 && g_tot < 200 && b_tot > 100 && b_tot < 200)
+    return 3; // Sand
+  else if (r_tot > 150 && r_tot < 200 && g_tot > 20 && g_tot < 100 && b_tot > 175 && b_tot < 250)
+    return 4; // Gravel
+  else
+    return 0; // Unknown
+}
+
+int Color::getStructureColor() {
+  uint16_t r_tot, g_tot, b_tot;
+  uint16_t r, g, b, c;
+  for(int i = 0; i < 10; i++) {
+      getRawData(&r, &g, &b, &c);
+      r_tot+=r;
+      g_tot+=g;
+      b_tot+=b;
+  }
+  r_tot/=10;
+  g_tot/=10;
+  b_tot/=10;
+
+  // TODO: All of these values need to be calibrated
+  if (r_tot > 100 && r_tot < 200 && g_tot > 100 && g_tot < 200 && b_tot > 100 && b_tot < 200)
+    return 1; // Red House
+  else if (r_tot > 150 && r_tot < 200 && g_tot > 20 && g_tot < 100 && b_tot > 175 && b_tot < 250)
+    return 2; // Yellow House
+  else
+    return 0; // Unknown
+
+}
+
 uint16_t Color::calculateLux(uint16_t r, uint16_t g, uint16_t b) {
   float illuminance;
 

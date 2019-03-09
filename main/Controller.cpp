@@ -17,7 +17,7 @@ mag_heading = wrap360(v[0] + yaw_offset); //yaw = v[0], correct for magnetic Nor
 
  */
 #include "MotorPair.h"
-#include <PID_v1.h>
+#include "PID_v1.h"
 #include <Arduino.h>
 
 class Controller {

@@ -43,8 +43,8 @@ struct Cell {
 };
 
 enum BLOCK_TYPE {
-    P = 0, // Particle Board
-    U = 1, // Unknown
+    U = 0, // Unknown
+    P = 1, // Particle Board
     W = 2, // Water
     S = 3, // Sand
     G = 5, // Gravel
