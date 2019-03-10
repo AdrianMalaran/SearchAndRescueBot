@@ -44,15 +44,6 @@ uint16_t Color::read16(uint8_t reg) {
   uint16_t x; uint16_t t;
 
   if(m_is_soft) {
-    m_wire->beginTransmission(COLOR_ADDRESS);
-    m_wire->write(COLOR_COMMAND_BIT | reg);
-    m_wire->endTransmission();
-
-    m_wire->requestFrom(COLOR_ADDRESS, 2);
-
-    t = m_wire->read();
-    x = m_wire->read();
-  } else {
     m_i2c.beginTransmission(COLOR_ADDRESS);
     m_i2c.write(COLOR_COMMAND_BIT | reg);
     m_i2c.endTransmission();
@@ -61,6 +52,15 @@ uint16_t Color::read16(uint8_t reg) {
 
     t = m_i2c.read();
     x = m_i2c.read();
+  } else {
+    m_wire->beginTransmission(COLOR_ADDRESS);
+    m_wire->write(COLOR_COMMAND_BIT | reg);
+    m_wire->endTransmission();
+
+    m_wire->requestFrom(COLOR_ADDRESS, 2);
+
+    t = m_wire->read();
+    x = m_wire->read();
   }
 
   x <<= 8;

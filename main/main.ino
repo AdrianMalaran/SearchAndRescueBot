@@ -24,10 +24,10 @@
 Imu imu_sensor = Imu();
 
 // color1(0xC0, 0x00, 22, 23)
-Color color1(COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X, SDApin, SCLpin);
+Color color1(SDApin, SCLpin, COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X);
 
 // color2(0xC0, 0x00)
- Color color2(COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X);
+Color color2(COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X);
 
 // ultrasonic(trigPin, outPin)
 Ultrasonic ultrasonic(52,53);
@@ -78,8 +78,8 @@ void setup() {
     // LED pin for testing
     pinMode(LEDPin, OUTPUT);
 
+/*
     if(!imu_sensor.begin()) {
-        /* There was a problem detecting the BNO055 ... check your connections */
         Serial.print("Ooops, no imu_sensor detected ... Check your wiring or I2C ADDR!");
         while(1);
     }
@@ -96,16 +96,17 @@ void setup() {
         Serial.print(" Accel="); Serial.print(accel, DEC); Serial.print(" Mag="); Serial.println(mag, DEC);
         delay(100);
     }
+*/
 }
 
 void loop() {
-/*
+
   uint16_t r, g, b, c;
   color1.getRawData(&r, &g, &b, &c);
   Serial.print("R: "); Serial.print(r, DEC); Serial.print(" ");
   Serial.print("G: "); Serial.print(g, DEC); Serial.print(" ");
   Serial.print("B: "); Serial.print(b, DEC); Serial.println(" ");
-
+/*
   uint16_t r2, g2, b2, c2;
   color2.getRawData(&r2, &g2, &b2, &c2);
   Serial.print("R2: "); Serial.print(r2, DEC); Serial.print(" ");
@@ -113,13 +114,13 @@ void loop() {
   Serial.print("B2: "); Serial.print(b2, DEC); Serial.println(" ");
 */
 
-  imu::Vector<3> euler = imu_sensor.getEuler();
+  // imu::Vector<3> euler = imu_sensor.getEuler();
   // imu::Vector<3> euler = imu_sensor.getMag(); // Magnet
   // Serial.print("Yaw: "); Serial.print(euler.x());
   // Serial.print(" Pitch: "); Serial.print(euler.y());
   // Serial.print(" Roll: "); Serial.println(euler.z());
 
-  double desired_heading = 70;
-  double current_heading = euler.x();
-  DriveStraight(desired_heading, current_heading);
+  // double desired_heading = 70;
+  // double current_heading = euler.x();
+  // DriveStraight(desired_heading, current_heading);
 }
