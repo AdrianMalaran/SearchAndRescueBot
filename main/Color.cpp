@@ -200,7 +200,7 @@ uint16_t Color::calculateColorTemperature(uint16_t r, uint16_t g, uint16_t b) {
 }
 
 int Color::getTerrainColor() {
-  uint16_t r_tot, g_tot, b_tot;
+  uint16_t r_tot = 0, g_tot = 0, b_tot = 0;
   uint16_t r, g, b, c;
   for(int i = 0; i < 10; i++) {
       getRawData(&r, &g, &b, &c);
@@ -213,20 +213,20 @@ int Color::getTerrainColor() {
   b_tot/=10;
 
   // TODO: All of these values need to be calibrated
-  if (r_tot > 100 && r_tot < 200 && g_tot > 100 && g_tot < 200 && b_tot > 100 && b_tot < 200)
+  if (r_tot > 275 - 25 && r_tot < 275 + 25 && g_tot > 214 - 25 && g_tot < 214 + 25 && b_tot > 142 - 25 && b_tot < 142 + 25)
     return 1; // Particle Board
-  else if (r_tot > 150 && r_tot < 200 && g_tot > 20 && g_tot < 100 && b_tot > 175 && b_tot < 250)
+  else if (r_tot > 220 - 25 && r_tot < 236 + 25 && g_tot > 160 - 25 && g_tot < 160 + 25 && b_tot > 99 - 25 && b_tot < 99 + 25)
     return 2; // Water
-  else if (r_tot > 100 && r_tot < 200 && g_tot > 100 && g_tot < 200 && b_tot > 100 && b_tot < 200)
+  else if (r_tot > 58 - 25 && r_tot < 58 + 25 && g_tot > 41 - 25 && g_tot < 41 + 25 && b_tot > 32 - 25 && b_tot < 32 + 25)
     return 3; // Sand
-  else if (r_tot > 150 && r_tot < 200 && g_tot > 20 && g_tot < 100 && b_tot > 175 && b_tot < 250)
+  else if (r_tot > 149 - 25 && r_tot < 149 + 25 && g_tot > 115 - 25 && g_tot < 115 + 25 && b_tot > 78 - 25 && b_tot < 78 + 25)
     return 4; // Gravel
   else
     return 0; // Unknown
 }
 
 int Color::getStructureColor() {
-  uint16_t r_tot, g_tot, b_tot;
+  uint16_t r_tot = 0, g_tot = 0, b_tot = 0;
   uint16_t r, g, b, c;
   for(int i = 0; i < 10; i++) {
       getRawData(&r, &g, &b, &c);
