@@ -7,6 +7,7 @@ class MotorPair {
 	public:
 		MotorPair();
 		static void stop();
+    static void standby();
 		static void setMotorASpeed(int speed);
 		static void setMotorBSpeed(int speed);
 		static void moveForwards();
