@@ -149,17 +149,19 @@ void setup() {
 }
 
 void loop() {
-   // motorPair.moveForwards();
+  digitalWrite(47, HIGH); // to pull motor controlelr out of standby mode
+  motorPair.moveForwards();
+ //  delay(1000);
 
-    while(ultrasonic.getDistance() > 15) {};
+//    while(ultrasonic.getDistance() > 15) {};
 
-    digitalWrite(13, HIGH);
-    delay(1000);
-    digitalWrite(13, LOW);
+//    digitalWrite(13, HIGH);
+//    delay(1000);
+//    digitalWrite(13, LOW);
 
-    while(flame.getFireMagnitude() < 75) {};
-
-    digitalWrite(13, HIGH);
-    delay(1000);
-    digitalWrite(13, LOW);
+//   // while(flame.getFireMagnitude() < 75) {};
+//
+//    digitalWrite(13, HIGH);
+//    delay(1000);
+//    digitalWrite(13, LOW);
 }

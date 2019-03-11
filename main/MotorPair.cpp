@@ -65,8 +65,8 @@ void MotorPair::moveForwards() {
 
 	rampUp(MAX_SPEED);
 
-	analogWrite(m_enable_a, MAX_SPEED);
-	analogWrite(m_enable_b, MAX_SPEED);
+	analogWrite(m_enable_a, 210);
+	analogWrite(m_enable_b, 255);
 	delay(1000);
 
 	rampDown(MAX_SPEED);
