@@ -63,24 +63,7 @@ void setup() {
     // LED pin for testing
     pinMode(LEDPin, OUTPUT);
 
-    if(!imu_sensor.begin()) {
-        /* There was a problem detecting the BNO055 ... check your connections */
-        Serial.print("NO IMU SENSOR DETECTED ... Check your wiring or I2C ADDR!");
-        while(1);
-    }
-
-    int8_t temp = imu_sensor.getTemp();
-    Serial.print("Current Temperature: "); Serial.print(temp); Serial.println(" C");
-
-    imu_sensor.setExtCrystalUse(true);
-
-    uint8_t system = 0, gyro, accel, mag = 0;
-    while(system == 0) {
-        imu_sensor.getCalibration(&system, &gyro, &accel, &mag);
-        Serial.print("CALIBRATION: Sys="); Serial.print(system, DEC); Serial.print(" Gyro="); Serial.print(gyro, DEC);
-        Serial.print(" Accel="); Serial.print(accel, DEC); Serial.print(" Mag="); Serial.println(mag, DEC);
-        delay(100);
-    }
+    imu_sensor.calibrate();
 
     MotorPair::setupMotorPair();
     delay(1000);

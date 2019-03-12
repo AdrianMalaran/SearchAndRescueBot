@@ -352,6 +352,27 @@ void Imu::getCalibration(uint8_t *sys, uint8_t *gyro,
   }
 }
 
+void Imu::calibrate() {
+  if(!begin()) {
+    /* There was a problem detecting the BNO055 ... check your connections */
+    Serial.print("NO IMU SENSOR DETECTED ... Check your wiring or I2C ADDR!");
+    while(1);
+  }
+
+    int8_t temp = getTemp();
+    Serial.print("Current Temperature: "); Serial.print(temp); Serial.println(" C");
+
+    setExtCrystalUse(true);
+
+    uint8_t system = 0, gyro = 0, accel = 0, mag = 0;
+    while(system == 0) {
+        getCalibration(&system, &gyro, &accel, &mag);
+        Serial.print("CALIBRATION: Sys="); Serial.print(system, DEC); Serial.print(" Gyro="); Serial.print(gyro, DEC);
+        Serial.print(" Accel="); Serial.print(accel, DEC); Serial.print(" Mag="); Serial.println(mag, DEC);
+        delay(100);
+    }
+}
+
 /*!
  *  @brief  Gets the temperature in degrees celsius
  *  @return temperature in degrees celsius
