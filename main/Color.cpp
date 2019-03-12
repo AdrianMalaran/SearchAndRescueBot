@@ -44,15 +44,6 @@ uint16_t Color::read16(uint8_t reg) {
   uint16_t x; uint16_t t;
 
   if(m_is_soft) {
-    m_wire->beginTransmission(COLOR_ADDRESS);
-    m_wire->write(COLOR_COMMAND_BIT | reg);
-    m_wire->endTransmission();
-
-    m_wire->requestFrom(COLOR_ADDRESS, 2);
-
-    t = m_wire->read();
-    x = m_wire->read();
-  } else {
     m_i2c.beginTransmission(COLOR_ADDRESS);
     m_i2c.write(COLOR_COMMAND_BIT | reg);
     m_i2c.endTransmission();
@@ -61,6 +52,15 @@ uint16_t Color::read16(uint8_t reg) {
 
     t = m_i2c.read();
     x = m_i2c.read();
+  } else {
+    m_wire->beginTransmission(COLOR_ADDRESS);
+    m_wire->write(COLOR_COMMAND_BIT | reg);
+    m_wire->endTransmission();
+
+    m_wire->requestFrom(COLOR_ADDRESS, 2);
+
+    t = m_wire->read();
+    x = m_wire->read();
   }
 
   x <<= 8;
@@ -197,6 +197,55 @@ uint16_t Color::calculateColorTemperature(uint16_t r, uint16_t g, uint16_t b) {
   cct = (449.0F * powf(n, 3)) + (3525.0F * powf(n, 2)) + (6823.3F * n) + 5520.33F;
 
   return (uint16_t)cct;
+}
+
+int Color::getTerrainColor() {
+  uint16_t r_tot = 0, g_tot = 0, b_tot = 0;
+  uint16_t r, g, b, c;
+  for(int i = 0; i < 10; i++) {
+      getRawData(&r, &g, &b, &c);
+      r_tot+=r;
+      g_tot+=g;
+      b_tot+=b;
+  }
+  r_tot/=10;
+  g_tot/=10;
+  b_tot/=10;
+
+  // TODO: All of these values need to be calibrated
+  if (r_tot > 275 - 25 && r_tot < 275 + 25 && g_tot > 214 - 25 && g_tot < 214 + 25 && b_tot > 142 - 25 && b_tot < 142 + 25)
+    return 1; // Particle Board
+  else if (r_tot > 220 - 25 && r_tot < 236 + 25 && g_tot > 160 - 25 && g_tot < 160 + 25 && b_tot > 99 - 25 && b_tot < 99 + 25)
+    return 2; // Water
+  else if (r_tot > 58 - 25 && r_tot < 58 + 25 && g_tot > 41 - 25 && g_tot < 41 + 25 && b_tot > 32 - 25 && b_tot < 32 + 25)
+    return 3; // Sand
+  else if (r_tot > 149 - 25 && r_tot < 149 + 25 && g_tot > 115 - 25 && g_tot < 115 + 25 && b_tot > 78 - 25 && b_tot < 78 + 25)
+    return 4; // Gravel
+  else
+    return 0; // Unknown
+}
+
+int Color::getStructureColor() {
+  uint16_t r_tot = 0, g_tot = 0, b_tot = 0;
+  uint16_t r, g, b, c;
+  for(int i = 0; i < 10; i++) {
+      getRawData(&r, &g, &b, &c);
+      r_tot+=r;
+      g_tot+=g;
+      b_tot+=b;
+  }
+  r_tot/=10;
+  g_tot/=10;
+  b_tot/=10;
+
+  // TODO: All of these values need to be calibrated
+  if (r_tot > 100 && r_tot < 200 && g_tot > 100 && g_tot < 200 && b_tot > 100 && b_tot < 200)
+    return 1; // Red House
+  else if (r_tot > 150 && r_tot < 200 && g_tot > 20 && g_tot < 100 && b_tot > 175 && b_tot < 250)
+    return 2; // Yellow House
+  else
+    return 0; // Unknown
+
 }
 
 uint16_t Color::calculateLux(uint16_t r, uint16_t g, uint16_t b) {

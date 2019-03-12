@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
 #include "MotorPair.h"
-#include <PID_v1.h>
+#include "PID_v1.h"
 
 class Controller {
     public:

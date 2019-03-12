@@ -33,8 +33,10 @@ const int enable_b = 10;
 const int input3 = 5;
 const int input4 = 6;
 
-static void MotorPair::setupMotorPair() {
-	Serial.println("Constructor Hit");
+// standby pin
+const int stand_by = 47;
+
+MotorPair::MotorPair() {
 	// Set motor A pins
 	pinMode(enable_a, OUTPUT);
 	pinMode(input1, OUTPUT);
@@ -44,11 +46,25 @@ static void MotorPair::setupMotorPair() {
 	pinMode(enable_b, OUTPUT);
 	pinMode(input3, OUTPUT);
 	pinMode(input4, OUTPUT);
+
+  // Set standby pin
+  pinMode(stand_by, OUTPUT);
 }
 
 static void MotorPair::stop() {
 	analogWrite(enable_a, MIN_SPEED_A);
 	analogWrite(enable_b, MIN_SPEED_B);
+}
+
+static void MotorPair::standby() {
+  digitalWrite(stand_by, LOW);
+}
+
+static void MotorPair::rampUp(int set_speed) {
+	for(int speed = MIN_SPEED_A; speed < set_speed; speed++) {
+		analogWrite(enable_a, speed);
+		analogWrite(enable_b, speed);
+	}
 }
 
 // Possibly Remove
@@ -93,6 +109,7 @@ static void MotorPair::setMotorBSpeed(int speed) {
 }
 
 static void MotorPair::moveForwards() {
+  digitalWrite(stand_by, HIGH);
 	digitalWrite(input1, LOW);
 	digitalWrite(input2, HIGH);
 	digitalWrite(input3, LOW);
@@ -109,6 +126,7 @@ static void MotorPair::moveForwards() {
 }
 
 static void MotorPair::moveBackwards() {
+  digitalWrite(stand_by, HIGH);
 	digitalWrite(input1, HIGH);
 	digitalWrite(input2, LOW);
 	digitalWrite(input3, HIGH);
@@ -125,6 +143,7 @@ static void MotorPair::moveBackwards() {
 }
 
 static void MotorPair::turnLeft() {
+  digitalWrite(stand_by, HIGH);
 	digitalWrite(input1, LOW);
 	digitalWrite(input2, HIGH);
 	digitalWrite(input3, HIGH);
@@ -141,6 +160,7 @@ static void MotorPair::turnLeft() {
 }
 
 static void MotorPair::turnRight() {
+  digitalWrite(stand_by, HIGH);
 	digitalWrite(input1, HIGH);
 	digitalWrite(input2, LOW);
 	digitalWrite(input3, LOW);
