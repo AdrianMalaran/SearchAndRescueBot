@@ -1,3 +1,6 @@
+#ifndef Core_h
+#define Core_h
+
 /* GLOBAL CONSTANTS */
 const int GLOBAL_ROW = 6;
 const int GLOBAL_COL = 6;
@@ -82,39 +85,4 @@ enum TASK {
 //     { U, U, U, U, U, U}, // 4
 //     { U, U, U, P, U, U}  // 5
 
-/* Core Class */
-class Core {
-    public:
-        void InitRobot() {
-            // (1) Initialize map;
-            // (2) Test Path Planning
-            // (3) Calibrate sensors
-
-            // Set start coord
-            start_coord = Coord(4, 5);
-
-            // Initialize Start Map
-            for (int i = 0; i < GLOBAL_ROW; i ++) {
-                for (int j = 0; j < GLOBAL_COL; j++) {
-                    global_map[i][j] = U;
-                }
-            }
-
-            global_map[start_coord.row][start_coord.col] = P;
-        }
-
-        //TODO: implement this run function
-        void Run() {
-            // This function will be run in the loop() function of the arduino
-
-        }
-
-        void ReturnToStart() {
-            // Get current location
-            // travelToBack();
-            // stopToProgram();
-        }
-    private:
-        BLOCK_TYPE global_map[GLOBAL_ROW][GLOBAL_COL];
-        Coord start_coord;
-};
+#endif
