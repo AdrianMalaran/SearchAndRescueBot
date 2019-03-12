@@ -35,6 +35,8 @@ Ultrasonic ultrasonic(52,53);
 // flame(digitalPin, analogPin)
 Flame flame(27, 9);
 
+MotorPair motor_pair(imu_sensor);
+
 // controller
 double input, output, set_point, Kp = 30;
 PID pid(&input, &output, &set_point, 2, 5, 1, DIRECT);
@@ -65,8 +67,9 @@ void setup() {
 
     imu_sensor.calibrate();
 
-    MotorPair::setupMotorPair();
     delay(1000);
+
+    motor_pair.setupMotorPair();
 }
 
 /***************
@@ -98,7 +101,8 @@ void loop() {
   double desired_heading = m_desired_heading;
   double current_heading = euler.x();
 
-  Controller::DriveStraight(desired_heading, current_heading);
+  //Controller::DriveStraight(desired_heading, current_heading);
   // MotorPair::moveForwards();
   // Serial.println("Driving");
+  motor_pair.turnLeft();
 }

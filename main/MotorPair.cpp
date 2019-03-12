@@ -38,11 +38,13 @@ const int input4 = 6;
 // standby pin
 const int stand_by = 47;
 
-MotorPair::MotorPair() {
-	setupMotorPair();
+MotorPair::MotorPair(Imu imu_sensor) {
+	m_imu_sensor = imu_sensor;
 }
 
 void MotorPair::setupMotorPair() {
+	m_orientation = m_imu_sensor.getEuler().x();
+
 	// Set motor A pins
 	pinMode(enable_a, OUTPUT);
 	pinMode(input1, OUTPUT);
@@ -53,8 +55,8 @@ void MotorPair::setupMotorPair() {
 	pinMode(input3, OUTPUT);
 	pinMode(input4, OUTPUT);
 
-  // Set standby pin
-  pinMode(stand_by, OUTPUT);
+  	// Set standby pin
+  	pinMode(stand_by, OUTPUT);
 }
 
 static void MotorPair::stop() {
@@ -150,7 +152,14 @@ static void MotorPair::moveBackwards() {
 }
 
 static void MotorPair::turnLeft() {
-  digitalWrite(stand_by, HIGH);
+	// determine the desired orientation of imu with wrapper
+	if(m_orientation - 90 < 0)
+		m_orientation+=270;
+	else
+		m_orientation-=90;
+
+	// orientate motors for left turn
+  	digitalWrite(stand_by, HIGH);
 	digitalWrite(input1, LOW);
 	digitalWrite(input2, HIGH);
 	digitalWrite(input3, HIGH);
@@ -158,16 +167,24 @@ static void MotorPair::turnLeft() {
 
 	// rampUp(MAX_SPEED/2);
 
-	analogWrite(enable_a, MAX_SPEED_A);
-	analogWrite(enable_b, MAX_SPEED_B);
-	delay(500);
+	analogWrite(enable_a, MAX_SPEED_A/2);
+	analogWrite(enable_b, MAX_SPEED_B/2);
+	
+	while(m_imu_sensor.getEuler().x() != m_orientation) {}
 
 	// rampDown(MAX_SPEED/2);
 	stop();
 }
 
 static void MotorPair::turnRight() {
-  digitalWrite(stand_by, HIGH);
+	// determine the desired orientation of imu with wrapper
+	float desired_orientaion;
+	if(m_orientation + 90 > 360)
+		desired_orientaion = m_orientation - 270;
+	else
+		desired_orientaion = m_orientation + 90;
+
+  	digitalWrite(stand_by, HIGH);
   
 	digitalWrite(input1, HIGH);
 	digitalWrite(input2, LOW);
@@ -176,9 +193,10 @@ static void MotorPair::turnRight() {
 
 	// rampUp(MAX_SPEED/2);
 
-	analogWrite(enable_a, MAX_SPEED_A);
-	analogWrite(enable_b, MAX_SPEED_B);
-	delay(500);
+	analogWrite(enable_a, MAX_SPEED_A/2);
+	analogWrite(enable_b, MAX_SPEED_B/2);
+
+	while(m_imu_sensor.getEuler().x() != desired_orientaion) {}
 
 	// rampDown(MAX_SPEED/2);
 	stop();

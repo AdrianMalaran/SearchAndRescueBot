@@ -2,6 +2,7 @@
 #define MotorPair_h
 
 #include "Arduino.h"
+#include "Imu.h"
 
 
 /*
@@ -9,19 +10,21 @@ TODO: Should the MotorPair have access to the IMU ?
 */
 class MotorPair {
 	public:
-		MotorPair();
-		static void setupMotorPair();
+		MotorPair(Imu imu_sensor);
+		void setupMotorPair();
 		static void stop();
-    static void standby();
+    	void standby();
 		static void setMotorASpeed(int speed);
 		static void setMotorBSpeed(int speed);
-		static void moveForwards();
-		static void moveBackwards();
-		static void turnLeft();
-		static void turnRight();
+		void moveForwards();
+		void moveBackwards();
+		void turnLeft();
+		void turnRight();
     private:
-		static void rampUp(int set_speed);
-		static void rampDown(int curr_speed);
+		void rampUp(int set_speed);
+		void rampDown(int curr_speed);
+		Imu m_imu_sensor;
+		double m_orientation;
 };
 
 #endif
