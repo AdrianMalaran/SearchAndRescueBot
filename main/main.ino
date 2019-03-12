@@ -1,7 +1,7 @@
 #include "Tests.cpp"
 #include "Ultrasonic.h"
 #include "Flame.h"
-#include "MotorPair.h"
+// #include "MotorPair.h"
 #include "Color.h"
 #include "Imu.h"
 #include "utilities/imumaths.h"
@@ -11,7 +11,7 @@
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
 
-// #include "Controller.cpp"
+#include "PathPlanning.h"
 #include <PID_v1.h>
 
 #define LEDPin 13
@@ -24,10 +24,10 @@
 Imu imu_sensor = Imu();
 
 // color1(0xC0, 0x00, 22, 23)
-Color color1(COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X, SDApin, SCLpin);
+Color color1(SDApin, SCLpin, COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X);
 
 // color2(0xC0, 0x00)
- Color color2(COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X);
+Color color2(COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X);
 
 // ultrasonic(trigPin, outPin)
 Ultrasonic ultrasonic(52,53);
@@ -35,8 +35,8 @@ Ultrasonic ultrasonic(52,53);
 // flame(digitalPin, analogPin)
 Flame flame(27, 9);
 
-// CONTROLLER
-double input, output, set_point, Kp = 10;
+// controller
+double input, output, set_point, Kp = 30;
 PID pid(&input, &output, &set_point, 2, 5, 1, DIRECT);
 
 // MotorPair::enableA, input1-A, input2-A, enableB, input3-B, input4-B)
@@ -52,38 +52,25 @@ void setupController() {
     pid.SetMode(AUTOMATIC);
 }
 
-void DriveStraight(double desired_heading, double current_heading) {
-    input = current_heading;
-    set_point = desired_heading;
+double m_desired_heading;
 
-    pid.Compute();
-
-    double error = desired_heading - current_heading; // wraped in 360
-
-    double bias = (Kp * error)/10;
-
-    Serial.print("Desired: "); Serial.print(desired_heading);
-    Serial.print(" Current: "); Serial.print(current_heading);
-    Serial.print(" bias: "); Serial.println(bias);
-
-    int nominal_speed = 220;
-    MotorPair::setMotorASpeed(nominal_speed - bias);
-    MotorPair::setMotorBSpeed(nominal_speed + bias);
-}
-
+/**************
+*    SETUP    *
+***************/
 void setup() {
     Serial.begin(9600);
 
     Serial.println("Running Tests");
     // Tests::TestPathPlanning();
-    Tests::TestTrajectoryGeneration();
+    // Tests::TestTrajectoryGeneration();
+    Tests::TestController();
 
     // LED pin for testing
     pinMode(LEDPin, OUTPUT);
 
     if(!imu_sensor.begin()) {
         /* There was a problem detecting the BNO055 ... check your connections */
-        Serial.print("Ooops, no imu_sensor detected ... Check your wiring or I2C ADDR!");
+        Serial.print("NO IMU SENSOR DETECTED ... Check your wiring or I2C ADDR!");
         while(1);
     }
 
@@ -93,14 +80,22 @@ void setup() {
     imu_sensor.setExtCrystalUse(true);
 
     uint8_t system = 0, gyro, accel, mag = 0;
-    while(system == 0) {
-        imu_sensor.getCalibration(&system, &gyro, &accel, &mag);
-        Serial.print("CALIBRATION: Sys="); Serial.print(system, DEC); Serial.print(" Gyro="); Serial.print(gyro, DEC);
-        Serial.print(" Accel="); Serial.print(accel, DEC); Serial.print(" Mag="); Serial.println(mag, DEC);
-        delay(100);
-    }
+    // while(system == 0) {
+    //     imu_sensor.getCalibration(&system, &gyro, &accel, &mag);
+    //     Serial.print("CALIBRATION: Sys="); Serial.print(system, DEC); Serial.print(" Gyro="); Serial.print(gyro, DEC);
+    //     Serial.print(" Accel="); Serial.print(accel, DEC); Serial.print(" Mag="); Serial.println(mag, DEC);
+    //     delay(100);
+    // }
+
+    MotorPair::setupMotorPair();
+
+    delay(1000);
+    // m_desired_heading = imu_sensor.getEuler().x();
 }
 
+/***************
+*     LOOP     *
+****************/
 void loop() {
 /*
   uint16_t r, g, b, c;
@@ -116,13 +111,15 @@ void loop() {
   Serial.print("B2: "); Serial.print(b2, DEC); Serial.println(" ");
 */
 
-  imu::Vector<3> euler = imu_sensor.getEuler();
   // imu::Vector<3> euler = imu_sensor.getMag(); // Magnet
   // Serial.print("Yaw: "); Serial.print(euler.x());
   // Serial.print(" Pitch: "); Serial.print(euler.y());
   // Serial.print(" Roll: "); Serial.println(euler.z());
-
-  double desired_heading = 70;
+  imu::Vector<3> euler = imu_sensor.getEuler();
+  double desired_heading = m_desired_heading;
   double current_heading = euler.x();
-  DriveStraight(desired_heading, current_heading);
+
+  Controller::DriveStraight(desired_heading, current_heading);
+  // MotorPair::moveForwards();
+  // Serial.println("Driving");
 }

@@ -1,31 +1,28 @@
 #include <math.h>
-
-#include "Core.cpp"
-#include "Stack.cpp"
-#include "Queue.cpp"
+#include "PathPlanning.h"
 
 using namespace std;
 
 //TODO: Add a check that determines if its a water block
 //TODO: Determine how to gracefully handle an invalid path
-inline bool isValid(int row, int col) {
+static bool PathPlanning::isValid(int row, int col) {
   return row >= 0 && col >= 0 && row < GLOBAL_ROW && col < GLOBAL_COL;
 }
 
-inline bool isUnblocked(int grid[][GLOBAL_COL], int row, int col) {
+static bool PathPlanning::isUnblocked(int grid[][GLOBAL_COL], int row, int col) {
   return grid[row][col] == 0;
 }
 
-inline bool isDestination(int row, int col, Coord dest) {
+static bool PathPlanning::isDestination(int row, int col, Coord dest) {
   return (row == dest.row && col == dest.col);
 }
 
-inline double calculateHValue(int row, int col, Coord dest) {
+static double PathPlanning::calculateHValue(int row, int col, Coord dest) {
   // Calculate Manhattan Distance
   return row-dest.row + col-dest.col;
 }
 
-inline Stack<Coord> tracePath(Cell cellDetails[][GLOBAL_COL], Coord dest) {
+static Stack<Coord> PathPlanning::tracePath(Cell cellDetails[][GLOBAL_COL], Coord dest) {
     int row = dest.row;
     int col = dest.col;
 
@@ -47,7 +44,7 @@ inline Stack<Coord> tracePath(Cell cellDetails[][GLOBAL_COL], Coord dest) {
     return tempPath;
 }
 
-inline bool analyzeAdjacentCell(
+static bool PathPlanning::analyzeAdjacentCell(
     Stack<Coord>& pathToDest,
     Score newScore,
     Coord currCoord,
@@ -106,7 +103,7 @@ inline bool analyzeAdjacentCell(
     return false;
 }
 
-inline Stack<Coord> AStarSearch(int grid[][GLOBAL_COL], Coord start, Coord dest) {
+static Stack<Coord> PathPlanning::AStarSearch(int grid[][GLOBAL_COL], Coord start, Coord dest) {
     Stack<Coord> path;
 
     if (!isValid(start.row, start.col)) {
@@ -179,14 +176,14 @@ inline Stack<Coord> AStarSearch(int grid[][GLOBAL_COL], Coord start, Coord dest)
     }
 
     // ERROR CODE
-    // TODO: How should we handle this
+    // TODO: How should we handle this?
     path.push(Coord(-1, -1));
     return path;
 }
 
 /* Trajectory Generation */
 
-inline void addReorientation(Queue<Instruction>& instructions,
+static void PathPlanning::addReorientation(Queue<Instruction>& instructions,
                       Orientation curr_orientation,
                       Orientation new_orientation) {
     if (curr_orientation == new_orientation)
@@ -227,14 +224,14 @@ inline void addReorientation(Queue<Instruction>& instructions,
     }
 }
 
-inline Orientation convertAngleToOrientation(double angle) {
+static Orientation PathPlanning::convertAngleToOrientation(double angle) {
     return NORTH;
 }
 
 // Executes main batch of movement functions necessary for travelling
 // between two location blocks
 // By the end of this function, the robot should be at the destination location
-inline void executeInstructions(Queue<Instruction> instructions) {
+static void PathPlanning::executeInstructions(Queue<Instruction> instructions) {
     // Validate instructions
     if (instructions.empty())
         return;
@@ -259,7 +256,7 @@ inline void executeInstructions(Queue<Instruction> instructions) {
 }
 
 /* Inter coordinate planner: moving from 1 coord to another */
-inline Queue<Instruction> generateTrajectories(Stack<Coord> path, Orientation start_ori, Orientation finish_ori) {
+static Queue<Instruction> PathPlanning::generateTrajectories(Stack<Coord> path, Orientation start_ori, Orientation finish_ori) {
     // Convert starting pose to a list of instructions to end pose
     Queue<Instruction> instructions;
 
@@ -301,13 +298,58 @@ inline Queue<Instruction> generateTrajectories(Stack<Coord> path, Orientation st
         curr_orientation = new_orientation;
     }
 
-    //TODO: Rename consistent orientation or "ori"
     addReorientation(instructions, curr_orientation, finish_ori);
 }
 
-/* EXPLORE MODE */
+/* MAPPING */
 
-inline void detectAdjacentBlock() {
-    // Use motor encoders ??
-    // Detect adjacent block that are undiscovered
+// Test Mapping
+static bool PathPlanning::isUnexplored(Coord coord) {
+    //TODO: Replace global map;
+    BLOCK_TYPE global_map[GLOBAL_ROW][GLOBAL_COL];
+
+    // If coord is invalid, don't explore
+    if (isValid(coord.row, coord.col) && global_map[coord.row][coord.col] == U)
+        return true;
+
+    return false;
+}
+
+static void PathPlanning::mapAdjacentBlocks() {
+    // Use motor encoders to measure distance ??
+    // Detect adjacent blocks that are undiscovered
+
+    //TODO: Replace global map;
+    BLOCK_TYPE global_map[GLOBAL_ROW][GLOBAL_COL];
+
+    // Check global map for any undiscovered blocks
+    Coord current_location;
+
+    // Explore all adjacent blocks
+    Coord adjacent_blocks[4];
+    adjacent_blocks[0] = Coord(current_location.row - 1, current_location.col);
+    adjacent_blocks[0] = Coord(current_location.row + 1, current_location.col);
+    adjacent_blocks[0] = Coord(current_location.row, current_location.col - 1);
+    adjacent_blocks[0] = Coord(current_location.row, current_location.col + 1);
+
+    for (int i = 0; i < 4; i++) {
+        int row = adjacent_blocks[i].row;
+        int col = adjacent_blocks[i].col;
+        if (isValid(row, col) && global_map[row][col] == U) {
+            // Use color sensor to detect terrain
+        }
+    }
+}
+
+static void PathPlanning::mapBlockInFrontTerrain() {
+    /* Questions we want to answer:
+        How do we detect that we're at the edge of one block ? (Use ultrasonic sensors ?)
+    */
+
+    /*
+        Move forward until boundary of current block is met
+        Take colour sensor reading to determine correct terrain of block infront
+        Map this block
+        Move robot back to center of the block
+    */
 }

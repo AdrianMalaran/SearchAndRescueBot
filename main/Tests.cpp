@@ -1,5 +1,7 @@
 #include <Arduino.h>
-#include "PathPlanning.cpp"
+
+#include "PathPlanning.h"
+#include "Controller.h"
 
 /* Print Functions */
 inline void printCoord(Coord coord) {
@@ -20,13 +22,13 @@ inline void printOrientation(Orientation ori) {
 
 inline void printInstruction(Instruction ins) {
     if (ins == MOVE_FORWARD)
-        Serial.print("FORWARD");
+        Serial.print("MOVE FORWARD");
     else if (ins == MOVE_BACKWARD)
-        Serial.print("BACK");
+        Serial.print("MOVE BACK");
     else if (ins == ROTATE_RIGHT)
-        Serial.print("RIGHT");
+        Serial.print("TURN RIGHT");
     else if (ins == ROTATE_LEFT)
-        Serial.print("LEFT");
+        Serial.print("TURN LEFT");
 }
 
 inline void printStack(Stack<Coord> stack) {
@@ -51,7 +53,7 @@ inline void printStack(Stack<Coord> stack) {
 class Tests {
 public:
     static Stack<Coord> TestPathPlanning(int grid[][GLOBAL_COL], Coord start, Coord finish) {
-        printStack(AStarSearch(grid, start, finish));
+        printStack(PathPlanning::AStarSearch(grid, start, finish));
     }
     static Stack<Coord> TestPathPlanning() {
         int testGrid[GLOBAL_ROW][GLOBAL_COL] =
@@ -112,7 +114,7 @@ public:
         Orientation start = WEST;
         Orientation finish = SOUTH;
 
-        addReorientation(ins, start, finish);
+        PathPlanning::addReorientation(ins, start, finish);
 
         // Make into a function
         printOrientation(start);
@@ -147,7 +149,7 @@ public:
         path.push(Coord(4,3));
         path.push(Coord(3,3));
 
-        ins = generateTrajectories(path, start, finish);
+        ins = PathPlanning::generateTrajectories(path, start, finish);
 
         Serial.println("New Path:");
         while (!ins.empty()) {
@@ -158,5 +160,13 @@ public:
                 Serial.print(" -> ");
         }
         Serial.println("");
+    }
+
+    static void TestController() {
+        Controller::DriveStraight(10, 359);
+        Controller::DriveStraight(0, 359);
+        Controller::DriveStraight(350, 359);
+        Controller::DriveStraight(180, 270);
+
     }
 };

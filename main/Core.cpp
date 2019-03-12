@@ -65,6 +65,14 @@ enum Orientation {
     WEST
 };
 
+enum TASK {
+    EXTINGUISH_FIRE,
+    FIND_FOOD,
+    FIND_GROUP_OF_PEOPLE,
+    DELIVER_FOOD, // Could be eliminated
+    FIND_SURVIVOR
+};
+
 // Starting Map:
 //     //0, 1, 2, 3, 4, 5
 //     { U, U, U, U, U, U}, // 0
@@ -93,6 +101,18 @@ class Core {
             }
 
             global_map[start_coord.row][start_coord.col] = P;
+        }
+
+        //TODO: implement this run function
+        void Run() {
+            // This function will be run in the loop() function of the arduino
+
+        }
+
+        void ReturnToStart() {
+            // Get current location
+            // travelToBack();
+            // stopToProgram();
         }
     private:
         BLOCK_TYPE global_map[GLOBAL_ROW][GLOBAL_COL];
