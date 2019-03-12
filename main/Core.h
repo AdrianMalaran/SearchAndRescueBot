@@ -1,6 +1,9 @@
 #ifndef Core_h
 #define Core_h
 
+#include "Stack.cpp"
+#include "Queue.cpp"
+
 /* GLOBAL CONSTANTS */
 const int GLOBAL_ROW = 6;
 const int GLOBAL_COL = 6;
@@ -77,12 +80,14 @@ enum TASK {
 };
 
 // Starting Map:
-//     //0, 1, 2, 3, 4, 5
+// BLOCK_TYPE global_map[GLOBAL_ROW][GLOBAL_COL] =
+// {   //0, 1, 2, 3, 4, 5
 //     { U, U, U, U, U, U}, // 0
 //     { U, U, U, U, U, U}, // 1
 //     { U, U, U, U, U, U}, // 2
 //     { U, U, U, U, U, U}, // 3
 //     { U, U, U, U, U, U}, // 4
 //     { U, U, U, P, U, U}  // 5
+// };
 
 #endif

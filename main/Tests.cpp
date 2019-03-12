@@ -52,6 +52,12 @@ inline void printStack(Stack<Coord> stack) {
 // Store them in a seperate location
 class Tests {
 public:
+    static RunAllTests() {
+        // Tests::TestPathPlanning();
+        // Tests::TestTrajectoryGeneration();
+        Tests::TestController();
+    }
+
     static Stack<Coord> TestPathPlanning(int grid[][GLOBAL_COL], Coord start, Coord finish) {
         printStack(PathPlanning::AStarSearch(grid, start, finish));
     }

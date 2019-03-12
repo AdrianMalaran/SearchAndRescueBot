@@ -11,7 +11,9 @@
 // possible brownouts? Do we need to handle
 // ramping for turns?
 //
-// Code assumes A is right, B is left
+// Code assumes:
+// Motor A is right
+// Motor B is left
 //
 // Motor speed is 0-255
 
@@ -37,6 +39,10 @@ const int input4 = 6;
 const int stand_by = 47;
 
 MotorPair::MotorPair() {
+	setupMotorPair();
+}
+
+void MotorPair::setupMotorPair() {
 	// Set motor A pins
 	pinMode(enable_a, OUTPUT);
 	pinMode(input1, OUTPUT);
@@ -109,7 +115,8 @@ static void MotorPair::setMotorBSpeed(int speed) {
 }
 
 static void MotorPair::moveForwards() {
-  digitalWrite(stand_by, HIGH);
+  	digitalWrite(stand_by, HIGH);
+
 	digitalWrite(input1, LOW);
 	digitalWrite(input2, HIGH);
 	digitalWrite(input3, LOW);
@@ -126,7 +133,7 @@ static void MotorPair::moveForwards() {
 }
 
 static void MotorPair::moveBackwards() {
-  digitalWrite(stand_by, HIGH);
+  	digitalWrite(stand_by, HIGH);
 	digitalWrite(input1, HIGH);
 	digitalWrite(input2, LOW);
 	digitalWrite(input3, HIGH);
@@ -161,6 +168,7 @@ static void MotorPair::turnLeft() {
 
 static void MotorPair::turnRight() {
   digitalWrite(stand_by, HIGH);
+  
 	digitalWrite(input1, HIGH);
 	digitalWrite(input2, LOW);
 	digitalWrite(input3, LOW);

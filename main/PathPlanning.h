@@ -3,9 +3,7 @@
 
 #include "Arduino.h"
 
-#include "Core.cpp"
-#include "Stack.cpp"
-#include "Queue.cpp"
+#include "Core.h"
 
 class PathPlanning {
 	public:
@@ -36,12 +34,6 @@ class PathPlanning {
         static Queue<Instruction> generateTrajectories(Stack<Coord> path,
             Orientation start_ori,
             Orientation finish_ori);
-
-        static bool isUnexplored(Coord coord);
-        static void mapAdjacentBlocks();
-        static void mapBlockInFrontTerrain();
-    private:
-
 };
 
 #endif

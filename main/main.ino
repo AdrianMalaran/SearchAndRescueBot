@@ -58,13 +58,10 @@ void setup() {
     Serial.begin(9600);
 
     Serial.println("Running Tests");
-    // Tests::TestPathPlanning();
-    // Tests::TestTrajectoryGeneration();
-    Tests::TestController();
+    Tests::RunAllTests();
 
     // LED pin for testing
     pinMode(LEDPin, OUTPUT);
-
 
     if(!imu_sensor.begin()) {
         /* There was a problem detecting the BNO055 ... check your connections */
@@ -85,9 +82,8 @@ void setup() {
         delay(100);
     }
 
-    // MotorPair::setupMotorPair();
+    MotorPair::setupMotorPair();
     delay(1000);
-
 }
 
 /***************

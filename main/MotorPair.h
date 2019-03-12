@@ -3,6 +3,10 @@
 
 #include "Arduino.h"
 
+
+/*
+TODO: Should the MotorPair have access to the IMU ?
+*/
 class MotorPair {
 	public:
 		MotorPair();
