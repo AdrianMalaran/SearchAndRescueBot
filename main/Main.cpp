@@ -27,7 +27,8 @@ Main::Main(MotorPair motor_pair, Imu imu_sensor, Color color_front, Color color_
 }
 
 void Main::init() {
-    // (1) Initialize map;
+    // (0) Initialize sensors and actuators
+    // (1) Initialize map
     // (2) Test Path Planning
     // (3) Calibrate sensors
 
@@ -36,8 +37,10 @@ void Main::init() {
 
     delay(1000);
 
+    // Set motor pins
     m_motor_pair.setupMotorPair();
 
+    // Set flame pins
     Flame::setupFlame();
 
     // Set start coord
@@ -217,6 +220,7 @@ void Main::travelToBlock(MapLocation map[][GLOBAL_COL], Coord current_loc, Coord
 
     //updateLocation(); possibly update location ?
 }
+
 void Main::extinguishFire() {
     m_motor_pair.extinguishFireTurn();
 }

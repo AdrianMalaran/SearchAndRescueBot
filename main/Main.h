@@ -36,7 +36,7 @@ class Main {
 
         void extinguishFire(); //TODO: Implement
 
-        void Main::travelToBlock(MapLocation map[][GLOBAL_COL], Coord current_loc, Coord dest,
+        void travelToBlock(MapLocation map[][GLOBAL_COL], Coord current_loc, Coord dest,
                                 Orientation start_ori, Orientation finish_ori);
 
         void updateLocation(); //TODO: Implement
