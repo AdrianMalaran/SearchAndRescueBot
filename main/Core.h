@@ -9,6 +9,9 @@ const int GLOBAL_ROW = 6;
 const int GLOBAL_COL = 6;
 const int FLT_MAX = -2;
 
+const int INT_MAX = 999;
+const int INT_MIN = -999;
+
 /* Data Structures */
 struct Coord {
   int row;
@@ -48,13 +51,33 @@ struct Cell {
   double h;
 };
 
-enum BLOCK_TYPE {
+enum Landmark {
+    NONE,
+    FIRE,
+    FOOD,
+    PEOPLE,
+    SURVIVOR
+};
+
+enum BlockType {
     U = 0, // Unknown
     P = 1, // Particle Board
     W = 2, // Water
     S = 3, // Sand
     G = 5, // Gravel
     X = 6, // Locations of interest
+};
+
+struct MapLocation {
+    BlockType block_type = U;
+
+    bool searched = false;
+    bool land_mark_spot = false;
+
+    Landmark landmark = NONE;
+
+    MapLocation () {};
+    MapLocation(BlockType blocktype) : block_type(blocktype) {};
 };
 
 enum Instruction {
@@ -71,7 +94,7 @@ enum Orientation {
     WEST
 };
 
-enum TASK {
+enum Task {
     EXTINGUISH_FIRE,
     FIND_FOOD,
     FIND_GROUP_OF_PEOPLE,

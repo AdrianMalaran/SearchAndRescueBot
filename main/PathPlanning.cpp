@@ -9,8 +9,12 @@ static bool PathPlanning::isValid(int row, int col) {
   return row >= 0 && col >= 0 && row < GLOBAL_ROW && col < GLOBAL_COL;
 }
 
-static bool PathPlanning::isUnblocked(int grid[][GLOBAL_COL], int row, int col) {
-  return grid[row][col] == 0;
+static bool PathPlanning::isUnblocked(MapLocation grid[][GLOBAL_COL], int row, int col) {
+    bool unblocked = grid[row][col].block_type == P ||
+                     grid[row][col].block_type == S ||
+                     grid[row][col].block_type == G ||
+                     grid[row][col].block_type == X;
+  return unblocked;
 }
 
 static bool PathPlanning::isDestination(int row, int col, Coord dest) {
@@ -53,7 +57,7 @@ static bool PathPlanning::analyzeAdjacentCell(
     bool closedList[GLOBAL_ROW][GLOBAL_COL],
     Queue<CoordScore>& openList,
     Cell cellDetails[GLOBAL_ROW][GLOBAL_COL],
-    int grid[][GLOBAL_COL]) {
+    MapLocation grid[][GLOBAL_COL]) {
 
     // Only process this cell if this is a valid one
     if (!isValid(newCoord.row, newCoord.col)) {
@@ -103,7 +107,7 @@ static bool PathPlanning::analyzeAdjacentCell(
     return false;
 }
 
-static Stack<Coord> PathPlanning::AStarSearch(int grid[][GLOBAL_COL], Coord start, Coord dest) {
+static Stack<Coord> PathPlanning::AStarSearch(MapLocation grid[][GLOBAL_COL], Coord start, Coord dest) {
     Stack<Coord> path;
 
     if (!isValid(start.row, start.col)) {
@@ -255,7 +259,8 @@ static void PathPlanning::executeInstructions(Queue<Instruction> instructions) {
     }
 }
 
-/* Inter coordinate planner: moving from 1 coord to another */
+/* Inter-coordinate planner: moving from 1 coord to another */
+// TODO: Should account for whether start and finish orientation are the same
 static Queue<Instruction> PathPlanning::generateTrajectories(Stack<Coord> path, Orientation start_ori, Orientation finish_ori) {
     // Convert starting pose to a list of instructions to end pose
     Queue<Instruction> instructions;

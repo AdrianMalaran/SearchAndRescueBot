@@ -58,7 +58,8 @@ void setup() {
     Serial.begin(9600);
 
     Serial.println("Running Tests");
-    Tests::RunAllTests();
+    Tests test;
+    test.RunAllTests();
 
     // LED pin for testing
     pinMode(LEDPin, OUTPUT);

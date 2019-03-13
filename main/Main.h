@@ -2,29 +2,58 @@
 #define Main_h
 
 #include "Core.h"
+#include "PathPlanning.h"
+#include "Controller.h"
+#include "Color.h"
+#include "Imu.h"
 
 #include <Arduino.h>
 
 /* Core Class */
 class Main {
     public:
-        void Init();
-        void Run();
-        void ReturnToStart();
+        Main();
+        void init();
+        void run();
+        void returnToStart();
         void completeNextTask();
 
-        static void mapAdjacentBlocks(BLOCK_TYPE *global_map[][GLOBAL_COL]);
-        static bool isUnexplored(BLOCK_TYPE global_map[][GLOBAL_COL], Coord coord);
-        static void mapBlockInFrontTerrain();
+        void mapAdjacentBlocks(MapLocation *global_map[][GLOBAL_COL], Coord current_loc);
+        bool isUnexplored(MapLocation global_map[][GLOBAL_COL], Coord coord);
+        void mapTerrainOfBlockInFront();
 
-        static bool isValid(int row, int col); // TODO: Duplicate function
+        bool isValid(int row, int col); // TODO: Duplicate function
 
+        //TODO: Implement these functions
+        void findFood(MapLocation global_map[][GLOBAL_COL], Coord current_loc);
+        Coord getClosestSandBlock(MapLocation global_map[][GLOBAL_COL], Coord current_loc); //TODO: Implement
+
+        void extinguishFire(); //TODO: Implement
+
+        void Main::travelToBlock(MapLocation map[][GLOBAL_COL], Coord current_loc, Coord dest,
+                                Orientation start_ori, Orientation finish_ori);
+
+        void updateLocation(); //TODO: Implement
+
+        int getManhattanDistance(Coord c1, Coord c2);
     private:
-        static BLOCK_TYPE global_map[GLOBAL_ROW][GLOBAL_COL];
+        MapLocation global_map[GLOBAL_ROW][GLOBAL_COL];
 
-        Coord start_coord;
+        Queue<Task> tasks;
 
-        Queue<TASK> tasks;
+        Coord m_start_coord;
+        Coord m_current_location;
+        Orientation m_current_orientation;
+
+        int m_sand_block_counts; // TODO: Increment counter when mapping
+        Coord m_sand_block_locations[36];
+
+        // TODO: Add these flags
+        // bool m_found_food;
+        // bool m_found_people;
+        // bool m_found_survivor;
+        // bool m_extinguished_fire;
+
 };
 
 #endif
