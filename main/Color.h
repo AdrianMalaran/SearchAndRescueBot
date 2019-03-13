@@ -2,6 +2,7 @@
 #define _Color_H_
 
 #include "SoftwareWire.h"
+#include "Core.h"
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -54,7 +55,7 @@ public:
   void write8(uint8_t reg, uint32_t value);
   uint8_t read8(uint8_t reg);
   uint16_t read16(uint8_t reg);
-  int getTerrainColor();
+  BlockType getTerrainColor();
   int getStructureColor();
   void enable();
 

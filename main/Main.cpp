@@ -116,16 +116,16 @@ void Main::mapAdjacentBlocks(MapLocation *global_map[][GLOBAL_COL], Coord curren
     // Explore all adjacent blocks
     Coord adjacent_blocks[4];
     adjacent_blocks[0] = Coord(current_loc.row - 1, current_loc.col);
-    adjacent_blocks[0] = Coord(current_loc.row + 1, current_loc.col);
-    adjacent_blocks[0] = Coord(current_loc.row, current_loc.col - 1);
-    adjacent_blocks[0] = Coord(current_loc.row, current_loc.col + 1);
+    adjacent_blocks[1] = Coord(current_loc.row + 1, current_loc.col);
+    adjacent_blocks[2] = Coord(current_loc.row, current_loc.col - 1);
+    adjacent_blocks[3] = Coord(current_loc.row, current_loc.col + 1);
 
     for (int i = 0; i < 4; i++) {
         int row = adjacent_blocks[i].row;
         int col = adjacent_blocks[i].col;
         MapLocation map_location = *global_map[row][col];
         if (isValid(row, col) && map_location.block_type == U) {
-            // Use color sensor to detect terrain
+            map_location.block_type = m_color_down.getTerrainColor();
         }
     }
 }
