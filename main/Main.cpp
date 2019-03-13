@@ -1,5 +1,9 @@
 #include "Main.h"
 
+Main::Main(MotorPair motor_pair) {
+    m_motor_pair = motor_pair;
+}
+
 void Main::Init() {
     // (1) Initialize map;
     // (2) Test Path Planning
@@ -34,6 +38,8 @@ void Main::completeNextTask() {
 
     switch (current_task) {
         case EXTINGUISH_FIRE:
+            // Assume there is some sort of Path Planning (Adrian) that gets us within
+            // the flame sensors range of the candle.
             Serial.println("TASK: Extinguishing Fire");
             extinguishFire();
             break;
@@ -121,9 +127,6 @@ static bool Main::isValid(int row, int col) {
 /***********************
 *    TASK FUNCTIONS    *
 ************************/
-static void Main::extinguishFire() {
-    while(Flame::getFireMagnitude() > 5) {
-        // TODO: Actuate the fan
-    }
-    // TODO: Stop the fan
+void Main::extinguishFire() {
+    m_motor_pair.extinguishFireTurn();
 }

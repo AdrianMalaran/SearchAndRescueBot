@@ -6,11 +6,11 @@
 #include "Imu.h"
 #include "utilities/imumaths.h"
 #include "Adafruit_Sensor.h"
+#include "Main.h"
 
 #include <Wire.h>
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
-
 
 #define LEDPin 13
 

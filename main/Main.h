@@ -2,13 +2,15 @@
 #define Main_h
 
 #include "Core.h"
-#include "Flame.h"
+#include "MotorPair.h"
 
 #include <Arduino.h>
 
 /* Core Class */
 class Main {
     public:
+        Main();
+        Main(MotorPair motor_pair);
         void Init();
         void Run();
         void ReturnToStart();
@@ -20,7 +22,7 @@ class Main {
 
         static bool isValid(int row, int col); // TODO: Duplicate function
 
-        static void extinguishFire();
+        void extinguishFire();
 
     private:
         static BLOCK_TYPE global_map[GLOBAL_ROW][GLOBAL_COL];
@@ -28,6 +30,8 @@ class Main {
         Coord start_coord;
 
         Queue<TASK> tasks;
+
+        MotorPair m_motor_pair;
 };
 
 #endif

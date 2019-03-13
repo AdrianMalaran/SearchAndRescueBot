@@ -52,7 +52,7 @@ inline void printStack(Stack<Coord> stack) {
 // Store them in a seperate location
 class Tests {
 public:
-    static RunAllTests() {
+    static void RunAllTests() {
         // Tests::TestPathPlanning();
         // Tests::TestTrajectoryGeneration();
         Tests::TestController();

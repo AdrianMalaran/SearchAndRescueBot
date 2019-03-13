@@ -3,6 +3,7 @@
 
 #include "Arduino.h"
 #include "Imu.h"
+#include "Flame.h"
 
 
 /*
@@ -10,6 +11,7 @@ TODO: Should the MotorPair have access to the IMU ?
 */
 class MotorPair {
 	public:
+		MotorPair();
 		MotorPair(Imu imu_sensor);
 		void setupMotorPair();
 		static void stop();
@@ -20,6 +22,7 @@ class MotorPair {
 		void moveBackwards();
 		void turnLeft();
 		void turnRight();
+		void extinguishFireTurn();
     private:
 		void rampUp(int set_speed);
 		void rampDown(int curr_speed);
