@@ -64,8 +64,8 @@ enum BlockType {
     P = 1, // Particle Board
     W = 2, // Water
     S = 3, // Sand
-    G = 5, // Gravel
-    X = 6, // Locations of interest
+    G = 4, // Gravel
+    X = 5, // Locations of interest
 };
 
 struct MapLocation {
@@ -91,7 +91,8 @@ enum Orientation {
     NORTH,
     EAST,
     SOUTH,
-    WEST
+    WEST,
+    DONTCARE // Don't care which orientation
 };
 
 enum Task {
@@ -100,6 +101,14 @@ enum Task {
     FIND_GROUP_OF_PEOPLE,
     DELIVER_FOOD, // Could be eliminated
     FIND_SURVIVOR
+};
+
+struct Pose {
+    Coord coord;
+    Orientation orientation;
+
+    Pose () {};
+    Pose (Coord c, Orientation o) : coord(c), orientation(o) {};
 };
 
 // Starting Map:

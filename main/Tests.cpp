@@ -203,9 +203,16 @@ public:
         Orientation start_ori = NORTH;
         Orientation finish_ori = SOUTH;
 
+        Pose start_pose (start, start_ori);
+        Pose finish_pose (finish, finish_ori);
+
         Serial.println("Testing Travel to block");
 
-        m_main_engine.travelToBlock(map, start, finish, start_ori, finish_ori);
+        m_main_engine.travelToBlock(map, start_pose, finish_pose);
+    }
+
+    void TestFindFood() {
 
     }
+
 };

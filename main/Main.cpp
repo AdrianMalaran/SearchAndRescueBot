@@ -157,7 +157,7 @@ bool Main::isValid(int row, int col) {
 *    TASK FUNCTIONS    *
 ************************/
 
-void Main::findFood(MapLocation global_map[][GLOBAL_COL], Coord current_loc) {
+void Main::findFood(MapLocation global_map[][GLOBAL_COL], Pose current_pose) {
     // Check to see if there are mapped sand blocks
     //     if there are no mapped sand blocks, go explore
 
@@ -171,7 +171,14 @@ void Main::findFood(MapLocation global_map[][GLOBAL_COL], Coord current_loc) {
     //TODO: if we get close enough to sand block boundary to detect a magnet,
     // then we should automatically mark that spot as the food location
 
-    Coord closest_sand_block = getClosestSandBlock(global_map, current_loc);
+    Coord closest_sand_block = getClosestSandBlock(global_map, current_pose.coord);
+    if (closest_sand_block.row == -1 && closest_sand_block.col == -1) {
+        Serial.println("All sandblocks mapped have been searched, explore for more");
+        // Go explore unmapped blocks
+    } else {
+        Serial.println("Travelling to closest sand block");
+        travelToBlock(global_map, current_pose, Pose(closest_sand_block, DONTCARE));
+    }
 }
 
 Coord Main::getClosestSandBlock(MapLocation global_map[][GLOBAL_COL], Coord current_loc) {
@@ -201,17 +208,24 @@ int Main::getManhattanDistance(Coord c1, Coord c2) {
 }
 
 // TODO: Rigourous testing needed for this algorithm
-void Main::travelToBlock(MapLocation map[][GLOBAL_COL], Coord current_loc, Coord dest,
-                         Orientation start_ori, Orientation finish_ori) {
+void Main::travelToBlock(MapLocation map[][GLOBAL_COL], Pose start_pose, Pose finish_pose) {
     // Path Plan from current_location to dest
     Stack<Coord> shortest_path =
-        PathPlanning::AStarSearch(map, current_loc, dest);
+        PathPlanning::AStarSearch(map, start_pose.coord, finish_pose.coord);
     Serial.println("Calculated Shortest Path");
 
-    Queue<Instruction> maneuver_instructions =
-        PathPlanning::generateTrajectories(shortest_path, start_ori, finish_ori);
+    // Handle Invalid Path errors
+    if (shortest_path.size() == 1 &&
+        shortest_path.top().row == -1 &&
+        shortest_path.top().col == -1) {
+        Serial.println("No Path Found");
+        return;
+    }
 
+    Queue<Instruction> maneuver_instructions =
+        PathPlanning::generateTrajectories(shortest_path, start_pose.orientation, finish_pose.orientation);
     Serial.println("Calculated Trajectories");
+
     PathPlanning::executeInstructions(maneuver_instructions);
     Serial.println("Executed Trajectories");
 

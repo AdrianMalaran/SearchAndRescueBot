@@ -31,13 +31,12 @@ class Main {
         bool isValid(int row, int col); // TODO: Duplicate function
 
         //TODO: Implement these functions
-        void findFood(MapLocation global_map[][GLOBAL_COL], Coord current_loc);
+        void findFood(MapLocation global_map[][GLOBAL_COL], Pose current_pose);
         Coord getClosestSandBlock(MapLocation global_map[][GLOBAL_COL], Coord current_loc); //TODO: Implement
 
         void extinguishFire(); //TODO: Implement
 
-        void Main::travelToBlock(MapLocation map[][GLOBAL_COL], Coord current_loc, Coord dest,
-                                Orientation start_ori, Orientation finish_ori);
+        void travelToBlock(MapLocation map[][GLOBAL_COL], Pose start_pose, Pose finish_pose);
 
         void updateLocation(); //TODO: Implement
 

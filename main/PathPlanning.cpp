@@ -190,7 +190,7 @@ static Stack<Coord> PathPlanning::AStarSearch(MapLocation grid[][GLOBAL_COL], Co
 static void PathPlanning::addReorientation(Queue<Instruction>& instructions,
                       Orientation curr_orientation,
                       Orientation new_orientation) {
-    if (curr_orientation == new_orientation)
+    if (curr_orientation == new_orientation || new_orientation == DONTCARE || curr_orientation == DONTCARE)
         return;
 
     int diff = curr_orientation - new_orientation;
@@ -245,15 +245,19 @@ static void PathPlanning::executeInstructions(Queue<Instruction> instructions) {
         instructions.pop();
 
         if (ins == MOVE_FORWARD) {
+            Serial.print("MOTOR FORWARDS->");
             // Map -> moveForward()
         }
         else if (ins == MOVE_BACKWARD) {
+            Serial.print("MOTOR BACKWARDS->");
             // Map -> moveBackward()
         }
         else if (ins == ROTATE_RIGHT) {
+            Serial.print("MOTOR RIGHT->");
             // Map -> turnRight()
         }
         else if (ins == ROTATE_LEFT) {
+            Serial.print("MOTOR LEFT->");
             // Map -> turnLeft()
         }
     }
@@ -272,7 +276,6 @@ static Queue<Instruction> PathPlanning::generateTrajectories(Stack<Coord> path, 
     // Assume a starting orientation
     // This will be done by converting the raw values of the orientation
     Orientation curr_orientation = start_ori; // Convert Angle to orientation
-    Orientation end_pose = finish_ori; //TODO: Incorporate into code
 
     Coord curr_coord = path.top(); // Starting coordinate
     path.pop();
