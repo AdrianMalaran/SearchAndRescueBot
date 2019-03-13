@@ -95,6 +95,8 @@ void Color::enable() {
   }
 }
 
+Color::Color() {}
+
 Color::Color(color_integration_time_t it, color_gain_t gain) {
   m_is_soft = false;
   m_color_initialised = false;

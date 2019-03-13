@@ -1,11 +1,7 @@
 #include "Tests.cpp"
 #include "Ultrasonic.h"
-#include "Flame.h"
-// #include "MotorPair.h"
 #include "Color.h"
 #include "Imu.h"
-#include "utilities/imumaths.h"
-#include "Adafruit_Sensor.h"
 #include "Main.h"
 
 #include <Wire.h>
@@ -13,25 +9,22 @@
 #include <avr/sleep.h>
 
 #define LEDPin 13
-
 #define SDA1pin 22
 #define SCL1pin 23
 #define SDA2pin 24
 #define SCL2pin 25
 
-#define BNO055_SAMPLERATE_DELAY_MS (100)
+#define BNO055_SAMPLERATE_DELAY_MS 100
 
 Imu imu_sensor = Imu();
 
-// color1(0xC0, 0x00, 22, 23)
-Color color1(SDA1pin, SCL1pin, COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X);
-
-// color2(0xC0, 0x00)
-Color color2(SDA2pin, SCL2pin, COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X);
+// color(0xC0, 0x00, 22, 23)
+Color color_front(SDA1pin, SCL1pin, COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X), color_down(SDA2pin, SCL2pin, COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X);
 
 // ultrasonic(trigPin, echoPin)
-Ultrasonic ultrasonic(52,53);
+Ultrasonic ultrasonic_front(52,53), ultrasonic_right(52,53), ultrasonic_left(52,53), ultrasonic_back(52,53);
 
+// MotorPair declaration
 MotorPair motor_pair(imu_sensor);
 
 // controller
@@ -59,24 +52,16 @@ void setup() {
     Serial.println("Running Tests");
     Tests::RunAllTests();
 
-    // LED pin for testing
+    // LED pin
     pinMode(LEDPin, OUTPUT);
-
-    imu_sensor.calibrate();
-
-    delay(1000);
-
-    Flame::setupFlame();
-
-    motor_pair.setupMotorPair();
 }
 
 /***************
 *     LOOP     *
 ****************/
 void loop() {
-
-//Serial.println(ultrasonic.getDistance());
+/*
+  //Serial.println(ultrasonic.getDistance());
 
   uint16_t r, g, b, c;
   color1.getRawData(&r, &g, &b, &c);
@@ -104,4 +89,5 @@ void loop() {
   // MotorPair::moveForwards();
   // Serial.println("Driving");
   motor_pair.turnLeft();
+*/
 }

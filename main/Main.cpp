@@ -1,13 +1,31 @@
 #include "Main.h"
 
-Main::Main(MotorPair motor_pair) {
+Main::Main(MotorPair motor_pair, Imu imu_sensor, Color color_front, Color color_down,
+            Ultrasonic ultrasonic_front, Ultrasonic ultrasonic_right, Ultrasonic ultrasonic_left,
+            Ultrasonic ultrasonic_back) {
     m_motor_pair = motor_pair;
+    m_imu_sensor = imu_sensor;
+    m_color_front = color_front;
+    m_color_down = color_down;
+    m_ultrasonic_front = ultrasonic_front;
+    m_ultrasonic_right = ultrasonic_right;
+    m_ultrasonic_left = ultrasonic_left;
+    m_ultrasonic_back = ultrasonic_back;
 }
 
 void Main::Init() {
     // (1) Initialize map;
     // (2) Test Path Planning
     // (3) Calibrate sensors
+
+    // Calibrate Imu
+    m_imu_sensor.calibrate();
+
+    delay(1000);
+
+    m_motor_pair.setupMotorPair();
+
+    Flame::setupFlame();
 
     // Set start coord
     start_coord = Coord(4, 5);
