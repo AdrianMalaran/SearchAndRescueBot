@@ -49,16 +49,16 @@ void Main::init() {
     // Initialize Start Map
     for (int i = 0; i < GLOBAL_ROW; i ++)
         for (int j = 0; j < GLOBAL_COL; j++)
-            global_map[i][j].block_type = U;
+            m_global_map[i][j].block_type = U;
 
-    global_map[m_start_coord.row][m_start_coord.col].block_type = P;
+    m_global_map[m_start_coord.row][m_start_coord.col].block_type = P;
 }
 
 // This function will be run in the loop() function of the arduino
 void Main::run() {
 
     if (tasks.empty()) {
-        returnToStart();
+        returnToStart(m_global_map, m_current_pose);
         // Stop Program
     } else {
         // All tasks are not completed yet
@@ -99,10 +99,11 @@ void Main::completeNextTask() {
     tasks.pop();
 }
 
-void Main::returnToStart() {
+void Main::returnToStart(MapLocation global_map[][GLOBAL_COL], Pose current_pose) {
     // Get current location
     // Travel To Start Location();
     // stopToProgram();
+    travelToBlock(global_map, current_pose, Pose(m_start_coord, DONTCARE));
 }
 
 /***********************
@@ -152,8 +153,8 @@ void Main::mapTerrainOfBlockInFront() {
     */
 }
 
-bool Main::isValid(int row, int col) {
-  return row >= 0 && col >= 0 && row < GLOBAL_ROW && col < GLOBAL_COL;
+static bool Main::isValid(Coord c) {
+  return c.row >= 0 && c.col >= 0 && c.row < GLOBAL_ROW && c.col < GLOBAL_COL;
 }
 
 /***********************
@@ -179,6 +180,7 @@ void Main::findFood(MapLocation global_map[][GLOBAL_COL], Pose current_pose) {
         Serial.println("All sandblocks mapped have been searched, explore for more");
         // Go explore unmapped blocks
     } else {
+        //TODO: Maybe we can just go to the closest
         Serial.println("Travelling to closest sand block");
         travelToBlock(global_map, current_pose, Pose(closest_sand_block, DONTCARE));
     }
@@ -214,7 +216,7 @@ int Main::getManhattanDistance(Coord c1, Coord c2) {
 void Main::travelToBlock(MapLocation map[][GLOBAL_COL], Pose start_pose, Pose finish_pose) {
     // Path Plan from current_location to dest
     Stack<Coord> shortest_path =
-        PathPlanning::AStarSearch(map, start_pose.coord, finish_pose.coord);
+        PathPlanning::findShortestPath(map, start_pose.coord, finish_pose.coord);
     Serial.println("Calculated Shortest Path");
 
     // Handle Invalid Path errors
@@ -230,9 +232,39 @@ void Main::travelToBlock(MapLocation map[][GLOBAL_COL], Pose start_pose, Pose fi
     Serial.println("Calculated Trajectories");
 
     PathPlanning::executeInstructions(maneuver_instructions);
-    Serial.println("Executed Trajectories");
+    Serial.println("Executed Maneuvers");
 
     //updateLocation(); possibly update location ?
+}
+
+static bool Main::hasUnknownNeighbors(MapLocation global_map[][GLOBAL_COL], Coord start_loc) {
+    if (!isValid(start_loc)) {
+        Serial.println("Invalid start coordinate");
+        return false;
+    }
+
+    Coord adjacent_blocks[4];
+    adjacent_blocks[0] = Coord(start_loc.row - 1, start_loc.col);
+    adjacent_blocks[1] = Coord(start_loc.row + 1, start_loc.col);
+    adjacent_blocks[2] = Coord(start_loc.row, start_loc.col - 1);
+    adjacent_blocks[3] = Coord(start_loc.row, start_loc.col + 1);
+
+    for (int i = 0; i < 4; i++) {
+        if (global_map[adjacent_blocks[i].row][[adjacent_blocks[i].col]].block_type == U) // Unknown
+            return true;
+    }
+
+    return false;
+}
+
+static Coord Main::findClosestBlockWithUnknownNeighbors(MapLocation grid[][GLOBAL_COL], Coord start_loc) {
+    if (!isValid(start_loc)) {
+        Serial.println("Invalid start coordinate");
+        return false;
+    }
+
+    // Implement a BFS
+    Queue<Coord> to_visit;
 }
 
 void Main::extinguishFire() {

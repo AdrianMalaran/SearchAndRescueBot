@@ -21,14 +21,14 @@ class Main {
             Ultrasonic ultrasonic_back);
         void init();
         void run();
-        void returnToStart();
+        void returnToStart(MapLocation global_map[][GLOBAL_COL], Pose current_pose);
         void completeNextTask();
 
         void mapAdjacentBlocks(MapLocation *global_map[][GLOBAL_COL], Coord current_loc);
         bool isUnexplored(MapLocation global_map[][GLOBAL_COL], Coord coord);
         void mapTerrainOfBlockInFront();
 
-        bool isValid(int row, int col); // TODO: Duplicate function
+        bool isValid(Coord c); // TODO: Duplicate function
 
         //TODO: Implement these functions
         void findFood(MapLocation global_map[][GLOBAL_COL], Pose current_pose);
@@ -41,14 +41,20 @@ class Main {
         void updateLocation(); //TODO: Implement
 
         int getManhattanDistance(Coord c1, Coord c2);
+
+        static bool hasUnknownNeighbors(MapLocation global_map[][GLOBAL_COL], Coord start_loc);
+
+        static Coord findClosestBlockWithUnknownNeighbors(MapLocation grid[][GLOBAL_COL], Coord start_loc);
     private:
-        MapLocation global_map[GLOBAL_ROW][GLOBAL_COL];
+        MapLocation m_global_map[GLOBAL_ROW][GLOBAL_COL];
 
         Queue<Task> tasks;
 
         Coord m_start_coord;
         Coord m_current_location;
         Orientation m_current_orientation;
+
+        Pose m_current_pose;
 
         int m_sand_block_counts; // TODO: Increment counter when mapping
         Coord m_sand_block_locations[36];

@@ -8,7 +8,7 @@
 class PathPlanning {
 	public:
 		PathPlanning();
-        static bool isValid(int row, int col);
+        static bool isValid(Coord c);
         static bool isUnblocked(MapLocation grid[][GLOBAL_COL], int row, int col);
         static bool isDestination(int row, int col, Coord dest);
         static double calculateHValue(int row, int col, Coord dest);
@@ -23,7 +23,7 @@ class PathPlanning {
             Queue<CoordScore>& openList,
             Cell cellDetails[GLOBAL_ROW][GLOBAL_COL],
             MapLocation grid[][GLOBAL_COL]);
-        static Stack<Coord> AStarSearch(MapLocation grid[][GLOBAL_COL], Coord start, Coord dest);
+        static Stack<Coord> findShortestPath(MapLocation grid[][GLOBAL_COL], Coord start, Coord dest);
 
         static void addReorientation(Queue<Instruction>& instructions,
                               Orientation curr_orientation,

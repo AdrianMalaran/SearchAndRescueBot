@@ -5,8 +5,8 @@ using namespace std;
 
 //TODO: Add a check that determines if its a water block
 //TODO: Determine how to gracefully handle an invalid path
-static bool PathPlanning::isValid(int row, int col) {
-  return row >= 0 && col >= 0 && row < GLOBAL_ROW && col < GLOBAL_COL;
+static bool PathPlanning::isValid(Coord c) {
+  return c.row >= 0 && c.col >= 0 && c.row < GLOBAL_ROW && c.col < GLOBAL_COL;
 }
 
 static bool PathPlanning::isUnblocked(MapLocation grid[][GLOBAL_COL], int row, int col) {
@@ -60,7 +60,7 @@ static bool PathPlanning::analyzeAdjacentCell(
     MapLocation grid[][GLOBAL_COL]) {
 
     // Only process this cell if this is a valid one
-    if (!isValid(newCoord.row, newCoord.col)) {
+    if (!isValid(newCoord)) {
         return false;
     }
 
@@ -107,10 +107,10 @@ static bool PathPlanning::analyzeAdjacentCell(
     return false;
 }
 
-static Stack<Coord> PathPlanning::AStarSearch(MapLocation grid[][GLOBAL_COL], Coord start, Coord dest) {
+static Stack<Coord> PathPlanning::findShortestPath(MapLocation grid[][GLOBAL_COL], Coord start, Coord dest) {
     Stack<Coord> path;
 
-    if (!isValid(start.row, start.col)) {
+    if (!isValid(start)) {
         // TODO: How should we handle this
         // printMessage("Source is invalid\n");
         return path;
@@ -245,19 +245,19 @@ static void PathPlanning::executeInstructions(Queue<Instruction> instructions) {
         instructions.pop();
 
         if (ins == MOVE_FORWARD) {
-            Serial.print("MOTOR FORWARDS->");
+            Serial.print("FORWARDS->");
             // Map -> moveForward()
         }
         else if (ins == MOVE_BACKWARD) {
-            Serial.print("MOTOR BACKWARDS->");
+            Serial.print("BACKWARDS->");
             // Map -> moveBackward()
         }
         else if (ins == ROTATE_RIGHT) {
-            Serial.print("MOTOR RIGHT->");
+            Serial.print("RIGHT->");
             // Map -> turnRight()
         }
         else if (ins == ROTATE_LEFT) {
-            Serial.print("MOTOR LEFT->");
+            Serial.print("LEFT->");
             // Map -> turnLeft()
         }
     }
@@ -270,7 +270,7 @@ static Queue<Instruction> PathPlanning::generateTrajectories(Stack<Coord> path, 
     Queue<Instruction> instructions;
 
     // Return empty instructions if non-valid path
-    if (path.size() <= 1)
+    if (path.size() <= 1 && path.top().row == -1 && path.top().col == -1)
         return instructions;
 
     // Assume a starting orientation

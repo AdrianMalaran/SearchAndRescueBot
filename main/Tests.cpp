@@ -55,13 +55,13 @@ public:
 
     void RunAllTests() {
         // Tests::TestPathPlanning();
-        // Tests::TestTrajectoryGeneration();
+        Tests::TestTrajectoryGeneration();
         // Tests::TestController();
         TestTravel();
     }
 
     static Stack<Coord> TestPathPlanning(MapLocation grid[][GLOBAL_COL], Coord start, Coord finish) {
-        printStack(PathPlanning::AStarSearch(grid, start, finish));
+        printStack(PathPlanning::findShortestPath(grid, start, finish));
     }
     static Stack<Coord> TestPathPlanning() {
         MapLocation MP(P);
@@ -158,10 +158,10 @@ public:
         // path.push(Coord(0,0));
 
         path.push(Coord(3,3));
-        path.push(Coord(3,4));
-        path.push(Coord(4,4));
-        path.push(Coord(4,3));
-        path.push(Coord(3,3));
+        // path.push(Coord(3,4));
+        // path.push(Coord(4,4));
+        // path.push(Coord(4,3));
+        // path.push(Coord(3,3));
 
         ins = PathPlanning::generateTrajectories(path, start, finish);
 
@@ -199,7 +199,7 @@ public:
         };
 
         Coord start = Coord(4,5);
-        Coord finish = Coord(0,0);
+        Coord finish = Coord(4,5);
         Orientation start_ori = NORTH;
         Orientation finish_ori = SOUTH;
 
@@ -212,7 +212,8 @@ public:
     }
 
     void TestFindFood() {
-
+        //TEST find closest sand block
+        //TEST get manhattan distance
     }
 
 };
