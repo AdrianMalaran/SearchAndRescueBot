@@ -1,4 +1,3 @@
-
 #ifndef SoftwareWire_h
 #define SoftwareWire_h
 
