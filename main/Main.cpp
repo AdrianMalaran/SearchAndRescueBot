@@ -35,7 +35,7 @@ void Main::completeNextTask() {
     switch (current_task) {
         case EXTINGUISH_FIRE:
             Serial.println("TASK: Extinguishing Fire");
-            // extinguishFire();
+            extinguishFire();
             break;
         case FIND_FOOD:
             Serial.println("TASK: Finding Survivor");
@@ -116,4 +116,14 @@ static void Main::mapBlockInFrontTerrain() {
 
 static bool Main::isValid(int row, int col) {
   return row >= 0 && col >= 0 && row < GLOBAL_ROW && col < GLOBAL_COL;
+}
+
+/***********************
+*    TASK FUNCTIONS    *
+************************/
+static void Main::extinguishFire() {
+    while(Flame::getFireMagnitude() > 5) {
+        // TODO: Actuate the fan
+    }
+    // TODO: Stop the fan
 }

@@ -32,9 +32,6 @@ Color color2(SDA2pin, SCL2pin, COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X);
 // ultrasonic(trigPin, echoPin)
 Ultrasonic ultrasonic(52,53);
 
-// flame(digitalPin, analogPin)
-Flame flame(27, 9);
-
 MotorPair motor_pair(imu_sensor);
 
 // controller
@@ -68,6 +65,8 @@ void setup() {
     imu_sensor.calibrate();
 
     delay(1000);
+
+    Flame::setupFlame();
 
     motor_pair.setupMotorPair();
 }

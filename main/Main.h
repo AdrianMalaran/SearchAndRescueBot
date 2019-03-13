@@ -2,6 +2,7 @@
 #define Main_h
 
 #include "Core.h"
+#include "Flame.h"
 
 #include <Arduino.h>
 
@@ -18,6 +19,8 @@ class Main {
         static void mapBlockInFrontTerrain();
 
         static bool isValid(int row, int col); // TODO: Duplicate function
+
+        static void extinguishFire();
 
     private:
         static BLOCK_TYPE global_map[GLOBAL_ROW][GLOBAL_COL];
