@@ -15,8 +15,6 @@ class MotorPair {
     	void standby();
 		static void setMotorASpeed(int speed);
 		static void setMotorBSpeed(int speed);
-		void moveForwards();
-		void moveBackwards();
 		void turnLeft();
 		void turnRight();
 		void extinguishFireTurn();

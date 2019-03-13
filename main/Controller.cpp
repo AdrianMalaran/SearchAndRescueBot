@@ -18,7 +18,7 @@ mag_heading = wrap360(v[0] + yaw_offset); //yaw = v[0], correct for magnetic Nor
 
  #include "Controller.h"
 
-static void Controller::DriveStraight(double desired_heading, double current_heading) {
+static void Controller::DriveStraight(double desired_heading, double current_heading, double nominal_speed) {
 
     if (current_heading == 0 && current_heading == 0) {
         // IMU not working, Don't Drive
@@ -40,8 +40,6 @@ static void Controller::DriveStraight(double desired_heading, double current_hea
         error += 360;
 
     double bias = (Kp * error)/10;
-
-    int nominal_speed = 180;
 
     Serial.print("Desired: "); Serial.print(desired_heading);
     Serial.print(", Current: "); Serial.print(current_heading);

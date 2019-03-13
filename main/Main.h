@@ -24,7 +24,7 @@ class Main {
         void returnToStart();
         void completeNextTask();
 
-        void mapAdjacentBlocks(MapLocation *global_map[][GLOBAL_COL], Coord current_loc);
+        void mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose start_pose);
         bool isUnexplored(MapLocation global_map[][GLOBAL_COL], Coord coord);
         void mapTerrainOfBlockInFront();
 

@@ -10,7 +10,7 @@ class Controller {
     public:
         Controller ();
 
-        static void DriveStraight(double desired_heading, double current_heading);
+        static void DriveStraight(double desired_heading, double current_heading, double nominal_speed = 180);
     private:
         double set_point;
         double input;

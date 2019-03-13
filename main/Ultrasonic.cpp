@@ -1,6 +1,6 @@
 #include "Ultrasonic.h"
 
-float distance, duration, temp = 20;
+double distance, duration, temp = 20;
 
 Ultrasonic::Ultrasonic() {}
 
@@ -11,7 +11,7 @@ Ultrasonic::Ultrasonic(int trig_pin, int echo_pin) {
 	m_echo_pin = echo_pin;
 }
 
-float Ultrasonic::getDistance() {
+double Ultrasonic::getDistance() {
 	// Clears the trigPin
 	digitalWrite(m_trig_pin, LOW);
 	delayMicroseconds(5);
@@ -24,7 +24,7 @@ float Ultrasonic::getDistance() {
   // Reads the echoPin, returns the sound wave travel time in microseconds
   duration = pulseIn(m_echo_pin, HIGH);
 
-  float speedOfSound = 331.3 + 0.606 * temp;
+  double speedOfSound = 331.3 + 0.606 * temp;
 
   // Calculating the distance
   distance = (duration / 20000.0) * speedOfSound;

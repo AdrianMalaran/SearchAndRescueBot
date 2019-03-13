@@ -118,40 +118,6 @@ static void MotorPair::setMotorBSpeed(int speed) {
 	analogWrite(enable_b, min(fabs(speed), MAX_SPEED_B));
 }
 
-static void MotorPair::moveForwards() {
-  	digitalWrite(stand_by, HIGH);
-
-	digitalWrite(input1, LOW);
-	digitalWrite(input2, HIGH);
-	digitalWrite(input3, LOW);
-	digitalWrite(input4, HIGH);
-
-	// rampUp(MAX_SPEED);
-
-	analogWrite(enable_a, MAX_SPEED_A);
-	analogWrite(enable_b, MAX_SPEED_B);
-	delay(1000);
-
-	// rampDown(MAX_SPEED);
-	stop();
-}
-
-static void MotorPair::moveBackwards() {
-  	digitalWrite(stand_by, HIGH);
-	digitalWrite(input1, HIGH);
-	digitalWrite(input2, LOW);
-	digitalWrite(input3, HIGH);
-	digitalWrite(input4, LOW);
-
-	// rampUp(MAX_SPEED);
-
-	analogWrite(enable_a, MAX_SPEED_A);
-	analogWrite(enable_b, MAX_SPEED_B);
-	delay(1000);
-
-	// rampDown(MAX_SPEED);
-	stop();
-}
 
 static void MotorPair::turnLeft() {
 	// determine the desired orientation of imu with wrapper
@@ -180,7 +146,7 @@ static void MotorPair::turnLeft() {
 
 static void MotorPair::turnRight() {
 	// determine the desired orientation of imu with wrapper
-	float desired_orientaion;
+	double desired_orientaion;
 	if(m_orientation + 90 > 360)
 		desired_orientaion = m_orientation - 270;
 	else
@@ -205,7 +171,7 @@ static void MotorPair::turnRight() {
 }
 
 void MotorPair::extinguishFireTurn() {
-	float start_orientation = m_imu_sensor.getEuler().x();
+	double start_orientation = m_imu_sensor.getEuler().x();
 	bool fire_extinguished = false;
 
 	// orientate motors for left turn
