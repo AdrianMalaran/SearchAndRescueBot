@@ -41,7 +41,8 @@ typedef enum {
 
 class Color {
 public:
-  Color(color_integration_time_t = COLOR_INTEGRATIONTIME_2_4MS, color_gain_t = COLOR_GAIN_1X);
+  Color();
+  Color(color_integration_time_t, color_gain_t = COLOR_GAIN_1X);
   Color(uint8_t sda_pin, uint8_t scl_pin, color_integration_time_t = COLOR_INTEGRATIONTIME_2_4MS, color_gain_t = COLOR_GAIN_1X);
 
   boolean begin();

@@ -2,6 +2,8 @@
 
 float distance, duration, temp = 20;
 
+Ultrasonic::Ultrasonic() {}
+
 Ultrasonic::Ultrasonic(int trig_pin, int echo_pin) {
 	pinMode(trig_pin, OUTPUT);
 	pinMode(echo_pin, INPUT);

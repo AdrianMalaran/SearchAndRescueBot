@@ -51,7 +51,9 @@ inline void printStack(Stack<Coord> stack) {
 // Store them in a seperate location
 class Tests {
 public:
-    RunAllTests() {
+    Tests () {};
+
+    void RunAllTests() {
         // Tests::TestPathPlanning();
         // Tests::TestTrajectoryGeneration();
         // Tests::TestController();
@@ -182,7 +184,7 @@ public:
 
     }
 
-    Main main_engine;
+    Main m_main_engine;
 
     void TestTravel() {
         MapLocation map[GLOBAL_ROW][GLOBAL_COL] =
@@ -203,7 +205,7 @@ public:
 
         Serial.println("Testing Travel to block");
 
-        main_engine.travelToBlock(map, start, finish, start_ori, finish_ori);
+        m_main_engine.travelToBlock(map, start, finish, start_ori, finish_ori);
 
     }
 };

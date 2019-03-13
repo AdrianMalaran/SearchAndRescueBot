@@ -5,13 +5,11 @@
 
 class Flame {
 	public:
-		Flame(int digital_pin);
-		Flame(int digital_pin, int analog_pin);
-		bool isFire();
-		int getFireMagnitude();
+		Flame();
+		static void setupFlame();
+		static bool isFire();
+		static int getFireMagnitude();
     private:
-		int m_digital_pin;
-		int m_analog_pin;
 };
 
 #endif
