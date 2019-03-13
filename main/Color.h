@@ -70,7 +70,7 @@ private:
   SoftwareWire m_i2c;
   TwoWire *m_wire;
 
-  float powf(const float x, const float y);
+  double powf(const double x, const double y);
 };
 
 #endif

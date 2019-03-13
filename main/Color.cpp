@@ -4,8 +4,8 @@
 #include "SoftwareWire.h"
 #include "Color.h"
 
-float Color::powf(const float x, const float y) {
-  return (float)(pow((double)x, (double)y));
+double Color::powf(const double x, const double y) {
+  return (double)(pow((double)x, (double)y));
 }
 
 void Color::write8(uint8_t reg, uint32_t value) {
@@ -182,10 +182,10 @@ void Color::getRawData(uint16_t *r, uint16_t *g, uint16_t *b, uint16_t *c) {
 }
 
 uint16_t Color::calculateColorTemperature(uint16_t r, uint16_t g, uint16_t b) {
-  float X, Y, Z;
-  float xc, yc;
-  float n;
-  float cct;
+  double X, Y, Z;
+  double xc, yc;
+  double n;
+  double cct;
 
   X = (-0.14282F * r) + (1.54924F * g) + (-0.95641F * b);
   Y = (-0.32466F * r) + (1.57837F * g) + (-0.73191F * b);
@@ -251,7 +251,7 @@ int Color::getStructureColor() {
 }
 
 uint16_t Color::calculateLux(uint16_t r, uint16_t g, uint16_t b) {
-  float illuminance;
+  double illuminance;
 
   illuminance = (-0.32466F * r) + (1.57837F * g) + (-0.73191F * b);
 
