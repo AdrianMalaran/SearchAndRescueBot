@@ -52,9 +52,6 @@ void setup() {
     Tests test;
     Serial.println("Running Tests");
     test.RunAllTests();
-
-    // LED pin
-    pinMode(LEDPin, OUTPUT);
 }
 
 /***************

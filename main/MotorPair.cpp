@@ -223,9 +223,9 @@ void MotorPair::extinguishFireTurn() {
 	while(m_imu_sensor.getEuler().x() != m_orientation) {
 		if(Flame::getFireMagnitude() > 5) {
 			while(Flame::getFireMagnitude() > 5) {
-			// TODO: Actuate fan
+				Fan::on();
 			}
-			// TODO: Stop fan
+			Fan::off();
 			
 			if(fabs(start_orientation - m_orientation) < 180) {
 				digitalWrite(input1, HIGH);
