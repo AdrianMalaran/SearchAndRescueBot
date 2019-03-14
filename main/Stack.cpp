@@ -1,6 +1,8 @@
+#include <Arduino.h>
+
 using namespace std;
 
-const int MAX_STACK_SIZE = 100;
+const int MAX_STACK_SIZE = 36;
 
 template<class T>
 class Stack {
@@ -13,7 +15,7 @@ class Stack {
 
     void push(T input) {
         if (m_size >= MAX_STACK_SIZE) {
-            // printf("No more room");
+            Serial.println("Stack FULL --");
             return;
         }
 

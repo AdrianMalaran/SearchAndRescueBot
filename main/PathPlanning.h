@@ -8,8 +8,6 @@
 class PathPlanning {
 	public:
 		PathPlanning();
-        static bool isValid(Coord c);
-        static bool isUnblocked(MapLocation grid[][GLOBAL_COL], int row, int col);
         static bool isDestination(int row, int col, Coord dest);
         static double calculateHValue(int row, int col, Coord dest);
         static Stack<Coord> tracePath(Cell cellDetails[][GLOBAL_COL], Coord dest);

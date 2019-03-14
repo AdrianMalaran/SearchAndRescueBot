@@ -71,7 +71,7 @@ uint16_t Color::read16(uint8_t reg) {
 void Color::enable() {
   write8(COLOR_ENABLE, COLOR_ENABLE_PON);
   delay(3);
-  write8(COLOR_ENABLE, COLOR_ENABLE_PON | COLOR_ENABLE_AEN);  
+  write8(COLOR_ENABLE, COLOR_ENABLE_PON | COLOR_ENABLE_AEN);
 
   switch (m_color_integration_time) {
   case COLOR_INTEGRATIONTIME_2_4MS:
@@ -216,15 +216,15 @@ BlockType Color::getTerrainColor() {
 
   // TODO: All of these values need to be calibrated
   if (r_tot > 275 - 25 && r_tot < 275 + 25 && g_tot > 214 - 25 && g_tot < 214 + 25 && b_tot > 142 - 25 && b_tot < 142 + 25)
-    return P; // Particle Board
+    return PARTICLE; // Particle Board
   else if (r_tot > 220 - 25 && r_tot < 236 + 25 && g_tot > 160 - 25 && g_tot < 160 + 25 && b_tot > 99 - 25 && b_tot < 99 + 25)
-    return W; // Water
+    return WATER; // Water
   else if (r_tot > 58 - 25 && r_tot < 58 + 25 && g_tot > 41 - 25 && g_tot < 41 + 25 && b_tot > 32 - 25 && b_tot < 32 + 25)
-    return S; // Sand
+    return SAND; // Sand
   else if (r_tot > 149 - 25 && r_tot < 149 + 25 && g_tot > 115 - 25 && g_tot < 115 + 25 && b_tot > 78 - 25 && b_tot < 78 + 25)
-    return G; // Gravel
+    return GRAVEL; // Gravel
   else
-    return U; // Unknown
+    return UNKNOWN; // Unknown
 }
 
 int Color::getStructureColor() {

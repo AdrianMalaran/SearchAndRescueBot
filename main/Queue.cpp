@@ -1,6 +1,8 @@
+#include <Arduino.h>
+
 using namespace std;
 
-const int MAX_QUEUE_SIZE = 100;
+const int MAX_QUEUE_SIZE = 36;
 
 template<class T>
 class Queue {
@@ -11,6 +13,7 @@ class Queue {
 
     void push(T input) {
         if (m_size >= MAX_QUEUE_SIZE) {
+            Serial.println("Queue FULL --");
             return;
         }
 

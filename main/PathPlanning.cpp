@@ -5,17 +5,15 @@ using namespace std;
 
 //TODO: Add a check that determines if its a water block
 //TODO: Determine how to gracefully handle an invalid path
-static bool PathPlanning::isValid(Coord c) {
-  return c.row >= 0 && c.col >= 0 && c.row < GLOBAL_ROW && c.col < GLOBAL_COL;
-}
-
-static bool PathPlanning::isUnblocked(MapLocation grid[][GLOBAL_COL], int row, int col) {
-    bool unblocked = grid[row][col].block_type == P ||
-                     grid[row][col].block_type == S ||
-                     grid[row][col].block_type == G ||
-                     grid[row][col].block_type == X;
-  return unblocked;
-}
+// static bool PathPlanning::isValid(Coord c) {
+//   return c.row >= 0 && c.col >= 0 && c.row < GLOBAL_ROW && c.col < GLOBAL_COL;
+// }
+//
+// static bool PathPlanning::isUnblocked(MapLocation grid[][GLOBAL_COL], int row, int col) {
+//      return grid[row][col].block_type == P ||
+//             grid[row][col].block_type == S ||
+//             grid[row][col].block_type == G;
+// }
 
 static bool PathPlanning::isDestination(int row, int col, Coord dest) {
   return (row == dest.row && col == dest.col);
@@ -68,7 +66,7 @@ static bool PathPlanning::analyzeAdjacentCell(
         return false;
     }
 
-    if (!isUnblocked(grid, newCoord.row, newCoord.col)) {
+    if (!isUnblocked(grid, newCoord)) {
         return false;
     }
 
@@ -116,8 +114,7 @@ static Stack<Coord> PathPlanning::findShortestPath(MapLocation grid[][GLOBAL_COL
         return path;
     }
 
-    if (!isUnblocked(grid, start.row, start.col) ||
-      !isUnblocked(grid, dest.row, dest.col)) {
+    if (!isUnblocked(grid, start) || !isUnblocked(grid, dest)) {
         // TODO: How should we handle this
         // printMessage("Source is blocked!\n");
         return path;
@@ -188,10 +185,14 @@ static Stack<Coord> PathPlanning::findShortestPath(MapLocation grid[][GLOBAL_COL
 /* Trajectory Generation */
 
 static void PathPlanning::addReorientation(Queue<Instruction>& instructions,
-                      Orientation curr_orientation,
-                      Orientation new_orientation) {
-    if (curr_orientation == new_orientation || new_orientation == DONTCARE || curr_orientation == DONTCARE)
+                                           Orientation curr_orientation,
+                                           Orientation new_orientation) {
+    if (curr_orientation == new_orientation ||
+        new_orientation == DONTCARE ||
+        curr_orientation == DONTCARE) {
         return;
+    }
+
 
     int diff = curr_orientation - new_orientation;
     if (fabs(diff) == 2) {

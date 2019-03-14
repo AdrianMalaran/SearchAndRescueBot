@@ -11,6 +11,8 @@
 #include "Ultrasonic.h"
 
 #include <Arduino.h>
+#include <avr/interrupt.h>
+#include <avr/sleep.h>
 
 /* Core Class */
 class Main {
@@ -28,8 +30,6 @@ class Main {
         bool isUnexplored(MapLocation global_map[][GLOBAL_COL], Coord coord);
         void mapTerrainOfBlockInFront();
 
-        bool isValid(Coord c); // TODO: Duplicate function
-
         //TODO: Implement these functions
         void findFood(MapLocation global_map[][GLOBAL_COL], Pose current_pose);
         Coord getClosestSandBlock(MapLocation global_map[][GLOBAL_COL], Coord current_loc); //TODO: Implement
@@ -42,9 +42,11 @@ class Main {
 
         int getManhattanDistance(Coord c1, Coord c2);
 
-        static bool hasUnknownNeighbors(MapLocation global_map[][GLOBAL_COL], Coord start_loc);
+        bool hasUnknownNeighbors(MapLocation global_map[][GLOBAL_COL], Coord start_loc);
 
-        static Coord findClosestBlockWithUnknownNeighbors(MapLocation grid[][GLOBAL_COL], Coord start_loc);
+        Coord findClosestBlockWithUnknownNeighbors(MapLocation grid[][GLOBAL_COL], Coord start_loc);
+
+        void stopProgram();
     private:
         MapLocation m_global_map[GLOBAL_ROW][GLOBAL_COL];
 

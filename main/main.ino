@@ -1,12 +1,10 @@
-#include "Tests.cpp"
+#include "Tests.h"
 #include "Ultrasonic.h"
 #include "Color.h"
 #include "Imu.h"
 #include "Main.h"
 
 #include <Wire.h>
-#include <avr/interrupt.h>
-#include <avr/sleep.h>
 
 #define LEDPin 13
 #define SDA1pin 22
@@ -31,12 +29,6 @@ MotorPair motor_pair(imu_sensor);
 double input, output, set_point, Kp = 30;
 // PID pid(&input, &output, &set_point, 2, 5, 1, DIRECT);
 
-void stopProgram() {
-    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-    cli();  // Disable interrupts
-    sleep_mode();
-}
-
 // void setupController() {
 //     pid.SetMode(AUTOMATIC);
 // }
@@ -48,6 +40,7 @@ double m_desired_heading;
 ***************/
 void setup() {
     Serial.begin(9600);
+    Serial.println("Hello World!");
 
     Tests test;
     Serial.println("Running Tests");

@@ -10,7 +10,7 @@ void drawMap(MapLocation global_map[][GLOBAL_COL]) {
 }
 
 Main::Main() {
-    init();
+    Serial.println("Main Engine Constructor");
 }
 
 Main::Main(MotorPair motor_pair, Imu imu_sensor, Color color_front, Color color_down,
@@ -27,6 +27,7 @@ Main::Main(MotorPair motor_pair, Imu imu_sensor, Color color_front, Color color_
 }
 
 void Main::init() {
+    Serial.println("Main Engine Init()");
     // (0) Initialize sensors and actuators
     // (1) Initialize map
     // (2) Test Path Planning
@@ -49,9 +50,9 @@ void Main::init() {
     // Initialize Start Map
     for (int i = 0; i < GLOBAL_ROW; i ++)
         for (int j = 0; j < GLOBAL_COL; j++)
-            m_global_map[i][j].block_type = U;
+            m_global_map[i][j].block_type = UNKNOWN;
 
-    m_global_map[m_start_coord.row][m_start_coord.col].block_type = P;
+    m_global_map[m_start_coord.row][m_start_coord.col].block_type = PARTICLE;
 }
 
 // This function will be run in the loop() function of the arduino
@@ -100,10 +101,10 @@ void Main::completeNextTask() {
 }
 
 void Main::returnToStart(MapLocation global_map[][GLOBAL_COL], Pose current_pose) {
-    // Get current location
-    // Travel To Start Location();
-    // stopToProgram();
+    Serial.println("Travelling back to start");
     travelToBlock(global_map, current_pose, Pose(m_start_coord, DONTCARE));
+    Serial.println("Shutting Down...");
+    stopProgram();
 }
 
 /***********************
@@ -128,13 +129,13 @@ void Main::mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], 
         int row = adjacent_blocks[i].coord.row;
         int col = adjacent_blocks[i].coord.col;
         MapLocation map_location = global_map[row][col];
-        if (isValid(row, col) && map_location.block_type == U) {
+        if (isValid(adjacent_blocks[i].coord) && map_location.block_type == UNKNOWN) {
             desired_pose = Pose(current_pose.coord, adjacent_blocks[i].orientation);
             travelToBlock(global_map, current_pose, desired_pose);
 
             // Try with ultrasonic - If this doesn't work, include encoder control
             double start_distance = m_ultrasonic_front.getDistance();
-            while(m_ultrasonic_front.getDistance() > start_distance - 7) { 
+            while(m_ultrasonic_front.getDistance() > start_distance - 7) {
                 // Move forwards
                 Controller::DriveStraight(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), 180);
             }
@@ -142,7 +143,7 @@ void Main::mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], 
 
             map_location.block_type = m_color_down.getTerrainColor();
 
-            while(m_ultrasonic_front.getDistance() < start_distance) { 
+            while(m_ultrasonic_front.getDistance() < start_distance) {
                 // Move backwards
                 Controller::DriveStraight(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), -180);
             }
@@ -157,7 +158,7 @@ void Main::mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], 
 // TODO: Test
 bool Main::isUnexplored(MapLocation global_map[][GLOBAL_COL], Coord coord) {
     // If coord is invalid, don't explore
-    if (isValid(coord.row, coord.col) && global_map[coord.row][coord.col].block_type == U)
+    if (isValid(coord) && global_map[coord.row][coord.col].block_type == UNKNOWN)
         return true;
 
     return false;
@@ -176,9 +177,9 @@ void Main::mapTerrainOfBlockInFront() {
     */
 }
 
-static bool Main::isValid(Coord c) {
-  return c.row >= 0 && c.col >= 0 && c.row < GLOBAL_ROW && c.col < GLOBAL_COL;
-}
+// static bool Main::isValid(Coord c) {
+//   return c.row >= 0 && c.col >= 0 && c.row < GLOBAL_ROW && c.col < GLOBAL_COL;
+// }
 
 /***********************
 *    TASK FUNCTIONS    *
@@ -217,7 +218,7 @@ Coord Main::getClosestSandBlock(MapLocation global_map[][GLOBAL_COL], Coord curr
         for (int j = 0; j < GLOBAL_COL; j++) {
             // Check to see if the block is a SAND block and that
             // it has not already been searched
-            if (global_map[i][j].block_type == S && global_map[i][j].searched == false) {
+            if (global_map[i][j].block_type == SAND && global_map[i][j].searched == false) {
                 int distance = getManhattanDistance(Coord(i,j), current_loc);
 
                 if (distance < min_distance) {
@@ -260,34 +261,87 @@ void Main::travelToBlock(MapLocation map[][GLOBAL_COL], Pose start_pose, Pose fi
     //updateLocation(); possibly update location ?
 }
 
-static bool Main::hasUnknownNeighbors(MapLocation global_map[][GLOBAL_COL], Coord start_loc) {
+bool Main::hasUnknownNeighbors(MapLocation global_map[][GLOBAL_COL], Coord start_loc) {
     if (!isValid(start_loc)) {
         Serial.println("Invalid start coordinate");
         return false;
     }
 
-    Coord adjacent_blocks[4];
-    adjacent_blocks[0] = Coord(start_loc.row - 1, start_loc.col);
-    adjacent_blocks[1] = Coord(start_loc.row + 1, start_loc.col);
-    adjacent_blocks[2] = Coord(start_loc.row, start_loc.col - 1);
-    adjacent_blocks[3] = Coord(start_loc.row, start_loc.col + 1);
+    Coord adjacent[4];
+    adjacent[0] = Coord(start_loc.row - 1, start_loc.col);
+    adjacent[1] = Coord(start_loc.row + 1, start_loc.col);
+    adjacent[2] = Coord(start_loc.row, start_loc.col - 1);
+    adjacent[3] = Coord(start_loc.row, start_loc.col + 1);
 
     for (int i = 0; i < 4; i++) {
-        if (global_map[adjacent_blocks[i].row][[adjacent_blocks[i].col]].block_type == U) // Unknown
+        if (isValid(adjacent[i]) && global_map[adjacent[i].row][adjacent[i].col].block_type == UNKNOWN) // Unknown
             return true;
     }
 
     return false;
 }
 
-static Coord Main::findClosestBlockWithUnknownNeighbors(MapLocation grid[][GLOBAL_COL], Coord start_loc) {
+Coord Main::findClosestBlockWithUnknownNeighbors(MapLocation global_map[][GLOBAL_COL], Coord start_loc) {
+    Coord invalid_coord = Coord(-1, -1);
     if (!isValid(start_loc)) {
         Serial.println("Invalid start coordinate");
-        return false;
+        return invalid_coord;
     }
 
     // Implement a BFS
     Queue<Coord> to_visit;
+
+    to_visit.push(start_loc);
+    // Initialize all to false (unvisited)
+    bool visited[GLOBAL_ROW][GLOBAL_COL] =
+        {   //0, 1, 2, 3, 4, 5
+            { 0, 0, 0, 0, 0, 0}, // 0
+            { 0, 0, 0, 0, 0, 0}, // 1
+            { 0, 0, 0, 0, 0, 0}, // 2
+            { 0, 0, 0, 0, 0, 0}, // 3
+            { 0, 0, 0, 0, 0, 0}, // 4
+            { 0, 0, 0, 0, 0, 0}  // 5
+        };
+
+    visited[start_loc.row][start_loc.col] = true;
+
+    Coord current;
+
+    while (!to_visit.empty()) {
+        current = to_visit.front();
+        to_visit.pop();
+        Serial.print("Current Block: ("); Serial.print(current.row); Serial.print(","); Serial.print(current.col); Serial.println(")");
+        //TODO: Remove 2nd condition
+        if (hasUnknownNeighbors(global_map, current)) // Found a coord with unknown neighbors
+            return current;
+
+        // Explore all neighbors
+        Coord adjacent[4];
+        adjacent[0] = Coord(current.row - 1, current.col);
+        adjacent[1] = Coord(current.row + 1, current.col);
+        adjacent[2] = Coord(current.row, current.col - 1);
+        adjacent[3] = Coord(current.row, current.col + 1);
+
+        for (int i = 0; i < 4; i++) {
+            int row = adjacent[i].row;
+            int col = adjacent[i].col;
+
+            // Validate traversable block
+            if (isValid(adjacent[i]) && !visited[row][col] && isUnblocked(global_map, adjacent[i])) {
+                visited[row][col] = true;
+                to_visit.push(adjacent[i]);
+            }
+        }
+    }
+
+    Serial.println("No block with unknown neighbors");
+    return invalid_coord;
+}
+
+void Main::stopProgram() {
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    cli();  // Disable interrupts
+    sleep_mode();
 }
 
 void Main::extinguishFire() {

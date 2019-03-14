@@ -60,16 +60,16 @@ enum Landmark {
 };
 
 enum BlockType {
-    U = 0, // Unknown
-    P = 1, // Particle Board
-    W = 2, // Water
-    S = 3, // Sand
-    G = 4, // Gravel
-    X = 5, // Locations of interest
+    UNKNOWN = 0, // Unknown
+    PARTICLE = 1, // Particle Board
+    WATER = 2, // Water
+    SAND = 3, // Sand
+    GRAVEL = 4, // Gravel
+    INTEREST = 5, // Locations of interest
 };
 
 struct MapLocation {
-    BlockType block_type = U;
+    BlockType block_type = UNKNOWN;
 
     bool searched = false;
     bool land_mark_spot = false;
@@ -110,6 +110,16 @@ struct Pose {
     Pose () {};
     Pose (Coord c, Orientation o) : coord(c), orientation(o) {};
 };
+
+inline bool isUnblocked(MapLocation grid[][GLOBAL_COL], Coord c) {
+     return grid[c.row][c.col].block_type == PARTICLE ||
+            grid[c.row][c.col].block_type == SAND ||
+            grid[c.row][c.col].block_type == GRAVEL;
+}
+
+inline bool isValid(Coord c) {
+  return c.row >= 0 && c.col >= 0 && c.row < GLOBAL_ROW && c.col < GLOBAL_COL;
+}
 
 // Starting Map:
 // BLOCK_TYPE global_map[GLOBAL_ROW][GLOBAL_COL] =
