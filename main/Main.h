@@ -35,7 +35,7 @@ class Main {
         Task getNextTask();
         bool taskIsMapped(Task task);
 
-        Coord getGlobalPosition();
+        Coord getGlobalPosition(Pose pose);
         void mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose start_pose);
         bool isUnexplored(MapLocation global_map[][GLOBAL_COL], Coord coord);
         BlockType mapTerrainOfBlockInFront();

@@ -173,13 +173,31 @@ void Main::returnToStart(MapLocation global_map[][GLOBAL_COL], Pose current_pose
 * PERIPHERAL FUNCTIONS *
 ************************/
 
-Coord Main::getGlobalPosition() {
-    double col1 = m_ultrasonic_left.getDistance() / 30.3;
-    double col2 = m_ultrasonic_right.getDistance() / 30.3;
-    double row1 = m_ultrasonic_front.getDistance() / 30.3;
-    double row2 = m_ultrasonic_back.getDistance() / 30.3;
 
-    return Coord(round((row1 + row2)/2), round((col1 + col2)/2));
+Coord Main::getGlobalPosition(Pose pose) {
+    double left_distance = m_ultrasonic_left.getDistance() / 30.3;
+    double right_distance = m_ultrasonic_right.getDistance() / 30.3;
+    double front_distance = m_ultrasonic_front.getDistance() / 30.3;
+    double back_distance = m_ultrasonic_back.getDistance() / 30.3;
+
+    if(left_distance + right_distance > 155 && front_distance + back_distance > 155) {
+        switch (pose.orientation) {
+        case NORTH:
+            return Coord(floor(front_distance), floor(left_distance));
+        case SOUTH:
+            return Coord(floor(back_distance), floor(right_distance));
+        case EAST:
+            return Coord(floor(left_distance), floor(back_distance));
+        case WEST:
+            return Coord(floor(right_distance), floor(front_distance));
+        default:
+            Serial.println("UNKNOWN ORIENTATION");
+            return Coord(-1,-1);
+        }
+    } else {
+        // There is some sort of obstruction
+        return Coord(-1,-1);
+    }
 }
 
 void Main::mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose start_pose) {
