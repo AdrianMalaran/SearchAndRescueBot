@@ -173,6 +173,49 @@ void Main::returnToStart(MapLocation global_map[][GLOBAL_COL], Pose current_pose
 * PERIPHERAL FUNCTIONS *
 ************************/
 
+bool Main::isLandmarkAhead(MapLocation &map, Pose pose) {
+    double front_distance = m_ultrasonic_front.getDistance();
+    double back_distance = m_ultrasonic_back.getDistance();
+    int row = pose.coord.row;
+    int col = pose.coord.col;
+
+    if (front_distance + back_distance < 155) {
+        switch (pose.orientation) {
+        case NORTH:
+            // check if on North wall
+            if(pose.coord.row == 0) {
+                return false;
+            } else if (front_distance < 30) {
+                return true;
+            }
+        case SOUTH:
+            // check if on south wall
+            if(pose.coord.row == 5) {
+                return false;
+            } else if (front_distance < 30) {
+                return true;
+            }
+        case EAST:
+            // check if on east wall
+            if(pose.coord.col == 5) {
+                return false;
+            } else if (front_distance < 30) {
+                return true;
+            }
+        case WEST:
+            // check if on west wall
+            if(pose.coord.col == 0) {
+                return false;
+            } else if (front_distance < 30) {
+                return true;
+            }
+        default:
+            // TODO: We should never hit this case.... but DONTCARE is a thing
+            Serial.println("UNKNOWN ORIENTATION");
+            return false;
+        }
+    }
+}
 
 Coord Main::getGlobalPosition(Pose pose) {
     double left_distance = m_ultrasonic_left.getDistance() / 30.3;
@@ -210,24 +253,25 @@ void Main::mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], 
 
     Pose adjacent_blocks[4];
     adjacent_blocks[0] = Pose(Coord(start_pose.coord.row - 1, start_pose.coord.col), NORTH);
-    adjacent_blocks[1] = Pose(Coord(start_pose.coord.row + 1, start_pose.coord.col), SOUTH);
-    adjacent_blocks[2] = Pose(Coord(start_pose.coord.row, start_pose.coord.col - 1), WEST);
-    adjacent_blocks[3] = Pose(Coord(start_pose.coord.row, start_pose.coord.col + 1), EAST);
+    adjacent_blocks[1] = Pose(Coord(start_pose.coord.row, start_pose.coord.col + 1), EAST);
+    adjacent_blocks[2] = Pose(Coord(start_pose.coord.row + 1, start_pose.coord.col), SOUTH);
+    adjacent_blocks[3] = Pose(Coord(start_pose.coord.row, start_pose.coord.col - 1), WEST);
 
     for (int i = 0; i < 4; i++) {
         int row = adjacent_blocks[i].coord.row;
         int col = adjacent_blocks[i].coord.col;
         MapLocation map_location = global_map[row][col];
+
         if (isValid(adjacent_blocks[i].coord) && map_location.block_type == UNKNOWN) {
-            desired_pose = Pose(current_pose.coord, adjacent_blocks[i].orientation);
+            desired_pose = Pose(start_pose.coord, adjacent_blocks[i].orientation);
             travelToBlock(global_map, current_pose, desired_pose);
 
-            map_location.block_type = mapTerrainOfBlockInFront();
-
             current_pose = desired_pose;
+
+            mapBlockInFront(map_location, current_pose);
         }
-        travelToBlock(global_map, current_pose, start_pose);
     }
+    travelToBlock(global_map, current_pose, start_pose);
 }
 
 // TODO: Test
@@ -239,7 +283,7 @@ bool Main::isUnexplored(MapLocation global_map[][GLOBAL_COL], Coord coord) {
     return false;
 }
 
-BlockType Main::mapTerrainOfBlockInFront() {
+void Main::mapBlockInFront(MapLocation &map_location, Pose pose) {
     /* Questions we want to answer:
         How do we detect that we're at the edge of one block ? (Use ultrasonic sensors )
     */
@@ -252,15 +296,16 @@ BlockType Main::mapTerrainOfBlockInFront() {
     }
     m_motor_pair.stop();
 
-    BlockType block_type = m_color_down.getTerrainColor();
+    map_location.block_type = m_color_down.getTerrainColor();
+
+    //map_location.is_landmark =
+    bool temp = isLandmarkAhead(map_location, pose);
 
     while(m_ultrasonic_front.getDistance() < start_distance) {
         // Move backwards
         Controller::DriveStraight(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), -180);
     }
     m_motor_pair.stop();
-
-    return block_type;
 }
 
 // static bool Main::isValid(Coord c) {

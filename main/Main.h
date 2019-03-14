@@ -35,10 +35,11 @@ class Main {
         Task getNextTask();
         bool taskIsMapped(Task task);
 
+        bool isLandmarkAhead(MapLocation &location, Pose start_pose);
         Coord getGlobalPosition(Pose pose);
         void mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose start_pose);
         bool isUnexplored(MapLocation global_map[][GLOBAL_COL], Coord coord);
-        BlockType mapTerrainOfBlockInFront();
+        void mapBlockInFront(MapLocation &location, Pose pose);
 
         //TODO: Implement these functions
         void findFood(MapLocation global_map[][GLOBAL_COL], Pose current_pose);
