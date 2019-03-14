@@ -29,13 +29,13 @@ class Main {
         Coord getGlobalPosition();
         void mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose start_pose);
         bool isUnexplored(MapLocation global_map[][GLOBAL_COL], Coord coord);
-        void mapTerrainOfBlockInFront();
+        BlockType mapTerrainOfBlockInFront();
 
         //TODO: Implement these functions
         void findFood(MapLocation global_map[][GLOBAL_COL], Pose current_pose);
         Coord getClosestSandBlock(MapLocation global_map[][GLOBAL_COL], Coord current_loc); //TODO: Implement
 
-        void extinguishFire(); //TODO: Implement
+        void extinguishFire();
 
         void travelToBlock(MapLocation map[][GLOBAL_COL], Pose start_pose, Pose finish_pose);
 
@@ -66,8 +66,8 @@ class Main {
         // bool m_found_food;
         // bool m_found_people;
         // bool m_found_survivor;
-        // bool m_extinguished_fire;
 
+        bool m_extinguished_fire;
         MotorPair m_motor_pair;
         Imu m_imu_sensor;
         Color m_color_front;
