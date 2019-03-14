@@ -39,6 +39,12 @@ void Main::init() {
 
     delay(1000);
 
+    // Initialize Tasks
+    m_found_food = false;
+    m_found_people = false;
+    m_found_survivor = false;
+    m_extinguished_fire = false;
+
     // Set motor pins
     m_motor_pair.setupMotorPair();
 
@@ -56,23 +62,77 @@ void Main::init() {
     m_global_map[m_start_coord.row][m_start_coord.col].block_type = PARTICLE;
 }
 
-// This function will be run in the loop() function of the arduino
+//TODO: This function will be run in the loop() function of the arduino (?)
+// OR just in the setup loop?
 void Main::run() {
 
-    if (tasks.empty()) {
-        returnToStart(m_global_map, m_current_pose);
-        // Stop Program
-    } else {
-        // All tasks are not completed yet
-        completeNextTask();
+    //TODO: Store next tasks in a different data structure than a queue,
+    // because only putting out the fire needs to be done first
+    while (!allTasksCompleted()) {
+        Task task = getNextTask();
+
+        if (taskIsMapped(task)) {
+            engageObjectiveMode(task);
+        } else {
+            engageExploreMode();
+        }
     }
+
+    returnToStart(m_global_map, m_current_pose);
+    // Stop Program
 }
 
-void Main::completeNextTask() {
-    // Retrieve current task
-    Task current_task = tasks.front();
+void Main::engageExploreMode() {
+    Serial.println("Enaging Explore Mode!");
 
-    switch (current_task) {
+    Coord explore_block = findClosestBlockWithUnknownNeighbors(m_global_map, m_current_pose.coord);
+    travelToBlock(m_global_map, m_current_pose, Pose(explore_block, DONTCARE));
+    mapAdjacentBlocks(m_global_map, m_current_pose);
+}
+
+bool Main::allTasksCompleted() {
+    return (m_found_food &&
+            m_found_people &&
+            m_found_survivor &&
+            m_extinguished_fire);
+}
+
+Task Main::getNextTask() {
+    if (!m_extinguished_fire)
+        return EXTINGUISH_FIRE;
+
+    // TODO: Allow for these task to be in any order
+    if (!m_found_food)
+        return FIND_FOOD;
+
+    if (!m_found_people)
+        return FIND_GROUP_OF_PEOPLE;
+
+    return FIND_SURVIVOR;
+}
+
+bool Main::taskIsMapped(Task task) {
+    // TODO: I'm not sure if we want to add this as a task if we plan
+    // to put out the fire immediately when we start, may take out later
+    if (task == EXTINGUISH_FIRE)
+        // Special Case: This should be the first task performed
+        // Assume that the candle is mapped when we perform extinguish fire
+        return true;
+    if (task == FIND_FOOD)
+        return m_food_mapped;
+    if (task == FIND_GROUP_OF_PEOPLE)
+        return m_group_mapped;
+    if (task == FIND_SURVIVOR)
+        return m_survivor_mapped;
+
+    Serial.println("Given task is unspecified");
+    return false;
+}
+
+void Main::engageObjectiveMode(Task task) {
+    Serial.println("Enaging Objective Mode!");
+
+    switch (task) {
         case EXTINGUISH_FIRE:
             // Assume there is some sort of Path Planning (Adrian) that gets us within
             // the flame sensors range of the candle.
@@ -355,5 +415,9 @@ void Main::stopProgram() {
 }
 
 void Main::extinguishFire() {
+    Serial.println("extinguishFire()");
     m_motor_pair.extinguishFireTurn();
+    Serial.println("Fire extinguished");
+    //TODO: Flag m_extinguished_fire as true
+    m_extinguished_fire = true;
 }

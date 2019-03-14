@@ -14,6 +14,10 @@
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
 
+
+/*
+    TODO: Add Localization + Speed Controller
+*/
 /* Core Class */
 class Main {
     public:
@@ -24,7 +28,12 @@ class Main {
         void init();
         void run();
         void returnToStart(MapLocation global_map[][GLOBAL_COL], Pose current_pose);
-        void completeNextTask();
+        void engageExploreMode();
+        void engageObjectiveMode(Task task);
+
+        bool allTasksCompleted();
+        Task getNextTask();
+        bool taskIsMapped(Task task);
 
         Coord getGlobalPosition();
         void mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose start_pose);
@@ -63,10 +72,15 @@ class Main {
         Coord m_sand_block_locations[36];
 
         // TODO: Add these flags
-        // bool m_found_food;
-        // bool m_found_people;
-        // bool m_found_survivor;
-        // bool m_extinguished_fire;
+        bool m_found_food;
+        bool m_found_people;
+        bool m_found_survivor;
+        bool m_delivered_food;
+        bool m_extinguished_fire;
+
+        bool m_food_mapped;
+        bool m_group_mapped;
+        bool m_survivor_mapped;
 
         MotorPair m_motor_pair;
         Imu m_imu_sensor;

@@ -184,20 +184,20 @@ void Tests::TestExplore() {
     MapLocation O(SAND);
     MapLocation X(WATER);
     MapLocation MG(GRAVEL);
-    MapLocation MU(UNKNOWN);
+    MapLocation U(UNKNOWN);
 
     MapLocation map[GLOBAL_ROW][GLOBAL_COL] =
     {
-    //    0, 1, 2, 3, 4, 5
         { O, O, O, O, O, O}, // O
         { O, O, O, O, O, O}, // 1
-        { O, O, O, O, O, O}, // 2
-        { O, O, O, O, O, O}, // 3
-        { O, O, O, O, O, O}, // 4
-        { O, O, O, O, O, O}  // 5
+        { O, O, U, X, X, O}, // 2
+        { O, O, X, X, O, O}, // 3
+        { O, O, O, O, X, O}, // 4
+        { O, O, X, O, O, O}  // 5
+    //    0, 1, 2, 3, 4, 5
     };
 
-    Coord start_loc(0,0);
+    Coord start_loc(3,5);
 
     Main m_main_engine;
 
