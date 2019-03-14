@@ -298,8 +298,7 @@ void Main::mapBlockInFront(MapLocation &map_location, Pose pose) {
 
     map_location.block_type = m_color_down.getTerrainColor();
 
-    //map_location.is_landmark =
-    bool temp = isLandmarkAhead(map_location, pose);
+    map_location.land_mark_spot = isLandmarkAhead(map_location, pose);
 
     while(m_ultrasonic_front.getDistance() < start_distance) {
         // Move backwards
