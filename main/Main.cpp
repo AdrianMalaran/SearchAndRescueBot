@@ -24,6 +24,7 @@ Main::Main(MotorPair motor_pair, Imu imu_sensor, Color color_front, Color color_
     m_ultrasonic_right = ultrasonic_right;
     m_ultrasonic_left = ultrasonic_left;
     m_ultrasonic_back = ultrasonic_back;
+    init();
 }
 
 void Main::init() {
@@ -79,7 +80,7 @@ void Main::completeNextTask() {
             extinguishFire();
             break;
         case FIND_FOOD:
-            Serial.println("TASK: Finding Survivor");
+            Serial.println("TASK: Finding Food");
             // findFood();
             break;
         case FIND_GROUP_OF_PEOPLE:
@@ -110,6 +111,15 @@ void Main::returnToStart(MapLocation global_map[][GLOBAL_COL], Pose current_pose
 /***********************
 * PERIPHERAL FUNCTIONS *
 ************************/
+
+Coord Main::getGlobalPosition() {
+    double col1 = m_ultrasonic_left.getDistance() / 30.3;
+    double col2 = m_ultrasonic_right.getDistance() / 30.3;
+    double row1 = m_ultrasonic_front.getDistance() / 30.3;
+    double row2 = m_ultrasonic_back.getDistance() / 30.3;
+
+    return Coord(round((row1 + row2)/2), round((col1 + col2)/2));
+}
 
 void Main::mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose start_pose) {
     // Use motor encoders to measure distance ??
