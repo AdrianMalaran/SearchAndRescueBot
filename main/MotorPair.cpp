@@ -121,7 +121,7 @@ static void MotorPair::setMotorBSpeed(int speed) {
 
 static void MotorPair::turnLeft() {
 	// determine the desired orientation of imu with wrapper
-	if(m_orientation - 90 < 0)
+	if (m_orientation - 90 < 0)
 		m_orientation+=270;
 	else
 		m_orientation-=90;
@@ -138,7 +138,7 @@ static void MotorPair::turnLeft() {
 	analogWrite(enable_a, MAX_SPEED_A/2);
 	analogWrite(enable_b, MAX_SPEED_B/2);
 	
-	while(m_imu_sensor.getEuler().x() != m_orientation) {}
+	while (m_imu_sensor.getEuler().x() != m_orientation) {}
 
 	// rampDown(MAX_SPEED/2);
 	stop();
@@ -147,7 +147,7 @@ static void MotorPair::turnLeft() {
 static void MotorPair::turnRight() {
 	// determine the desired orientation of imu with wrapper
 	double desired_orientaion;
-	if(m_orientation + 90 > 360)
+	if (m_orientation + 90 > 360)
 		desired_orientaion = m_orientation - 270;
 	else
 		desired_orientaion = m_orientation + 90;
@@ -164,7 +164,7 @@ static void MotorPair::turnRight() {
 	analogWrite(enable_a, MAX_SPEED_A/2);
 	analogWrite(enable_b, MAX_SPEED_B/2);
 
-	while(m_imu_sensor.getEuler().x() != desired_orientaion) {}
+	while (m_imu_sensor.getEuler().x() != desired_orientaion) {}
 
 	// rampDown(MAX_SPEED/2);
 	stop();
@@ -184,14 +184,14 @@ bool MotorPair::extinguishFireTurn() {
 	analogWrite(enable_a, MAX_SPEED_A/3);
 	analogWrite(enable_b, MAX_SPEED_B/3);
 	
-	while(m_imu_sensor.getEuler().x() != m_orientation) {
-		if(Flame::getFireMagnitude() > 5) {
-			while(Flame::getFireMagnitude() > 5) {
+	while (m_imu_sensor.getEuler().x() != m_orientation) {
+		if (Flame::getFireMagnitude() > 5) {
+			while (Flame::getFireMagnitude() > 5) {
 				Fan::on();
 			}
 			Fan::off();
 			
-			if(fabs(start_orientation - m_orientation) < 180) {
+			if (fabs(start_orientation - m_orientation) < 180) {
 				digitalWrite(input1, HIGH);
 				digitalWrite(input2, LOW);
 				digitalWrite(input3, LOW);
@@ -201,11 +201,11 @@ bool MotorPair::extinguishFireTurn() {
 			analogWrite(enable_a, MAX_SPEED_A/2);
 			analogWrite(enable_b, MAX_SPEED_B/2);
 
-			while(m_imu_sensor.getEuler().x() != start_orientation) {}
+			while (m_imu_sensor.getEuler().x() != start_orientation) {}
 
 			fire_extinguished = true;
 		}
-		if(fire_extinguished) break;
+		if (fire_extinguished) break;
 	}
 
 	stop();

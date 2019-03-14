@@ -223,7 +223,7 @@ Coord Main::getGlobalPosition(Pose pose) {
     double front_distance = m_ultrasonic_front.getDistance() / 30.3;
     double back_distance = m_ultrasonic_back.getDistance() / 30.3;
 
-    if(left_distance + right_distance > 155 && front_distance + back_distance > 155) {
+    if (left_distance + right_distance > 155 && front_distance + back_distance > 155) {
         switch (pose.orientation) {
         case NORTH:
             return Coord(floor(front_distance), floor(left_distance));
@@ -290,7 +290,7 @@ void Main::mapBlockInFront(MapLocation &map_location, Pose pose) {
 
     // Try with ultrasonic - If this doesn't work, include encoder control
     double start_distance = m_ultrasonic_front.getDistance();
-    while(m_ultrasonic_front.getDistance() > start_distance - 7) {
+    while (m_ultrasonic_front.getDistance() > start_distance - 7) {
         // Move forwards
         Controller::DriveStraight(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), 180);
     }
@@ -300,7 +300,7 @@ void Main::mapBlockInFront(MapLocation &map_location, Pose pose) {
 
     map_location.land_mark_spot = isLandmarkAhead(map_location, pose);
 
-    while(m_ultrasonic_front.getDistance() < start_distance) {
+    while (m_ultrasonic_front.getDistance() < start_distance) {
         // Move backwards
         Controller::DriveStraight(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), -180);
     }
