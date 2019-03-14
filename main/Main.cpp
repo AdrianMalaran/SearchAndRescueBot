@@ -78,7 +78,7 @@ void Main::completeNextTask() {
             extinguishFire();
             break;
         case FIND_FOOD:
-            Serial.println("TASK: Finding Survivor");
+            Serial.println("TASK: Finding Food");
             // findFood();
             break;
         case FIND_GROUP_OF_PEOPLE:
@@ -108,6 +108,15 @@ void Main::returnToStart() {
 /***********************
 * PERIPHERAL FUNCTIONS *
 ************************/
+
+Coord Main::getGlobalPosition() {
+    double x1 = m_ultrasonic_left.getDistance() / 30.3;
+    double x2 = m_ultrasonic_right.getDistance() / 30.3;
+    double y1 = m_ultrasonic_front.getDistance() / 30.3;
+    double y2 = m_ultrasonic_back.getDistance() / 30.3;
+
+    return Coord(round((x1 + x2)/2), round((y1 + y2)/2));
+}
 
 void Main::mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose start_pose) {
     // Use motor encoders to measure distance ??
