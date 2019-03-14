@@ -50,6 +50,7 @@ void Main::init() {
 
     // Set flame pins
     Flame::setupFlame();
+    m_extinguished_fire = false;
 
     // Set start coord
     m_start_coord = Coord(4, 5);
@@ -203,21 +204,7 @@ void Main::mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], 
             desired_pose = Pose(current_pose.coord, adjacent_blocks[i].orientation);
             travelToBlock(global_map, current_pose, desired_pose);
 
-            // Try with ultrasonic - If this doesn't work, include encoder control
-            double start_distance = m_ultrasonic_front.getDistance();
-            while(m_ultrasonic_front.getDistance() > start_distance - 7) {
-                // Move forwards
-                Controller::DriveStraight(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), 180);
-            }
-            m_motor_pair.stop();
-
-            map_location.block_type = m_color_down.getTerrainColor();
-
-            while(m_ultrasonic_front.getDistance() < start_distance) {
-                // Move backwards
-                Controller::DriveStraight(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), -180);
-            }
-            m_motor_pair.stop();
+            map_location.block_type = mapTerrainOfBlockInFront();
 
             current_pose = desired_pose;
         }
@@ -234,17 +221,28 @@ bool Main::isUnexplored(MapLocation global_map[][GLOBAL_COL], Coord coord) {
     return false;
 }
 
-void Main::mapTerrainOfBlockInFront() {
+BlockType Main::mapTerrainOfBlockInFront() {
     /* Questions we want to answer:
         How do we detect that we're at the edge of one block ? (Use ultrasonic sensors )
     */
 
-    /*
-        Move forward until boundary of current block is met
-        Take colour sensor reading to determine correct terrain of block infront
-        Map this block
-        Move robot back to center of the block
-    */
+    // Try with ultrasonic - If this doesn't work, include encoder control
+    double start_distance = m_ultrasonic_front.getDistance();
+    while(m_ultrasonic_front.getDistance() > start_distance - 7) {
+        // Move forwards
+        Controller::DriveStraight(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), 180);
+    }
+    m_motor_pair.stop();
+
+    BlockType block_type = m_color_down.getTerrainColor();
+
+    while(m_ultrasonic_front.getDistance() < start_distance) {
+        // Move backwards
+        Controller::DriveStraight(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), -180);
+    }
+    m_motor_pair.stop();
+
+    return block_type;
 }
 
 // static bool Main::isValid(Coord c) {
@@ -274,7 +272,7 @@ void Main::findFood(MapLocation global_map[][GLOBAL_COL], Pose current_pose) {
         Serial.println("All sandblocks mapped have been searched, explore for more");
         // Go explore unmapped blocks
     } else {
-        //TODO: Maybe we can just go to the closest
+        // TODO: Maybe we can just go to the closest
         Serial.println("Travelling to closest sand block");
         travelToBlock(global_map, current_pose, Pose(closest_sand_block, DONTCARE));
     }
@@ -416,8 +414,6 @@ void Main::stopProgram() {
 
 void Main::extinguishFire() {
     Serial.println("extinguishFire()");
-    m_motor_pair.extinguishFireTurn();
+    m_extinguished_fire = m_motor_pair.extinguishFireTurn();
     Serial.println("Fire extinguished");
-    //TODO: Flag m_extinguished_fire as true
-    m_extinguished_fire = true;
 }

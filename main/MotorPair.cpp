@@ -170,7 +170,7 @@ static void MotorPair::turnRight() {
 	stop();
 }
 
-void MotorPair::extinguishFireTurn() {
+bool MotorPair::extinguishFireTurn() {
 	double start_orientation = m_imu_sensor.getEuler().x();
 	bool fire_extinguished = false;
 
@@ -180,8 +180,6 @@ void MotorPair::extinguishFireTurn() {
 	digitalWrite(input2, HIGH);
 	digitalWrite(input3, HIGH);
 	digitalWrite(input4, LOW);
-
-	// rampUp(MAX_SPEED/2);
 
 	analogWrite(enable_a, MAX_SPEED_A/3);
 	analogWrite(enable_b, MAX_SPEED_B/3);
@@ -210,7 +208,7 @@ void MotorPair::extinguishFireTurn() {
 		if(fire_extinguished) break;
 	}
 
-	// rampDown(MAX_SPEED/2);
-
 	stop();
+
+	return fire_extinguished;
 }

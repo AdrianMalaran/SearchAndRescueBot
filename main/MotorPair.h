@@ -17,7 +17,7 @@ class MotorPair {
 		static void setMotorBSpeed(int speed);
 		void turnLeft();
 		void turnRight();
-		void extinguishFireTurn();
+		bool extinguishFireTurn();
     private:
 		void rampUp(int set_speed);
 		void rampDown(int curr_speed);
