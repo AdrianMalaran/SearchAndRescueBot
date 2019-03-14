@@ -182,39 +182,25 @@ bool Main::isLandmarkAhead(MapLocation &map, Pose pose) {
     if (front_distance + back_distance < 155) {
         switch (pose.orientation) {
         case NORTH:
-            // check if on North wall
-            if(pose.coord.row == 0) {
-                return false;
-            } else if (front_distance < 30) {
+             if (front_distance < 30)
                 return true;
-            }
         case SOUTH:
-            // check if on south wall
-            if(pose.coord.row == 5) {
-                return false;
-            } else if (front_distance < 30) {
+            if (front_distance < 30)
                 return true;
-            }
         case EAST:
-            // check if on east wall
-            if(pose.coord.col == 5) {
-                return false;
-            } else if (front_distance < 30) {
+            if (front_distance < 30)
                 return true;
-            }
         case WEST:
-            // check if on west wall
-            if(pose.coord.col == 0) {
-                return false;
-            } else if (front_distance < 30) {
+            if (front_distance < 30)
                 return true;
-            }
         default:
             // TODO: We should never hit this case.... but DONTCARE is a thing
             Serial.println("UNKNOWN ORIENTATION");
             return false;
         }
     }
+
+    return false;
 }
 
 Coord Main::getGlobalPosition(Pose pose) {
@@ -238,7 +224,7 @@ Coord Main::getGlobalPosition(Pose pose) {
             return Coord(-1,-1);
         }
     } else {
-        // There is some sort of obstruction
+        // There is some sort of obstruction - return invalid coord
         return Coord(-1,-1);
     }
 }
