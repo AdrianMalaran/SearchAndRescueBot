@@ -308,12 +308,17 @@ void Main::findFood(MapLocation global_map[][GLOBAL_COL], Pose current_pose) {
     // Search for closest sand block
     // travel to sand block
     // inspect sand block to see if a magnet is detected
+    // In response to the above higher level plan, would it not be simpler to check the sand blocks
+    // as we traverse them, and if we are unsuccesful then go down this route - maybe a checked_for_magnet flag?
 
     //TODO: Need to know if the robot can just stay in place and the IMU will detect
-    // that reading
+    // that reading -> We would need to have the nominal stationary value and then
+    // compare this value to the nominal - so yes, this should be simple enough to do,
+    // we just need to characterize the magnetometer first.
 
     //TODO: if we get close enough to sand block boundary to detect a magnet,
-    // then we should automatically mark that spot as the food location
+    // then we should automatically mark that spot as the food location -> this could be possible,
+    // but would be highly dependent on the magnetic field orientations.
 
     Coord closest_sand_block = getClosestSandBlock(global_map, current_pose.coord);
     if (closest_sand_block.row == -1 && closest_sand_block.col == -1) {

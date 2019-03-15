@@ -20,7 +20,7 @@ Imu imu_sensor = Imu();
 Color color_front(SDA1pin, SCL1pin, COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X), color_down(SDA2pin, SCL2pin, COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X);
 
 // ultrasonic(trigPin, echoPin)
-Ultrasonic ultrasonic_front(52,53), ultrasonic_right(52,53), ultrasonic_left(52,53), ultrasonic_back(52,53);
+Ultrasonic ultrasonic_front(49,48), ultrasonic_right(51,50), ultrasonic_left(47,46), ultrasonic_back(53,52);
 
 // MotorPair declaration
 MotorPair motor_pair(imu_sensor);

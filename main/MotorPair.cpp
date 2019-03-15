@@ -27,16 +27,16 @@ const int MIN_SPEED_B = 0;
 
 // Motor A
 const int enable_a = 9;
-const int input1 = 3;
-const int input2 = 4;
+const int input1 = 28;
+const int input2 = 29;
 
 // Motor B
 const int enable_b = 10;
-const int input3 = 5;
-const int input4 = 6;
+const int input3 = 30;
+const int input4 = 31;
 
 // standby pin
-const int stand_by = 47;
+const int stand_by = 34;
 
 MotorPair::MotorPair() {}
 
@@ -119,7 +119,7 @@ static void MotorPair::setMotorBSpeed(int speed) {
 }
 
 
-static void MotorPair::turnLeft() {
+void MotorPair::turnLeft() {
 	// determine the desired orientation of imu with wrapper
 	if (m_orientation - 90 < 0)
 		m_orientation+=270;
@@ -144,7 +144,7 @@ static void MotorPair::turnLeft() {
 	stop();
 }
 
-static void MotorPair::turnRight() {
+void MotorPair::turnRight() {
 	// determine the desired orientation of imu with wrapper
 	double desired_orientaion;
 	if (m_orientation + 90 > 360)
@@ -186,6 +186,7 @@ bool MotorPair::extinguishFireTurn() {
 	
 	while (m_imu_sensor.getEuler().x() != m_orientation) {
 		if (Flame::getFireMagnitude() > 5) {
+			stop();
 			while (Flame::getFireMagnitude() > 5) {
 				Fan::on();
 			}
