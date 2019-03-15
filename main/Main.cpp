@@ -176,13 +176,60 @@ void Main::returnToStart(MapLocation global_map[][GLOBAL_COL], Pose current_pose
 * PERIPHERAL FUNCTIONS *
 ************************/
 
-Coord Main::getGlobalPosition() {
-    double col1 = m_ultrasonic_left.getDistance() / 30.3;
-    double col2 = m_ultrasonic_right.getDistance() / 30.3;
-    double row1 = m_ultrasonic_front.getDistance() / 30.3;
-    double row2 = m_ultrasonic_back.getDistance() / 30.3;
+bool Main::isLandmarkAhead(MapLocation &map, Pose pose) {
+    double front_distance = m_ultrasonic_front.getDistance();
+    double back_distance = m_ultrasonic_back.getDistance();
+    int row = pose.coord.row;
+    int col = pose.coord.col;
 
-    return Coord(round((row1 + row2)/2), round((col1 + col2)/2));
+    if (front_distance + back_distance < 155) {
+        switch (pose.orientation) {
+        case NORTH:
+             if (front_distance < 30)
+                return true;
+        case SOUTH:
+            if (front_distance < 30)
+                return true;
+        case EAST:
+            if (front_distance < 30)
+                return true;
+        case WEST:
+            if (front_distance < 30)
+                return true;
+        default:
+            // TODO: We should never hit this case.... but DONTCARE is a thing
+            Serial.println("UNKNOWN ORIENTATION");
+            return false;
+        }
+    }
+
+    return false;
+}
+
+Coord Main::getGlobalPosition(Pose pose) {
+    double left_distance = m_ultrasonic_left.getDistance() / 30.3;
+    double right_distance = m_ultrasonic_right.getDistance() / 30.3;
+    double front_distance = m_ultrasonic_front.getDistance() / 30.3;
+    double back_distance = m_ultrasonic_back.getDistance() / 30.3;
+
+    if (left_distance + right_distance > 155 && front_distance + back_distance > 155) {
+        switch (pose.orientation) {
+        case NORTH:
+            return Coord(floor(front_distance), floor(left_distance));
+        case SOUTH:
+            return Coord(floor(back_distance), floor(right_distance));
+        case EAST:
+            return Coord(floor(left_distance), floor(back_distance));
+        case WEST:
+            return Coord(floor(right_distance), floor(front_distance));
+        default:
+            Serial.println("UNKNOWN ORIENTATION");
+            return Coord(-1,-1);
+        }
+    } else {
+        // There is some sort of obstruction - return invalid coord
+        return Coord(-1,-1);
+    }
 }
 
 void Main::mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose start_pose) {
@@ -195,24 +242,25 @@ void Main::mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], 
 
     Pose adjacent_blocks[4];
     adjacent_blocks[0] = Pose(Coord(start_pose.coord.row - 1, start_pose.coord.col), NORTH);
-    adjacent_blocks[1] = Pose(Coord(start_pose.coord.row + 1, start_pose.coord.col), SOUTH);
-    adjacent_blocks[2] = Pose(Coord(start_pose.coord.row, start_pose.coord.col - 1), WEST);
-    adjacent_blocks[3] = Pose(Coord(start_pose.coord.row, start_pose.coord.col + 1), EAST);
+    adjacent_blocks[1] = Pose(Coord(start_pose.coord.row, start_pose.coord.col + 1), EAST);
+    adjacent_blocks[2] = Pose(Coord(start_pose.coord.row + 1, start_pose.coord.col), SOUTH);
+    adjacent_blocks[3] = Pose(Coord(start_pose.coord.row, start_pose.coord.col - 1), WEST);
 
     for (int i = 0; i < 4; i++) {
         int row = adjacent_blocks[i].coord.row;
         int col = adjacent_blocks[i].coord.col;
         MapLocation map_location = global_map[row][col];
+
         if (isValid(adjacent_blocks[i].coord) && map_location.block_type == UNKNOWN) {
-            desired_pose = Pose(current_pose.coord, adjacent_blocks[i].orientation);
+            desired_pose = Pose(start_pose.coord, adjacent_blocks[i].orientation);
             travelToBlock(global_map, current_pose, desired_pose);
 
-            map_location.block_type = mapTerrainOfBlockInFront();
-
             current_pose = desired_pose;
+
+            mapBlockInFront(map_location, current_pose);
         }
-        travelToBlock(global_map, current_pose, start_pose);
     }
+    travelToBlock(global_map, current_pose, start_pose);
 }
 
 // TODO: Test
@@ -224,28 +272,28 @@ bool Main::isUnexplored(MapLocation global_map[][GLOBAL_COL], Coord coord) {
     return false;
 }
 
-BlockType Main::mapTerrainOfBlockInFront() {
+void Main::mapBlockInFront(MapLocation &map_location, Pose pose) {
     /* Questions we want to answer:
         How do we detect that we're at the edge of one block ? (Use ultrasonic sensors )
     */
 
     // Try with ultrasonic - If this doesn't work, include encoder control
     double start_distance = m_ultrasonic_front.getDistance();
-    while(m_ultrasonic_front.getDistance() > start_distance - 7) {
+    while (m_ultrasonic_front.getDistance() > start_distance - 7) {
         // Move forwards
         Controller::DriveStraight(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), 180);
     }
     m_motor_pair.stop();
 
-    BlockType block_type = m_color_down.getTerrainColor();
+    map_location.block_type = m_color_down.getTerrainColor();
 
-    while(m_ultrasonic_front.getDistance() < start_distance) {
+    map_location.land_mark_spot = isLandmarkAhead(map_location, pose);
+
+    while (m_ultrasonic_front.getDistance() < start_distance) {
         // Move backwards
         Controller::DriveStraight(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), -180);
     }
     m_motor_pair.stop();
-
-    return block_type;
 }
 
 // static bool Main::isValid(Coord c) {
@@ -257,8 +305,23 @@ BlockType Main::mapTerrainOfBlockInFront() {
 ************************/
 
 void Main::findFood(MapLocation global_map[][GLOBAL_COL], Pose current_pose) {
+    // Check to see if there are mapped sand blocks
+    //     if there are no mapped sand blocks, go explore
+
+    // Search for closest sand block
+    // travel to sand block
+    // inspect sand block to see if a magnet is detected
+    // In response to the above higher level plan, would it not be simpler to check the sand blocks
+    // as we traverse them, and if we are unsuccesful then go down this route - maybe a checked_for_magnet flag?
+
+    //TODO: Need to know if the robot can just stay in place and the IMU will detect
+    // that reading -> We would need to have the nominal stationary value and then
+    // compare this value to the nominal - so yes, this should be simple enough to do,
+    // we just need to characterize the magnetometer first.
+
     //TODO: if we get close enough to sand block boundary to detect a magnet,
-    // then we should automatically mark that spot as the food location
+    // then we should automatically mark that spot as the food location -> this could be possible,
+    // but would be highly dependent on the magnetic field orientations.
 
     /*
     Coord closest_sand_block = getClosestSandBlock(global_map, current_pose.coord);

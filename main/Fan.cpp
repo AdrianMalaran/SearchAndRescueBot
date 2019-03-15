@@ -1,7 +1,7 @@
 #include "Fan.h"
 #include <Arduino.h>
 
-const int FanPin = 34;
+const int FanPin = 33;
 
 Fan::Fan() {
     pinMode(FanPin, OUTPUT);

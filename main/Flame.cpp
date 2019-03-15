@@ -1,7 +1,7 @@
 #include "Flame.h"
 
-const int analog_pin = 9;
-const int digital_pin = 27;
+const int analog_pin = 15;
+const int digital_pin = 45;
 
 Flame::Flame() {
 	setupFlame();
