@@ -33,6 +33,10 @@ double input, output, set_point, Kp = 30;
 //     pid.SetMode(AUTOMATIC);
 // }
 
+Tests test;
+
+Main main_engine(motor_pair, imu_sensor, color_front, color_down, ultrasonic_front, ultrasonic_right, ultrasonic_left, ultrasonic_back);
+
 double m_desired_heading;
 
 /**************
@@ -42,7 +46,6 @@ void setup() {
     Serial.begin(9600);
     Serial.println("Hello World!");
 
-    Tests test;
     Serial.println("Running Tests");
     test.RunAllTests();
 }
@@ -51,34 +54,29 @@ void setup() {
 *     LOOP     *
 ****************/
 void loop() {
-/*
-  //Serial.println(ultrasonic.getDistance());
+    // Controller::DriveStraight(imu_sensor.getEuler().x(), imu_sensor.getEuler().x(), 200);
 
-  uint16_t r, g, b, c;
-  color1.getRawData(&r, &g, &b, &c);
-  Serial.print("R: "); Serial.print(r, DEC); Serial.print(" ");
-  Serial.print("G: "); Serial.print(g, DEC); Serial.print(" ");
-  Serial.print("B: "); Serial.print(b, DEC); Serial.println(" ");
+    Serial.print("euler X: "); Serial.println(imu_sensor.getEuler().x());
+    Serial.print("mag X: "); Serial.print(imu_sensor.getMag().x());
+    Serial.print(" mag Y: "); Serial.print(imu_sensor.getMag().y());
+    Serial.print(" mag Z: "); Serial.println(imu_sensor.getMag().z());
 
-  Serial.println(color1.getTerrainColor());
+    delay(1000);
 
-  uint16_t r2, g2, b2, c2;
-  color2.getRawData(&r2, &g2, &b2, &c2);
-  Serial.print("R2: "); Serial.print(r2, DEC); Serial.print(" ");
-  Serial.print("G2: "); Serial.print(g2, DEC); Serial.print(" ");
-  Serial.print("B2: "); Serial.print(b2, DEC); Serial.println(" ");
+    /*
+    Serial.print("Terrain: "); Serial.println(color_down.getTerrainColor());
+    */
 
-  // imu::Vector<3> euler = imu_sensor.getMag(); // Magnet
-  // Serial.print("Yaw: "); Serial.print(euler.x());
-  // Serial.print(" Pitch: "); Serial.print(euler.y());
-  // Serial.print(" Roll: "); Serial.println(euler.z());
-  imu::Vector<3> euler = imu_sensor.getEuler();
-  double desired_heading = m_desired_heading;
-  double current_heading = euler.x();
+    /*
+    Serial.print("Structure: "); Serial.println(color_front.getStructureColor());
+    */
 
-  //Controller::DriveStraight(desired_heading, current_heading);
-  // MotorPair::moveForwards();
-  // Serial.println("Driving");
-  motor_pair.turnLeft();
-*/
+    /*
+    MapLocation map_location = MapLocation(UNKNOWN);
+    Serial.print("landmark ahead: "); Serial.println(main_engine.isLandmarkAhead(map_location, Pose(Coord(2,2), NORTH)));
+    */
+
+    /*
+    Serial.print("global position: "); printCoord(main_engine.getGlobalPosition(Pose(Coord(2,2), NORTH))); Serial.println("");
+    */
 }
