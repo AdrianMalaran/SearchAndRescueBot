@@ -53,8 +53,13 @@ class Main {
         int getManhattanDistance(Coord c1, Coord c2);
 
         bool hasUnknownNeighbors(MapLocation global_map[][GLOBAL_COL], Coord start_loc);
-
         Coord findClosestBlockWithUnknownNeighbors(MapLocation grid[][GLOBAL_COL], Coord start_loc);
+
+        bool hasMatchingNeighbors(MapLocation global_map[][GLOBAL_COL], MapLocation location_of_interest, Coord start_loc);
+        Coord findClosestBlockToInterest(MapLocation global_map[][GLOBAL_COL],
+            MapLocation location_of_interest,
+            Coord start_loc);
+        bool neighborMatchesCondition(MapLocation global_map[][GLOBAL_COL], MapLocation location_of_interest, Coord coord);
 
         void stopProgram();
     private:
@@ -81,6 +86,10 @@ class Main {
         bool m_food_mapped;
         bool m_group_mapped;
         bool m_survivor_mapped;
+
+        Coord m_food_location;
+        Coord m_people_location;
+        Coord m_survivor_location;
 
         MotorPair m_motor_pair;
         Imu m_imu_sensor;

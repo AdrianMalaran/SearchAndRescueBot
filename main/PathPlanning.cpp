@@ -3,18 +3,6 @@
 
 using namespace std;
 
-//TODO: Add a check that determines if its a water block
-//TODO: Determine how to gracefully handle an invalid path
-// static bool PathPlanning::isValid(Coord c) {
-//   return c.row >= 0 && c.col >= 0 && c.row < GLOBAL_ROW && c.col < GLOBAL_COL;
-// }
-//
-// static bool PathPlanning::isUnblocked(MapLocation grid[][GLOBAL_COL], int row, int col) {
-//      return grid[row][col].block_type == P ||
-//             grid[row][col].block_type == S ||
-//             grid[row][col].block_type == G;
-// }
-
 static bool PathPlanning::isDestination(int row, int col, Coord dest) {
   return (row == dest.row && col == dest.col);
 }
@@ -109,20 +97,16 @@ static Stack<Coord> PathPlanning::findShortestPath(MapLocation grid[][GLOBAL_COL
     Stack<Coord> path;
 
     if (!isValid(start)) {
-        // TODO: How should we handle this
-        // printMessage("Source is invalid\n");
+        Serial.println("Source is invalid");
         return path;
     }
 
     if (!isUnblocked(grid, start) || !isUnblocked(grid, dest)) {
-        // TODO: How should we handle this
-        // printMessage("Source is blocked!\n");
+        Serial.println("Source is blocked!");
         return path;
     }
 
     if (isDestination(start.row, start.col, dest)) {
-        // TODO: How should we handle this
-        // printMessage("Already at Destination");
         path.push(start);
         return path;
     }

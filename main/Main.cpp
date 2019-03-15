@@ -83,14 +83,6 @@ void Main::run() {
     // Stop Program
 }
 
-void Main::engageExploreMode() {
-    Serial.println("Enaging Explore Mode!");
-
-    Coord explore_block = findClosestBlockWithUnknownNeighbors(m_global_map, m_current_pose.coord);
-    travelToBlock(m_global_map, m_current_pose, Pose(explore_block, DONTCARE));
-    mapAdjacentBlocks(m_global_map, m_current_pose);
-}
-
 bool Main::allTasksCompleted() {
     return (m_found_food &&
             m_found_people &&
@@ -128,6 +120,17 @@ bool Main::taskIsMapped(Task task) {
 
     Serial.println("Given task is unspecified");
     return false;
+}
+
+void Main::engageExploreMode() {
+    Serial.println("Enaging Explore Mode!");
+
+    //TODO: Test this
+    MapLocation location_of_interest(UNKNOWN); // Initialize to unknown block
+    Coord explore_block = findClosestBlockToInterest(m_global_map, location_of_interest, m_current_pose.coord);
+    // Coord explore_block = findClosestBlockWithUnknownNeighbors(m_global_map, m_current_pose.coord);
+    travelToBlock(m_global_map, m_current_pose, Pose(explore_block, DONTCARE));
+    mapAdjacentBlocks(m_global_map, m_current_pose);
 }
 
 void Main::engageObjectiveMode(Task task) {
@@ -254,19 +257,10 @@ BlockType Main::mapTerrainOfBlockInFront() {
 ************************/
 
 void Main::findFood(MapLocation global_map[][GLOBAL_COL], Pose current_pose) {
-    // Check to see if there are mapped sand blocks
-    //     if there are no mapped sand blocks, go explore
-
-    // Search for closest sand block
-    // travel to sand block
-    // inspect sand block to see if a magnet is detected
-
-    //TODO: Need to know if the robot can just stay in place and the IMU will detect
-    // that reading
-
     //TODO: if we get close enough to sand block boundary to detect a magnet,
     // then we should automatically mark that spot as the food location
 
+    /*
     Coord closest_sand_block = getClosestSandBlock(global_map, current_pose.coord);
     if (closest_sand_block.row == -1 && closest_sand_block.col == -1) {
         Serial.println("All sandblocks mapped have been searched, explore for more");
@@ -276,6 +270,18 @@ void Main::findFood(MapLocation global_map[][GLOBAL_COL], Pose current_pose) {
         Serial.println("Travelling to closest sand block");
         travelToBlock(global_map, current_pose, Pose(closest_sand_block, DONTCARE));
     }
+    */
+
+    /*
+    This objective function assumes:
+    - that the IMU is already able to detect the magnets
+      in the area as soon as the terrain is detected
+    - the sandblock is already mapped
+    */
+
+    //TODO: If the food is already found, don't we just need to go to the group of people ?
+    travelToBlock(global_map, current_pose, Pose(m_food_location, DONTCARE));
+
 }
 
 Coord Main::getClosestSandBlock(MapLocation global_map[][GLOBAL_COL], Coord current_loc) {
@@ -329,6 +335,7 @@ void Main::travelToBlock(MapLocation map[][GLOBAL_COL], Pose start_pose, Pose fi
     //updateLocation(); possibly update location ?
 }
 
+//TODO: Replace this function
 bool Main::hasUnknownNeighbors(MapLocation global_map[][GLOBAL_COL], Coord start_loc) {
     if (!isValid(start_loc)) {
         Serial.println("Invalid start coordinate");
@@ -342,6 +349,7 @@ bool Main::hasUnknownNeighbors(MapLocation global_map[][GLOBAL_COL], Coord start
     adjacent[3] = Coord(start_loc.row, start_loc.col + 1);
 
     for (int i = 0; i < 4; i++) {
+        //TODO: Replace 2nd condition with neighborMatchesCondition
         if (isValid(adjacent[i]) && global_map[adjacent[i].row][adjacent[i].col].block_type == UNKNOWN) // Unknown
             return true;
     }
@@ -349,6 +357,106 @@ bool Main::hasUnknownNeighbors(MapLocation global_map[][GLOBAL_COL], Coord start
     return false;
 }
 
+bool Main::hasMatchingNeighbors(MapLocation global_map[][GLOBAL_COL], MapLocation location_of_interest, Coord start_loc) {
+    if (!isValid(start_loc)) {
+        Serial.println("Invalid start coordinate");
+        return false;
+    }
+
+    Coord adjacent[4];
+    adjacent[0] = Coord(start_loc.row - 1, start_loc.col);
+    adjacent[1] = Coord(start_loc.row + 1, start_loc.col);
+    adjacent[2] = Coord(start_loc.row, start_loc.col - 1);
+    adjacent[3] = Coord(start_loc.row, start_loc.col + 1);
+
+    for (int i = 0; i < 4; i++) {
+        //TODO: Replace 2nd condition with neighborMatchesCondition
+        if (neighborMatchesCondition(global_map, location_of_interest, start_loc))
+            return true;
+    }
+
+    return false;
+}
+
+bool Main::neighborMatchesCondition(MapLocation global_map[][GLOBAL_COL], MapLocation location_of_interest, Coord coord) {
+    if (!isValid(coord))
+        return false;
+    // Searches for closest block that has a neighbor that matches the criteria:
+
+    // EXPLORE MODE | Block w/ unknown neighbor
+    if (location_of_interest.block_type == UNKNOWN)
+        return (global_map[coord.row][coord.col].block_type == UNKNOWN);
+
+    // OBJECTIVE MODE | Block w/ location of interest
+    if (location_of_interest.land_mark_spot)
+        return global_map[coord.row][coord.col].land_mark_spot;
+
+    return false;
+}
+
+//TODO: This should already return the direction to the block of interest
+Coord Main::findClosestBlockToInterest(MapLocation global_map[][GLOBAL_COL],
+    MapLocation location_of_interest,
+    Coord start_loc) {
+
+    Coord invalid_coord = Coord(-1, -1);
+    if (!isValid(start_loc)) {
+        Serial.println("Invalid start coordinate");
+        return invalid_coord;
+    }
+
+    // Implement a BFS
+    Queue<Coord> to_visit;
+
+    to_visit.push(start_loc);
+    // Initialize all to false (unvisited)
+    bool visited[GLOBAL_ROW][GLOBAL_COL] =
+        {
+            { 0, 0, 0, 0, 0, 0}, // 0
+            { 0, 0, 0, 0, 0, 0}, // 1
+            { 0, 0, 0, 0, 0, 0}, // 2
+            { 0, 0, 0, 0, 0, 0}, // 3
+            { 0, 0, 0, 0, 0, 0}, // 4
+            { 0, 0, 0, 0, 0, 0}  // 5
+            //0, 1, 2, 3, 4, 5
+        };
+
+    visited[start_loc.row][start_loc.col] = true;
+
+    Coord current;
+
+    while (!to_visit.empty()) {
+        current = to_visit.front();
+        to_visit.pop();
+        // TODO: Remove print statements
+        // Serial.print("Current Block: ("); Serial.print(current.row); Serial.print(","); Serial.print(current.col); Serial.println(")");
+        if (hasMatchingNeighbors(global_map, location_of_interest, current)) // Found a coord with unknown neighbors
+            return current;
+
+        // Explore all neighbors
+        Coord adjacent[4];
+        adjacent[0] = Coord(current.row - 1, current.col);
+        adjacent[1] = Coord(current.row + 1, current.col);
+        adjacent[2] = Coord(current.row, current.col - 1);
+        adjacent[3] = Coord(current.row, current.col + 1);
+
+        for (int i = 0; i < 4; i++) {
+            int row = adjacent[i].row;
+            int col = adjacent[i].col;
+
+            // Validate traversable block
+            if (isValid(adjacent[i]) && !visited[row][col] && isUnblocked(global_map, adjacent[i])) {
+                visited[row][col] = true;
+                to_visit.push(adjacent[i]);
+            }
+        }
+    }
+
+    Serial.println("No block with interesting neighbors");
+    return invalid_coord;
+}
+
+//TODO: Delete COPY
 Coord Main::findClosestBlockWithUnknownNeighbors(MapLocation global_map[][GLOBAL_COL], Coord start_loc) {
     Coord invalid_coord = Coord(-1, -1);
     if (!isValid(start_loc)) {
@@ -362,13 +470,14 @@ Coord Main::findClosestBlockWithUnknownNeighbors(MapLocation global_map[][GLOBAL
     to_visit.push(start_loc);
     // Initialize all to false (unvisited)
     bool visited[GLOBAL_ROW][GLOBAL_COL] =
-        {   //0, 1, 2, 3, 4, 5
+        {
             { 0, 0, 0, 0, 0, 0}, // 0
             { 0, 0, 0, 0, 0, 0}, // 1
             { 0, 0, 0, 0, 0, 0}, // 2
             { 0, 0, 0, 0, 0, 0}, // 3
             { 0, 0, 0, 0, 0, 0}, // 4
             { 0, 0, 0, 0, 0, 0}  // 5
+            //0, 1, 2, 3, 4, 5
         };
 
     visited[start_loc.row][start_loc.col] = true;
@@ -378,8 +487,8 @@ Coord Main::findClosestBlockWithUnknownNeighbors(MapLocation global_map[][GLOBAL
     while (!to_visit.empty()) {
         current = to_visit.front();
         to_visit.pop();
-        Serial.print("Current Block: ("); Serial.print(current.row); Serial.print(","); Serial.print(current.col); Serial.println(")");
-        //TODO: Remove 2nd condition
+        // TODO: Remove print statements
+        // Serial.print("Current Block: ("); Serial.print(current.row); Serial.print(","); Serial.print(current.col); Serial.println(")");
         if (hasUnknownNeighbors(global_map, current)) // Found a coord with unknown neighbors
             return current;
 
