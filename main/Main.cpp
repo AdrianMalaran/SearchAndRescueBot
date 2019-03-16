@@ -34,8 +34,8 @@ void Main::init() {
     // (2) Test Path Planning
     // (3) Calibrate sensors
 
-    // Calibrate Imu
-    // m_imu_sensor.calibrate();
+    // Start the imu
+    imu_sensor.begin();
 
     delay(1000);
 
