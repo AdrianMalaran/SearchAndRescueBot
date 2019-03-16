@@ -274,11 +274,13 @@ void Main::mapBlockInFront(MapLocation &map_location, Pose pose) {
         How do we detect that we're at the edge of one block ? (Use ultrasonic sensors )
     */
 
+    double start_heading = m_imu_sensor.getEuler().x();
+
     // Try with ultrasonic - If this doesn't work, include encoder control
     double start_distance = m_ultrasonic_front.getDistance();
     while (m_ultrasonic_front.getDistance() > start_distance - 7) {
         // Move forwards
-        Controller::DriveStraight(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), 180);
+        Controller::DriveStraight(start_heading, m_imu_sensor.getEuler().x(), 180);
     }
     m_motor_pair.stop();
 
@@ -288,7 +290,7 @@ void Main::mapBlockInFront(MapLocation &map_location, Pose pose) {
 
     while (m_ultrasonic_front.getDistance() < start_distance) {
         // Move backwards
-        Controller::DriveStraight(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), -180);
+        Controller::DriveStraight(start_heading, m_imu_sensor.getEuler().x(), -180);
     }
     m_motor_pair.stop();
 }

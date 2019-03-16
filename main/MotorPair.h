@@ -19,8 +19,6 @@ class MotorPair {
 		void turnRight();
 		bool extinguishFireTurn();
     private:
-		void rampUp(int set_speed);
-		void rampDown(int curr_speed);
 		Imu m_imu_sensor;
 		double m_orientation;
 };
