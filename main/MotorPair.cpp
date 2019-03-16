@@ -1,16 +1,6 @@
 #include "MotorPair.h"
 #include <Arduino.h>
 
-//////////////////// TODO ////////////////////
-// We need to decide how to move:
-//   pass a time based value |
-//   each call is one tile of motion |
-//   pass a distance based value;
-//
-// Also do we need to deal with ramping to astatic void
-// possible brownouts? Do we need to handle
-// ramping for turns?
-//
 // Code assumes:
 // Motor A is right
 // Motor B is left
@@ -73,28 +63,6 @@ static void MotorPair::standby() {
   digitalWrite(stand_by, LOW);
 }
 
-static void MotorPair::rampUp(int set_speed) {
-	for(int speed = MIN_SPEED_A; speed < set_speed; speed++) {
-		analogWrite(enable_a, speed);
-		analogWrite(enable_b, speed);
-	}
-}
-
-// Possibly Remove
-// static void MotorPair::rampUp(int set_speed) {
-// 	for(int speed = MIN_SPEED; speed < set_speed; speed++) {
-// 		analogWrite(enable_a, speed);
-// 		analogWrite(enable_b, speed);
-// 	}
-// }
-//
-// static void MotorPair::rampDown(int curr_speed) {
-// 	for(int speed = curr_speed; speed > MIN_SPEED; speed--) {
-// 		analogWrite(enable_a, speed);
-// 		analogWrite(enable_b, speed);
-// 	}
-// }
-
 static void MotorPair::setMotorASpeed(int speed) {
 	if (speed > 0) {
 		digitalWrite(input1, LOW);
@@ -123,11 +91,12 @@ static void MotorPair::setMotorBSpeed(int speed) {
 
 
 void MotorPair::turnLeft() {
+	// get the latest heading
+	m_orientation = m_imu_sensor.getEuler().x();
+
 	// determine the desired orientation of imu with wrapper
-	if (m_orientation - 90 < 0)
-		m_orientation+=270;
-	else
-		m_orientation-=90;
+	m_orientation-=90;
+	if (m_orientation < 0) m_orientation+=270;
 
 	// orientate motors for left turn
   	digitalWrite(stand_by, HIGH);
@@ -145,17 +114,16 @@ void MotorPair::turnLeft() {
 		Serial.println(" ");
 	}
 
-	// rampDown(MAX_SPEED/2);
 	stop();
 }
 
 void MotorPair::turnRight() {
+	// get the latest heading
+	m_orientation = m_imu_sensor.getEuler().x();
+
 	// determine the desired orientation of imu with wrapper
-	double desired_orientaion;
-	if (m_orientation + 90 > 360)
-		desired_orientaion = m_orientation - 270;
-	else
-		desired_orientaion = m_orientation + 90;
+	m_orientation+=90;
+	if (m_orientation > 360) m_orientation-=270;
 
   	digitalWrite(stand_by, HIGH);
 
@@ -164,14 +132,11 @@ void MotorPair::turnRight() {
 	digitalWrite(input3, LOW);
 	digitalWrite(input4, HIGH);
 
-	// rampUp(MAX_SPEED/2);
-
 	analogWrite(enable_a, MAX_SPEED_A/2);
 	analogWrite(enable_b, MAX_SPEED_B/2);
 
-	while (m_imu_sensor.getEuler().x() != desired_orientaion) {}
+	while (m_imu_sensor.getEuler().x() != m_orientation) {}
 
-	// rampDown(MAX_SPEED/2);
 	stop();
 }
 

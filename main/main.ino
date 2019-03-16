@@ -48,6 +48,10 @@ Encoder encoderB(encoderBpin1, encoderBpin2);
 //     pid.SetMode(AUTOMATIC);
 // }
 
+Tests test;
+
+Main main_engine(motor_pair, imu_sensor, color_front, color_down, ultrasonic_front, ultrasonic_right, ultrasonic_left, ultrasonic_back);
+
 double m_desired_heading;
 
 // Interrupts for calculating speed
@@ -109,19 +113,20 @@ void setup() {
     // motor_pair.turnLeft();
 
     // Timers
-    Timer1.initialize(timer_micro_seconds); // Microseconds
-    Timer1.attachInterrupt(updateActualSpeed);
-    Timer1.setPeriod(timer_micro_seconds);
+    // Timer1.initialize(timer_micro_seconds); // Microseconds
+    // Timer1.attachInterrupt(updateActualSpeed);
+    // Timer1.setPeriod(timer_micro_seconds);
 }
 
 /***************
 *     LOOP     *
 ****************/
 void loop() {
-    current_encA_value ++;
-    current_encB_value ++;
-    motor_pair.setMotorBSpeed(160);
-    Serial.print("Encoder: "); Serial.println(encoderB.read());
+
+    // current_encA_value ++;
+    // current_encB_value ++;
+    // motor_pair.setMotorBSpeed(160);
+    // Serial.print("Encoder: "); Serial.println(encoderB.read());
     // Serial.print(current_encA_value); Serial.print(" "); Serial.println(current_encB_value);
     // Serial.println("gangang");
     // Serial.println(m_current_speed);
@@ -157,4 +162,21 @@ void loop() {
 */
 
 // Controller::DriveStraight(m_desired_heading, imu_sensor.getEuler().x(), 140);
+
+    /*
+    Serial.print("Terrain: "); Serial.println(color_down.getTerrainColor());
+    */
+
+    /*
+    Serial.print("Structure: "); Serial.println(color_front.getStructureColor());
+    */
+
+    /*
+    MapLocation map_location = MapLocation(UNKNOWN);
+    Serial.print("landmark ahead: "); Serial.println(main_engine.isLandmarkAhead(map_location, Pose(Coord(2,2), NORTH)));
+    */
+
+    /*
+    Serial.print("global position: "); printCoord(main_engine.getGlobalPosition(Pose(Coord(2,2), NORTH))); Serial.println("");
+    */
 }

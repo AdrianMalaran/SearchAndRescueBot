@@ -35,8 +35,8 @@ void Main::init() {
     // (2) Test Path Planning
     // (3) Calibrate sensors
 
-    // Calibrate Imu
-    // m_imu_sensor.calibrate();
+    // Start the imu
+    m_imu_sensor.begin();
 
     delay(1000);
 
@@ -241,6 +241,8 @@ void Main::mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], 
     Pose current_pose = start_pose;
     Pose desired_pose;
 
+    double start_mag = m_imu_sensor.getMag().z();
+
     Pose adjacent_blocks[4];
     adjacent_blocks[0] = Pose(Coord(start_pose.coord.row - 1, start_pose.coord.col), NORTH);
     adjacent_blocks[1] = Pose(Coord(start_pose.coord.row, start_pose.coord.col + 1), EAST);
@@ -258,7 +260,7 @@ void Main::mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], 
 
             current_pose = desired_pose;
 
-            mapBlockInFront(map_location, current_pose);
+            mapBlockInFront(map_location, current_pose, start_mag);
         }
     }
     travelToBlock(global_map, current_pose, start_pose);
@@ -273,10 +275,12 @@ bool Main::isUnexplored(MapLocation global_map[][GLOBAL_COL], Coord coord) {
     return false;
 }
 
-void Main::mapBlockInFront(MapLocation &map_location, Pose pose) {
+void Main::mapBlockInFront(MapLocation &map_location, Pose pose, double start_mag) {
     /* Questions we want to answer:
         How do we detect that we're at the edge of one block ? (Use ultrasonic sensors )
     */
+
+    double start_heading = m_imu_sensor.getEuler().x();
 
     // Try with ultrasonic - If this doesn't work, include encoder control
     double start_distance = m_ultrasonic_front.getDistance();
@@ -288,6 +292,13 @@ void Main::mapBlockInFront(MapLocation &map_location, Pose pose) {
 
     map_location.block_type = m_color_down.getTerrainColor();
 
+    if (map_location.block_type == SAND && isFood(start_mag)) {
+        m_found_food = true;
+        LED::on();
+        delay(1000);
+        LED::off();
+    }
+
     map_location.land_mark_spot = isLandmarkAhead(map_location, pose);
 
     while (m_ultrasonic_front.getDistance() < start_distance) {
@@ -295,6 +306,10 @@ void Main::mapBlockInFront(MapLocation &map_location, Pose pose) {
         m_controller.DriveStraight(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), -180);
     }
     m_motor_pair.stop();
+}
+
+bool Main::isFood(double current_mag) {
+    return (fabs(fabs(m_imu_sensor.getMag().z()) - fabs(current_mag)) > 30);
 }
 
 // static bool Main::isValid(Coord c) {
