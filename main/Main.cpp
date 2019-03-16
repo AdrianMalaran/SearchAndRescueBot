@@ -309,7 +309,7 @@ void Main::mapBlockInFront(MapLocation &map_location, Pose pose, double start_ma
 }
 
 bool Main::isFood(double current_mag) {
-    return (fabs(fabs(m_imu_sensor.getMag().z()) - fabs(current_mag)) > 30);
+    return (fabs(fabs(m_imu_sensor.getMag().z()) - fabs(current_mag)) > 5);
 }
 
 // static bool Main::isValid(Coord c) {
