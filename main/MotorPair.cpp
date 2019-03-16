@@ -32,8 +32,8 @@ const int input2 = 29;
 
 // Motor B
 const int enable_b = 10;
-const int input3 = 30;
-const int input4 = 31;
+const int input3 = 31;
+const int input4 = 30;
 
 // standby pin
 const int stand_by = 34;
@@ -47,6 +47,7 @@ MotorPair::MotorPair(Imu imu_sensor) {
 void MotorPair::setupMotorPair() {
 	m_orientation = m_imu_sensor.getEuler().x();
 
+	Serial.println("Setting Motor Pair");
 	// Set motor A pins
 	pinMode(enable_a, OUTPUT);
 	pinMode(input1, OUTPUT);
@@ -59,6 +60,8 @@ void MotorPair::setupMotorPair() {
 
   	// Set standby pin
   	pinMode(stand_by, OUTPUT);
+
+	digitalWrite(stand_by, HIGH);
 }
 
 static void MotorPair::stop() {
@@ -113,7 +116,7 @@ static void MotorPair::setMotorBSpeed(int speed) {
 		digitalWrite(input3, HIGH);
 		digitalWrite(input4, LOW);
 	}
-
+	// Serial.println("Setting Motor Speed");
 	// Continually Turn Motors
 	analogWrite(enable_b, min(fabs(speed), MAX_SPEED_B));
 }
@@ -134,11 +137,13 @@ void MotorPair::turnLeft() {
 	digitalWrite(input4, LOW);
 
 	// rampUp(MAX_SPEED/2);
+	analogWrite(enable_a, 150);
+	analogWrite(enable_b, 150);
 
-	analogWrite(enable_a, MAX_SPEED_A/2);
-	analogWrite(enable_b, MAX_SPEED_B/2);
-	
-	while (m_imu_sensor.getEuler().x() != m_orientation) {}
+	while (m_imu_sensor.getEuler().x() != m_orientation) {
+		Serial.print("Orientation: "); Serial.print(m_orientation);
+		Serial.println(" ");
+	}
 
 	// rampDown(MAX_SPEED/2);
 	stop();
@@ -153,7 +158,7 @@ void MotorPair::turnRight() {
 		desired_orientaion = m_orientation + 90;
 
   	digitalWrite(stand_by, HIGH);
-  
+
 	digitalWrite(input1, HIGH);
 	digitalWrite(input2, LOW);
 	digitalWrite(input3, LOW);
@@ -183,7 +188,7 @@ bool MotorPair::extinguishFireTurn() {
 
 	analogWrite(enable_a, MAX_SPEED_A/3);
 	analogWrite(enable_b, MAX_SPEED_B/3);
-	
+
 	while (m_imu_sensor.getEuler().x() != m_orientation) {
 		if (Flame::getFireMagnitude() > 5) {
 			stop();
@@ -191,7 +196,7 @@ bool MotorPair::extinguishFireTurn() {
 				Fan::on();
 			}
 			Fan::off();
-			
+
 			if (fabs(start_orientation - m_orientation) < 180) {
 				digitalWrite(input1, HIGH);
 				digitalWrite(input2, LOW);

@@ -18,15 +18,21 @@ mag_heading = wrap360(v[0] + yaw_offset); //yaw = v[0], correct for magnetic Nor
 
  #include "Controller.h"
 
-static void Controller::DriveStraight(double desired_heading, double current_heading, double nominal_speed) {
+Controller::Controller(Encoder encA, Encoder encB) {
+    m_encoderA = encA;
+    m_encoderB = encB;
+}
+
+void Controller::DriveStraight(double desired_heading, double current_heading, double nominal_speed) {
 
     if (current_heading == 0 && current_heading == 0) {
+        Serial.println("IMU not working, Don't Drive");
         // IMU not working, Don't Drive
         MotorPair::stop();
         return;
     }
 
-    double Kp = 30;
+    double Kp = 20;
 
     // input = current_heading;
     // set_point = desired_heading;
@@ -48,6 +54,27 @@ static void Controller::DriveStraight(double desired_heading, double current_hea
     Serial.print(" SpeedA: "); Serial.print(nominal_speed - bias);
     Serial.print(" SpeedB: "); Serial.println(nominal_speed + bias);
 
-    MotorPair::setMotorASpeed(nominal_speed - bias);
-    MotorPair::setMotorBSpeed(nominal_speed + bias);
+    // TODO: Separate actuation from PWN calculation
+    MotorPair::setMotorASpeed(nominal_speed + bias);
+    MotorPair::setMotorBSpeed(nominal_speed - bias);
+}
+
+void Controller::SpeedControl(double desired_speed, double current_speed) {
+
+    // Get current speed
+    // Calculate error between between desired speed and current speed
+    m_encoderA.read();
+
+
+    double error = desired_speed - current_speed;
+
+    // if (error) is negative - we are travelling faster than what we desire -> decrease speed
+    // if (error) is positive - we are travelling slower than what we desire -> increase speed
+
+    //TODO: Add
+    double speed_Kp = 30;
+
+    double speed_bias = (Kp * error)/10;
+
+    // Calculate PWM
 }

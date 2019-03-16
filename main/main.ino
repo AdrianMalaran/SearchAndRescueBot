@@ -4,13 +4,24 @@
 #include "Imu.h"
 #include "Main.h"
 
+#include <TimerOne.h>
+
 #include <Wire.h>
 
+// LED Pins
 #define LEDPin 13
+
+// Color Pins
 #define SDA1pin 22
 #define SCL1pin 23
 #define SDA2pin 24
 #define SCL2pin 25
+
+// Encoder Pins
+#define encoderApin1 18
+#define encoderApin2 19
+#define encoderBpin1 2
+#define encoderBpin2 3
 
 #define BNO055_SAMPLERATE_DELAY_MS 100
 
@@ -29,28 +40,91 @@ MotorPair motor_pair(imu_sensor);
 double input, output, set_point, Kp = 30;
 // PID pid(&input, &output, &set_point, 2, 5, 1, DIRECT);
 
+// encoders
+// Encoder encoderA(encoderApin1, encoderApin2);
+Encoder encoderB(encoderBpin1, encoderBpin2);
+
 // void setupController() {
 //     pid.SetMode(AUTOMATIC);
 // }
 
 double m_desired_heading;
 
+// Interrupts for calculating speed
+// pinMode(interruptPin, INPUT_PULLUP);
+// attachInterrupt(digitalPinToInterrupt(interruptPin), blink, CHANGE);
+
+// Global Variable
+int m_motor_speed_A = 0;
+int m_motor_speed_B = 0;
+int last_encA_value = 0;
+int last_encB_value = 0;
+
+//Testing
+int current_encA_value = 0;
+int current_encB_value = 0;
+
+
+const int timer_micro_seconds = 1000000;
+
+double calculateSpeed(int current_encoder_value, int last_encoder_value, int period) {
+    double distance = 3.14*8;
+    double distancePerTick = distance / 341.2; // 341.2 counts/revolution
+
+    //TODO: check if need to wrap
+    //TODO: Test Encoder class input
+    // Serial.print("Distance: "); Serial.println(distancePerTick * (current_encoder_value - last_encoder_value));
+    double speed = distancePerTick * (current_encoder_value - last_encoder_value) / (period/1000000.0); // Convert from microseconds to seconds
+    return speed;
+}
+
+void updateActualSpeed() {
+    // int current_encA_value = encoderA.read();
+    // m_motor_speed_A = (current_encA_value - last_encA_value)/timer_micro_seconds;
+    m_motor_speed_A = calculateSpeed(current_encA_value, last_encA_value, timer_micro_seconds);
+    last_encA_value = current_encA_value;
+
+    // int current_encB_value = encoderB.read();
+    m_motor_speed_B = calculateSpeed(current_encB_value, last_encB_value, timer_micro_seconds);
+    last_encB_value = current_encB_value;
+
+    // Serial.print("MotorA Speed: "); Serial.print(m_motor_speed_A);
+    // Serial.print(" MotorB Speed: "); Serial.print(m_motor_speed_B);
+    // Serial.println("");
+}
+
 /**************
 *    SETUP    *
 ***************/
 void setup() {
     Serial.begin(9600);
-    Serial.println("Hello World!");
+    // Serial.println("Hello World!");
+    // Serial.println("Running Tests");
+    // Tests test;
+    // test.RunAllTests();
 
-    Tests test;
-    Serial.println("Running Tests");
-    test.RunAllTests();
+    // imu_sensor.calibrate();
+    //
+    motor_pair.setupMotorPair();
+    // motor_pair.turnLeft();
+
+    // Timers
+    Timer1.initialize(timer_micro_seconds); // Microseconds
+    Timer1.attachInterrupt(updateActualSpeed);
+    Timer1.setPeriod(timer_micro_seconds);
 }
 
 /***************
 *     LOOP     *
 ****************/
 void loop() {
+    current_encA_value ++;
+    current_encB_value ++;
+    motor_pair.setMotorBSpeed(160);
+    Serial.print("Encoder: "); Serial.println(encoderB.read());
+    // Serial.print(current_encA_value); Serial.print(" "); Serial.println(current_encB_value);
+    // Serial.println("gangang");
+    // Serial.println(m_current_speed);
 /*
   //Serial.println(ultrasonic.getDistance());
 
@@ -81,4 +155,6 @@ void loop() {
   // Serial.println("Driving");
   motor_pair.turnLeft();
 */
+
+// Controller::DriveStraight(m_desired_heading, imu_sensor.getEuler().x(), 140);
 }

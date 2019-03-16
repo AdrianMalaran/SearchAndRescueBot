@@ -15,7 +15,7 @@ Main::Main() {
 
 Main::Main(MotorPair motor_pair, Imu imu_sensor, Color color_front, Color color_down,
             Ultrasonic ultrasonic_front, Ultrasonic ultrasonic_right, Ultrasonic ultrasonic_left,
-            Ultrasonic ultrasonic_back) {
+            Ultrasonic ultrasonic_back, Controller controller) {
     m_motor_pair = motor_pair;
     m_imu_sensor = imu_sensor;
     m_color_front = color_front;
@@ -24,6 +24,7 @@ Main::Main(MotorPair motor_pair, Imu imu_sensor, Color color_front, Color color_
     m_ultrasonic_right = ultrasonic_right;
     m_ultrasonic_left = ultrasonic_left;
     m_ultrasonic_back = ultrasonic_back;
+    m_controller = controller;
     init();
 }
 
@@ -281,7 +282,7 @@ void Main::mapBlockInFront(MapLocation &map_location, Pose pose) {
     double start_distance = m_ultrasonic_front.getDistance();
     while (m_ultrasonic_front.getDistance() > start_distance - 7) {
         // Move forwards
-        Controller::DriveStraight(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), 180);
+        m_controller.DriveStraight(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), 180);
     }
     m_motor_pair.stop();
 
@@ -291,7 +292,7 @@ void Main::mapBlockInFront(MapLocation &map_location, Pose pose) {
 
     while (m_ultrasonic_front.getDistance() < start_distance) {
         // Move backwards
-        Controller::DriveStraight(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), -180);
+        m_controller.DriveStraight(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), -180);
     }
     m_motor_pair.stop();
 }

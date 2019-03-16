@@ -10,6 +10,8 @@
 #include "MotorPair.h"
 #include "Ultrasonic.h"
 
+#include "Encoder.h"
+
 #include <Arduino.h>
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
@@ -24,7 +26,7 @@ class Main {
         Main();
         Main(MotorPair motor_pair, Imu imu_sensor, Color color_front, Color color_down,
             Ultrasonic ultrasonic_front, Ultrasonic ultrasonic_right, Ultrasonic ultrasonic_left,
-            Ultrasonic ultrasonic_back);
+            Ultrasonic ultrasonic_back, Controller controller);
         void init();
         void run();
         void returnToStart(MapLocation global_map[][GLOBAL_COL], Pose current_pose);
@@ -100,6 +102,8 @@ class Main {
         Ultrasonic m_ultrasonic_right;
         Ultrasonic m_ultrasonic_left;
         Ultrasonic m_ultrasonic_back;
+
+        Controller m_controller;
 };
 
 #endif
