@@ -218,9 +218,18 @@ BlockType Color::getTerrainColor() {
   Serial.print(" G: "); Serial.print(g_tot);
   Serial.print(" B: "); Serial.println(b_tot);
 
+/*
+PARTICLE Board readings
+    R: 180 - 290
+    G: 170 - 240
+    B: 190 - 230
+
+SAND Board readings
+    r: 190 - 220
+*/
 
   // TODO: All of these values need to be calibrated
-  if (r_tot > 275 - 25 && r_tot < 275 + 25 && g_tot > 214 - 25 && g_tot < 214 + 25 && b_tot > 142 - 25 && b_tot < 142 + 25)
+  if (r_tot > 180 && r_tot < 290 && g_tot > 170 && g_tot < 240 && b_tot > 190 && b_tot < 230)
     return PARTICLE; // Particle Board
   else if (r_tot > 220 - 25 && r_tot < 236 + 25 && g_tot > 160 - 25 && g_tot < 160 + 25 && b_tot > 99 - 25 && b_tot < 99 + 25)
     return WATER; // Water
@@ -248,7 +257,7 @@ int Color::getStructureColor() {
   Serial.print("R: "); Serial.print(r_tot);
   Serial.print(" G: "); Serial.print(g_tot);
   Serial.print(" B: "); Serial.println(b_tot);
-  
+
   // TODO: All of these values need to be calibrated
   if (r_tot > 100 && r_tot < 200 && g_tot > 100 && g_tot < 200 && b_tot > 100 && b_tot < 200)
     return 1; // Red House

@@ -41,16 +41,17 @@ double input, output, set_point, Kp = 30;
 // PID pid(&input, &output, &set_point, 2, 5, 1, DIRECT);
 
 // encoders
-// Encoder encoderA(encoderApin1, encoderApin2);
+Encoder encoderA(encoderApin1, encoderApin2);
 Encoder encoderB(encoderBpin1, encoderBpin2);
 
+Controller controller(encoderA, encoderB);
 // void setupController() {
 //     pid.SetMode(AUTOMATIC);
 // }
 
 Tests test;
 
-Main main_engine(motor_pair, imu_sensor, color_front, color_down, ultrasonic_front, ultrasonic_right, ultrasonic_left, ultrasonic_back);
+Main main_engine(motor_pair, imu_sensor, color_front, color_down, ultrasonic_front, ultrasonic_right, ultrasonic_left, ultrasonic_back, controller);
 
 double m_desired_heading;
 
@@ -109,7 +110,7 @@ void setup() {
 
     // imu_sensor.calibrate();
     //
-    motor_pair.setupMotorPair();
+    // motor_pair.setupMotorPair();
     // motor_pair.turnLeft();
 
     // Timers
@@ -122,8 +123,6 @@ void setup() {
 *     LOOP     *
 ****************/
 void loop() {
-<<<<<<< Updated upstream
-
     // current_encA_value ++;
     // current_encB_value ++;
     // motor_pair.setMotorBSpeed(160);
@@ -164,7 +163,6 @@ void loop() {
 
 // Controller::DriveStraight(m_desired_heading, imu_sensor.getEuler().x(), 140);
 
-    /*
     Serial.print("Terrain: "); Serial.println(color_down.getTerrainColor());
 
     /*

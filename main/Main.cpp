@@ -25,7 +25,7 @@ Main::Main(MotorPair motor_pair, Imu imu_sensor, Color color_front, Color color_
     m_ultrasonic_left = ultrasonic_left;
     m_ultrasonic_back = ultrasonic_back;
     m_controller = controller;
-    init();
+    // init();
 }
 
 void Main::init() {
