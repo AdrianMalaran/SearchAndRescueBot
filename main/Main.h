@@ -9,11 +9,11 @@
 #include "Imu.h"
 #include "MotorPair.h"
 #include "Ultrasonic.h"
+#include "LED.h"
 
 #include <Arduino.h>
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
-
 
 /*
     TODO: Add Localization + Speed Controller
@@ -39,7 +39,8 @@ class Main {
         Coord getGlobalPosition(Pose pose);
         void mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose start_pose);
         bool isUnexplored(MapLocation global_map[][GLOBAL_COL], Coord coord);
-        void mapBlockInFront(MapLocation &location, Pose pose);
+        void mapBlockInFront(MapLocation &location, Pose pose, double start_mag);
+        bool isFood(double mag);
 
         //TODO: Implement these functions
         void findFood(MapLocation global_map[][GLOBAL_COL], Pose current_pose);

@@ -54,15 +54,6 @@ void setup() {
 *     LOOP     *
 ****************/
 void loop() {
-    // Controller::DriveStraight(imu_sensor.getEuler().x(), imu_sensor.getEuler().x(), 200);
-
-    Serial.print("euler X: "); Serial.println(imu_sensor.getEuler().x());
-    Serial.print("mag X: "); Serial.print(imu_sensor.getMag().x());
-    Serial.print(" mag Y: "); Serial.print(imu_sensor.getMag().y());
-    Serial.print(" mag Z: "); Serial.println(imu_sensor.getMag().z());
-
-    delay(1000);
-
     /*
     Serial.print("Terrain: "); Serial.println(color_down.getTerrainColor());
     */
