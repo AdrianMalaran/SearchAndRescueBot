@@ -221,24 +221,46 @@ BlockType Color::getTerrainColor() {
 /*
 PARTICLE Board readings
     R: 180 - 290
-    G: 170 - 240
+    G: 170 - 255
     B: 190 - 230
 
 SAND Board readings
-    r: 190 - 220
+    R: 90 - 140
+    G: 95 - 135
+    B: 100 - 140
+
+GRAVEL Board readings
+    R: 150 - 190
+    G: 155 - 195
+    B: 145 - 180
+
+WATER Board readings
+    R: 185 - 260
+    G: 160 - 210
+    B: 150 - 190
 */
 
   // TODO: All of these values need to be calibrated
-  if (r_tot > 180 && r_tot < 290 && g_tot > 170 && g_tot < 240 && b_tot > 190 && b_tot < 230)
-    return PARTICLE; // Particle Board
-  else if (r_tot > 220 - 25 && r_tot < 236 + 25 && g_tot > 160 - 25 && g_tot < 160 + 25 && b_tot > 99 - 25 && b_tot < 99 + 25)
+ if (r_tot > 185 && r_tot < 260 && g_tot > 160 && g_tot < 210 && b_tot > 150 && b_tot < 190) {
+    Serial.println("WATER");
     return WATER; // Water
-  else if (r_tot > 58 - 25 && r_tot < 58 + 25 && g_tot > 41 - 25 && g_tot < 41 + 25 && b_tot > 32 - 25 && b_tot < 32 + 25)
+}
+  else if (r_tot > 90 && r_tot < 140 && g_tot > 95 && g_tot < 135 && b_tot > 100 && b_tot < 140) {
+    Serial.println("SAND");
     return SAND; // Sand
-  else if (r_tot > 149 - 25 && r_tot < 149 + 25 && g_tot > 115 - 25 && g_tot < 115 + 25 && b_tot > 78 - 25 && b_tot < 78 + 25)
+}
+  else if (r_tot > 150 && r_tot < 200 && g_tot > 140 && g_tot < 195 && b_tot > 140 && b_tot < 180) {
+    Serial.println("GRAVEL");
     return GRAVEL; // Gravel
-  else
+}
+ else if (r_tot > 180 && r_tot < 290 && g_tot > 170 && g_tot < 255 && b_tot > 190 && b_tot < 230) {
+  Serial.println("PARTICLE");
+  return PARTICLE; // Particle Board
+}
+  else {
+    Serial.println("UNKNOWN");
     return UNKNOWN; // Unknown
+    }
 }
 
 int Color::getStructureColor() {

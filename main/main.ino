@@ -163,12 +163,18 @@ void loop() {
 
 // Controller::DriveStraight(m_desired_heading, imu_sensor.getEuler().x(), 140);
 
-    Serial.print("Terrain: "); Serial.println(color_down.getTerrainColor());
+    //Serial.print("Structure: "); Serial.println(color_front.getStructureColor());
+    //Serial.println(Flame::getFireMagnitude());
+    //if (Flame::getFireMagnitude() > 1) {
+    //    Fan::on();
+    //    delay(5000);
+    //}
+    //Fan::off();
 
-    /*
-    Serial.print("Structure: "); Serial.println(color_front.getStructureColor());
-    */
-
+digitalWrite(33,HIGH);
+delay(3000);
+digitalWrite(33,LOW);
+delay(3000);
     /*
     MapLocation map_location = MapLocation(UNKNOWN);
     Serial.print("landmark ahead: "); Serial.println(main_engine.isLandmarkAhead(map_location, Pose(Coord(2,2), NORTH)));
