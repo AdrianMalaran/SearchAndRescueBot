@@ -122,6 +122,7 @@ void setup() {
 *     LOOP     *
 ****************/
 void loop() {
+<<<<<<< Updated upstream
 
     // current_encA_value ++;
     // current_encB_value ++;
@@ -165,7 +166,6 @@ void loop() {
 
     /*
     Serial.print("Terrain: "); Serial.println(color_down.getTerrainColor());
-    */
 
     /*
     Serial.print("Structure: "); Serial.println(color_front.getStructureColor());
@@ -174,6 +174,10 @@ void loop() {
     /*
     MapLocation map_location = MapLocation(UNKNOWN);
     Serial.print("landmark ahead: "); Serial.println(main_engine.isLandmarkAhead(map_location, Pose(Coord(2,2), NORTH)));
+    */
+
+    /*
+    main_engine.extinguishFire();
     */
 
     /*
