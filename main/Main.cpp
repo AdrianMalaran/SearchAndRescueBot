@@ -35,7 +35,7 @@ void Main::init() {
     // (3) Calibrate sensors
 
     // Start the imu
-    imu_sensor.begin();
+    m_imu_sensor.begin();
 
     delay(1000);
 
