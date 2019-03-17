@@ -1,6 +1,6 @@
 #include "Ultrasonic.h"
 
-double distance, duration, temp = 20;
+double distance, duration, temp = 19;
 
 Ultrasonic::Ultrasonic() {}
 

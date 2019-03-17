@@ -10,7 +10,8 @@ void drawMap(MapLocation global_map[][GLOBAL_COL]) {
 }
 
 Main::Main() {
-    Serial.println("Main Engine Constructor");
+    // Serial.println("Main Engine Constructor");
+    // Serial.println("Main Engine Constructor 2");
 }
 
 Main::Main(MotorPair motor_pair, Imu imu_sensor, Color color_front, Color color_down,
@@ -25,7 +26,7 @@ Main::Main(MotorPair motor_pair, Imu imu_sensor, Color color_front, Color color_
     m_ultrasonic_left = ultrasonic_left;
     m_ultrasonic_back = ultrasonic_back;
     m_controller = controller;
-    // init();
+    init();
 }
 
 void Main::init() {
@@ -60,12 +61,13 @@ void Main::init() {
     for (int i = 0; i < GLOBAL_ROW; i ++)
         for (int j = 0; j < GLOBAL_COL; j++)
             m_global_map[i][j].block_type = UNKNOWN;
-
     m_global_map[m_start_coord.row][m_start_coord.col].block_type = PARTICLE;
 }
 
 //TODO: This function will be run in the loop() function of the arduino (?)
 // OR just in the setup loop?
+// TODO: Add possible fail-safe that saves the last image of the main member function
+// and possibly reloads it based off of that value
 void Main::run() {
 
     //TODO: Store next tasks in a different data structure than a queue,
@@ -95,14 +97,13 @@ Task Main::getNextTask() {
     if (!m_extinguished_fire)
         return EXTINGUISH_FIRE;
 
-    // TODO: Allow for these task to be in any order
-    if (!m_found_food)
-        return FIND_FOOD;
+    //TODO: must take care of the case where we find the people first
+    // but have not found the food yet
+    // In this case when, we find the food, we should find the people
+    if (m_found_food && !m_found_people)
+        return DELIVER_FOOD;
 
-    if (!m_found_people)
-        return FIND_GROUP_OF_PEOPLE;
-
-    return FIND_SURVIVOR;
+    return OTHER;
 }
 
 bool Main::taskIsMapped(Task task) {
@@ -161,9 +162,6 @@ void Main::engageObjectiveMode(Task task) {
             Serial.println("UNKNOWN TASK");
             break;
     }
-
-    // Mark task as completed
-    tasks.pop();
 }
 
 void Main::returnToStart(MapLocation global_map[][GLOBAL_COL], Pose current_pose) {
@@ -260,7 +258,7 @@ void Main::mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], 
 
             current_pose = desired_pose;
 
-            mapBlockInFront(map_location, current_pose, start_mag);
+            mapBlockInFront(map_location, current_pose, start_mag, adjacent_blocks[i].coord);
         }
     }
     travelToBlock(global_map, current_pose, start_pose);
@@ -275,7 +273,7 @@ bool Main::isUnexplored(MapLocation global_map[][GLOBAL_COL], Coord coord) {
     return false;
 }
 
-void Main::mapBlockInFront(MapLocation &map_location, Pose pose, double start_mag) {
+void Main::mapBlockInFront(MapLocation &map_location, Pose pose, double start_mag, Coord block_in_front) {
     /* Questions we want to answer:
         How do we detect that we're at the edge of one block ? (Use ultrasonic sensors )
     */
@@ -286,7 +284,7 @@ void Main::mapBlockInFront(MapLocation &map_location, Pose pose, double start_ma
     double start_distance = m_ultrasonic_front.getDistance();
     while (m_ultrasonic_front.getDistance() > start_distance - 7) {
         // Move forwards
-        m_controller.DriveStraight(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), 180);
+        m_controller.driveStraight(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), 180);
     }
     m_motor_pair.stop();
 
@@ -297,13 +295,14 @@ void Main::mapBlockInFront(MapLocation &map_location, Pose pose, double start_ma
         LED::on();
         delay(1000);
         LED::off();
+        m_food_location = block_in_front;
     }
 
     map_location.land_mark_spot = isLandmarkAhead(map_location, pose);
 
     while (m_ultrasonic_front.getDistance() < start_distance) {
         // Move backwards
-        m_controller.DriveStraight(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), -180);
+        m_controller.driveStraight(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), -180);
     }
     m_motor_pair.stop();
 }
@@ -408,7 +407,7 @@ void Main::travelToBlock(MapLocation map[][GLOBAL_COL], Pose start_pose, Pose fi
         PathPlanning::generateTrajectories(shortest_path, start_pose.orientation, finish_pose.orientation);
     Serial.println("Calculated Trajectories");
 
-    PathPlanning::executeInstructions(maneuver_instructions);
+    executeInstructions(maneuver_instructions);
     Serial.println("Executed Maneuvers");
 
     //updateLocation(); possibly update location ?
@@ -592,6 +591,99 @@ Coord Main::findClosestBlockWithUnknownNeighbors(MapLocation global_map[][GLOBAL
 
     Serial.println("No block with unknown neighbors");
     return invalid_coord;
+}
+
+/* Localization Functions */
+double Main::getCurrentOrientation() {
+
+}
+
+//TODO: Move to Main class
+void Main::moveForwardOneBlock() {
+	// Starting Pose
+	// TODO: Make a more intelligent design to drive forward one block
+	// by adding checks to validate which ultrasonic readings to get
+	double start_distance = m_ultrasonic_front.getDistance();
+    double start_heading = m_imu_sensor.getEuler().x();
+
+    Serial.print("Start Distance: "); Serial.print(start_distance);
+    Serial.print(" Start Heading: "); Serial.println(start_heading);
+	//TODO: Change to the length of one block For now test for 10 cms
+	// Want to end up 10 centimeters forward
+	double end_distance = start_distance - 27.0;
+
+	// Moves forward one block using either
+	// A: ENCODERS
+	// OR
+	// B: ULTRASONICS
+
+	while (m_ultrasonic_front.getDistance() > end_distance) {
+	// while (true) {
+        //TODO: Add a check to see if IMU is working
+        m_controller.driveStraight(start_heading, m_imu_sensor.getEuler().x(), TRAVEL_SPEED);
+	}
+
+    Serial.println("Stopping Motors");
+    m_motor_pair.stop();
+	// Use ultrasonic sensors for now
+}
+
+void Main::turnLeft() {
+
+    double start_orientation = m_imu_sensor.getEuler().x();
+	double end_orientation = start_orientation - 90;
+    Serial.print("Start Orientation: "); Serial.println(start_orientation);
+
+    m_motor_pair.setMotorASpeed(-1.0*TURN_SPEED);
+	m_motor_pair.setMotorBSpeed(TURN_SPEED);
+
+    if (start_orientation > end_orientation) {
+        while (m_imu_sensor.getEuler().x() > end_orientation) {}
+    } else {
+        while ((m_imu_sensor.getEuler().x() > 0 && m_imu_sensor.getEuler().x() < 90)) {}
+        while (m_imu_sensor.getEuler().x() > end_orientation) {}
+    }
+
+	Serial.println("Stop Motors");
+	m_motor_pair.stop();
+}
+
+// Executes main batch of movement functions necessary for travelling
+// between two location blocks
+// By the end of this function, the robot should be at the destination location
+static void Main::executeInstructions(Queue<Instruction> instructions) {
+    // Validate instructions
+    if (instructions.empty())
+        return;
+
+    while (!instructions.empty()) {
+        Instruction ins = instructions.front();
+        instructions.pop();
+
+        // Retrieve the heading that we currently have
+        // m_imu_sensor.
+
+        if (ins == MOVE_FORWARD) {
+            Serial.print("FORWARDS->");
+            // Map -> moveForward()
+            moveForwardOneBlock();
+        }
+        else if (ins == MOVE_BACKWARD) {
+            Serial.print("BACKWARDS->");
+            // Map -> moveBackward()
+            // moveBackwardOneBlock();
+        }
+        else if (ins == ROTATE_RIGHT) {
+            Serial.print("RIGHT->");
+            // Map -> turnRight()
+            // m_motor_pair.turnRight();
+        }
+        else if (ins == ROTATE_LEFT) {
+            Serial.print("LEFT->");
+            // Map -> turnLeft()
+            // m_motor_pair.turnLeft();
+        }
+    }
 }
 
 void Main::stopProgram() {

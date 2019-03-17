@@ -131,6 +131,14 @@ bool Imu::begin(adafruit_bno055_opmode_t mode) {
   setMode(mode);
   delay(20);
 
+  double prev_yaw = getEuler().x();
+
+  delay(200);
+  while (true) {
+      if (abs(prev_yaw - getEuler().x()) < 10)
+        break;
+  }
+
   return true;
 }
 

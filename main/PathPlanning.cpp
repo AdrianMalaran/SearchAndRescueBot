@@ -213,39 +213,9 @@ static void PathPlanning::addReorientation(Queue<Instruction>& instructions,
     }
 }
 
+//TODO: USE OR OMIT ?
 static Orientation PathPlanning::convertAngleToOrientation(double angle) {
     return NORTH;
-}
-
-// Executes main batch of movement functions necessary for travelling
-// between two location blocks
-// By the end of this function, the robot should be at the destination location
-static void PathPlanning::executeInstructions(Queue<Instruction> instructions) {
-    // Validate instructions
-    if (instructions.empty())
-        return;
-
-    while (!instructions.empty()) {
-        Instruction ins = instructions.front();
-        instructions.pop();
-
-        if (ins == MOVE_FORWARD) {
-            Serial.print("FORWARDS->");
-            // Map -> moveForward()
-        }
-        else if (ins == MOVE_BACKWARD) {
-            Serial.print("BACKWARDS->");
-            // Map -> moveBackward()
-        }
-        else if (ins == ROTATE_RIGHT) {
-            Serial.print("RIGHT->");
-            // Map -> turnRight()
-        }
-        else if (ins == ROTATE_LEFT) {
-            Serial.print("LEFT->");
-            // Map -> turnLeft()
-        }
-    }
 }
 
 /* Inter-coordinate planner: moving from 1 coord to another */

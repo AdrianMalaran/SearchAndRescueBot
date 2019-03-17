@@ -31,7 +31,6 @@ class PathPlanning {
         static Queue<Instruction> generateTrajectories(Stack<Coord> path,
             Orientation start_ori,
             Orientation finish_ori);
-		static void executeInstructions(Queue<Instruction> instructions);
 };
 
 #endif

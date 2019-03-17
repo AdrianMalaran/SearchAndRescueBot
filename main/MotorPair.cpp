@@ -34,6 +34,11 @@ MotorPair::MotorPair(Imu imu_sensor) {
 	m_imu_sensor = imu_sensor;
 }
 
+// MotorPair::MotorPair(Imu imu_sensor, Ultrasonic ultrasonic_front) {
+// 	m_imu_sensor = imu_sensor;
+// 	m_ultrasonic_front = ultrasonic_front;
+// }
+
 void MotorPair::setupMotorPair() {
 	m_orientation = m_imu_sensor.getEuler().x();
 
@@ -89,41 +94,13 @@ static void MotorPair::setMotorBSpeed(int speed) {
 	analogWrite(enable_b, min(fabs(speed), MAX_SPEED_B));
 }
 
-
-void MotorPair::turnLeft() {
-	// get the latest heading
-	m_orientation = m_imu_sensor.getEuler().x();
-
-	// determine the desired orientation of imu with wrapper
-	m_orientation-=90;
-	if (m_orientation < 0) m_orientation+=270;
-
-	// orientate motors for left turn
-  	digitalWrite(stand_by, HIGH);
-	digitalWrite(input1, LOW);
-	digitalWrite(input2, HIGH);
-	digitalWrite(input3, HIGH);
-	digitalWrite(input4, LOW);
-
-	// rampUp(MAX_SPEED/2);
-	analogWrite(enable_a, 150);
-	analogWrite(enable_b, 150);
-
-	while (m_imu_sensor.getEuler().x() != m_orientation) {
-		Serial.print("Orientation: "); Serial.print(m_orientation);
-		Serial.println(" ");
-	}
-
-	stop();
-}
-
 void MotorPair::turnRight() {
 	// get the latest heading
 	m_orientation = m_imu_sensor.getEuler().x();
 
 	// determine the desired orientation of imu with wrapper
 	m_orientation+=90;
-	if (m_orientation > 360) m_orientation-=270;
+	if (m_orientation > 360) m_orientation-=360;
 
   	digitalWrite(stand_by, HIGH);
 

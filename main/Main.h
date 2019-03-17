@@ -18,7 +18,14 @@
 #include <avr/sleep.h>
 
 /*
-    TODO: Add Localization + Speed Controller
+    TODO:
+    - Add Localization + Speed Controller
+    - Add a getHeading() to fix itself to before driving straight, and thats our desired direction
+    - Add executeInstructions to the main
+    - Possibly add fail-safe if the current heading is necessary (TEST to see if the heading resets for some reason)
+    - updateLocation()
+    - Add an initialization function that orients true north, east, south, west within init() function
+    - Define locomotion to work with driveStraight(), turnLeft(), turnRight()
 */
 /* Core Class */
 class Main {
@@ -41,7 +48,7 @@ class Main {
         Coord getGlobalPosition(Pose pose);
         void mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose start_pose);
         bool isUnexplored(MapLocation global_map[][GLOBAL_COL], Coord coord);
-        void mapBlockInFront(MapLocation &location, Pose pose, double start_mag);
+        void mapBlockInFront(MapLocation &location, Pose pose, double start_mag, Coord block_in_front);
         bool isFood(double mag);
 
         //TODO: Implement these functions
@@ -65,20 +72,31 @@ class Main {
             Coord start_loc);
         bool neighborMatchesCondition(MapLocation global_map[][GLOBAL_COL], MapLocation location_of_interest, Coord coord);
 
+        // Locomotion Wrapper Functions
+        void moveForwardOneBlock();
+        void turnLeft();
+        // void rotateRight();
+        void executeInstructions(Queue<Instruction> instructions);
+
+        double getCurrentOrientation();
+
         void stopProgram();
     private:
         MapLocation m_global_map[GLOBAL_ROW][GLOBAL_COL];
-
-        Queue<Task> tasks;
 
         Coord m_start_coord;
         Coord m_current_location;
         Orientation m_current_orientation;
 
-        Pose m_current_pose;
+        Pose m_current_pose; // updatePose
 
         int m_sand_block_counts; // TODO: Increment counter when mapping
         Coord m_sand_block_locations[36];
+
+        double true_north;
+        double true_south;
+        double true_west;
+        double true_east;
 
         // TODO: Add these flags
         bool m_found_food;

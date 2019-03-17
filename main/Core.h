@@ -12,6 +12,9 @@ const int FLT_MAX = -2;
 const int INT_MAX = 999;
 const int INT_MIN = -999;
 
+const double TRAVEL_SPEED = 150;
+const double TURN_SPEED = 220;
+
 /* Data Structures */
 struct Coord {
   int row;
@@ -64,8 +67,7 @@ enum BlockType {
     PARTICLE = 1, // Particle Board
     WATER = 2, // Water
     SAND = 3, // Sand
-    GRAVEL = 4, // Gravel
-    INTEREST = 5, // Locations of interest
+    GRAVEL = 4 // Gravel
 };
 
 struct MapLocation {
@@ -97,10 +99,11 @@ enum Orientation {
 
 enum Task {
     EXTINGUISH_FIRE,
-    FIND_FOOD,
-    FIND_GROUP_OF_PEOPLE,
-    DELIVER_FOOD, // Could be eliminated
-    FIND_SURVIVOR
+    DELIVER_FOOD,
+    OTHER
+    // FIND_FOOD,
+    // FIND_GROUP_OF_PEOPLE,
+    // FIND_SURVIVOR
 };
 
 struct Pose {

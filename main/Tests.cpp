@@ -2,9 +2,7 @@
 
 // TODO: Remove all tests for game day
 // Store them in a seperate location
-Tests::Tests () {
-    Serial.println("Test Constructor");
-};
+Tests::Tests () {};
 
 void Tests::RunAllTests() {
     // TestPathPlanning();

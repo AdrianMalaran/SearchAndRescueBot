@@ -12,7 +12,8 @@ class Controller {
         Controller() {};
         Controller(Encoder encA, Encoder encB);
 
-        void DriveStraight(double desired_heading, double current_heading, double nominal_speed = 180);
+        void driveStraight(double desired_heading, double current_heading, double nominal_speed = 180);
+        void rotateLeft(int speed);
         void SpeedControl(double desired_speed, double current_speed);
     private:
         double set_point;
@@ -24,6 +25,10 @@ class Controller {
 
         Encoder m_encoderA;
         Encoder m_encoderB;
+
+        double total_error;
+        double last_time;
+        int counter = 0;
 };
 
 #endif
