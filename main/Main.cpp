@@ -630,7 +630,7 @@ void Main::turnLeft() {
 
     double start_orientation = m_imu_sensor.getEuler().x();
 	double end_orientation = start_orientation - 90;
-    Serial.print("Start Orientation: "); Serial.println(start_orientation);
+    if (end_orientation < 0) end_orientation += 360;
 
     m_motor_pair.setMotorASpeed(-1.0*TURN_SPEED);
 	m_motor_pair.setMotorBSpeed(TURN_SPEED);
@@ -638,12 +638,32 @@ void Main::turnLeft() {
     if (start_orientation > end_orientation) {
         while (m_imu_sensor.getEuler().x() > end_orientation) {}
     } else {
-        while ((m_imu_sensor.getEuler().x() > 0 && m_imu_sensor.getEuler().x() < 90)) {}
+        while (m_imu_sensor.getEuler().x() > 0) {}
         while (m_imu_sensor.getEuler().x() > end_orientation) {}
     }
 
 	Serial.println("Stop Motors");
 	m_motor_pair.stop();
+}
+
+void Main::turnRight() {
+
+    double start_orientation = m_imu_sensor.getEuler().x();
+    double end_orientation = start_orientation + 90;
+    if (end_orientation > 360) end_orientation -= 360;
+
+    m_motor_pair.setMotorASpeed(TURN_SPEED);
+    m_motor_pair.setMotorBSpeed(-1.0*TURN_SPEED);
+
+    if (start_orientation < end_orientation) {
+        while (m_imu_sensor.getEuler().x() < end_orientation) {}
+    } else {
+        while (m_imu_sensor.getEuler().x() < 360) {}
+        while (m_imu_sensor.getEuler().x() > end_orientation) {}
+    }
+
+    Serial.println("Stop Motors");
+    m_motor_pair.stop();
 }
 
 // Executes main batch of movement functions necessary for travelling

@@ -93,29 +93,6 @@ static void MotorPair::setMotorBSpeed(int speed) {
 	analogWrite(enable_b, min(fabs(speed), MAX_SPEED_B));
 }
 
-void MotorPair::turnRight() {
-	// get the latest heading
-	m_orientation = m_imu_sensor.getEuler().x();
-
-	// determine the desired orientation of imu with wrapper
-	m_orientation+=90;
-	if (m_orientation > 360) m_orientation-=360;
-
-  	digitalWrite(stand_by, HIGH);
-
-	digitalWrite(input1, HIGH);
-	digitalWrite(input2, LOW);
-	digitalWrite(input3, LOW);
-	digitalWrite(input4, HIGH);
-
-	analogWrite(enable_a, MAX_SPEED_A/2);
-	analogWrite(enable_b, MAX_SPEED_B/2);
-
-	while (m_imu_sensor.getEuler().x() != m_orientation) {}
-
-	stop();
-}
-
 bool MotorPair::extinguishFireTurn() {
 	double start_orientation = m_imu_sensor.getEuler().x();
 	bool fire_extinguished = false;
