@@ -75,7 +75,7 @@ class Main {
         // Locomotion Wrapper Functions
         void moveForwardOneBlock();
         void turnLeft();
-        // void rotateRight();
+        void turnRight();
         void executeInstructions(Queue<Instruction> instructions);
 
         double getCurrentOrientation();
