@@ -1,14 +1,5 @@
 #include "Main.h"
 
-void drawMap(MapLocation global_map[][GLOBAL_COL]) {
-    for (int i = 0; i < GLOBAL_ROW; i++) {
-        for(int j = 0; j < GLOBAL_COL; j++) {
-            Serial.print(global_map[i][j].block_type);
-            Serial.print(" ");
-        }
-    }
-}
-
 Main::Main() {
     // Serial.println("Main Engine Constructor");
     // Serial.println("Main Engine Constructor 2");
@@ -26,11 +17,11 @@ Main::Main(MotorPair motor_pair, Imu imu_sensor, Color color_front, Color color_
     m_ultrasonic_left = ultrasonic_left;
     m_ultrasonic_back = ultrasonic_back;
     m_controller = controller;
+
     init();
 }
 
 void Main::init() {
-    Serial.println("Main Engine Init()");
     // (0) Initialize sensors and actuators
     // (1) Initialize map
     // (2) Test Path Planning
@@ -54,14 +45,19 @@ void Main::init() {
     Flame::setupFlame();
     m_extinguished_fire = false;
 
-    // Set start coord
+    // Set start pose
     m_start_coord = Coord(4, 5);
+    updateLocation(Pose(m_start_coord, NORTH));
 
     // Initialize Start Map
-    for (int i = 0; i < GLOBAL_ROW; i ++)
-        for (int j = 0; j < GLOBAL_COL; j++)
+    for (int i = 0; i < GLOBAL_ROW; i ++) {
+        for (int j = 0; j < GLOBAL_COL; j++) {
             m_global_map[i][j].block_type = UNKNOWN;
+        }
+    }
+
     m_global_map[m_start_coord.row][m_start_coord.col].block_type = PARTICLE;
+
 }
 
 //TODO: This function will be run in the loop() function of the arduino (?)
@@ -83,7 +79,9 @@ void Main::run() {
     }
 
     returnToStart(m_global_map, m_current_pose);
-    // Stop Program
+
+    Serial.println("Shutting Down Program.");
+    stopProgram();
 }
 
 bool Main::allTasksCompleted() {
@@ -99,8 +97,8 @@ Task Main::getNextTask() {
 
     //TODO: must take care of the case where we find the people first
     // but have not found the food yet
-    // In this case when, we find the food, we should find the people
-    if (m_found_food && !m_found_people)
+    // In this case when, we find the food then we should find the people
+    if (m_deliver_food_to_group)
         return DELIVER_FOOD;
 
     return OTHER;
@@ -129,9 +127,11 @@ void Main::engageExploreMode() {
 
     //TODO: Test this
     MapLocation location_of_interest(UNKNOWN); // Initialize to unknown block
-    Coord explore_block = findClosestBlockToInterest(m_global_map, location_of_interest, m_current_pose.coord);
+    Orientation finish_ori = DONTCARE;
+    Coord explore_block = findClosestBlockToInterest(m_global_map, location_of_interest, m_current_pose.coord, finish_ori);
     // Coord explore_block = findClosestBlockWithUnknownNeighbors(m_global_map, m_current_pose.coord);
     travelToBlock(m_global_map, m_current_pose, Pose(explore_block, DONTCARE));
+    Serial.println("Mapping Adjacent Blocks");
     mapAdjacentBlocks(m_global_map, m_current_pose);
 }
 
@@ -149,15 +149,19 @@ void Main::engageObjectiveMode(Task task) {
             Serial.println("TASK: Finding Food");
             // findFood();
             break;
-        case FIND_GROUP_OF_PEOPLE:
-            Serial.println("TASK: Finding Group of People");
-            break;
+        // TODO: Don't need these specific tasks, they will be discovered
+        // May be needed if we have it pre-mapped and stuff, hehehehehehe
+        // case FIND_GROUP_OF_PEOPLE:
+        //     Serial.println("TASK: Finding Group of People");
+        //     break;
         case DELIVER_FOOD:
             Serial.println("TASK: Delivering Food");
+            // TODO: Implement this to
+            deliverFoodToGroup(); // Map a path to the group of people
             break;
-        case FIND_SURVIVOR:
-            Serial.println("TASK: Finding Survivor");
-            break;
+        // case FIND_SURVIVOR:
+        //     Serial.println("TASK: Finding Survivor");
+        //     break;
         default:
             Serial.println("UNKNOWN TASK");
             break;
@@ -167,8 +171,10 @@ void Main::engageObjectiveMode(Task task) {
 void Main::returnToStart(MapLocation global_map[][GLOBAL_COL], Pose current_pose) {
     Serial.println("Travelling back to start");
     travelToBlock(global_map, current_pose, Pose(m_start_coord, DONTCARE));
-    Serial.println("Shutting Down...");
-    stopProgram();
+}
+
+void Main::deliverFoodToGroup() {
+    travelToBlock(m_global_map, m_current_pose, Pose(m_people_location, DONTCARE));
 }
 
 /***********************
@@ -203,6 +209,11 @@ bool Main::isLandmarkAhead(MapLocation &map, Pose pose) {
     }
 
     return false;
+}
+
+Landmark identifyLandMark() {
+    // TODO: Implement this landmark
+    return PEOPLE;
 }
 
 Coord Main::getGlobalPosition(Pose pose) {
@@ -255,10 +266,10 @@ void Main::mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], 
         if (isValid(adjacent_blocks[i].coord) && map_location.block_type == UNKNOWN) {
             desired_pose = Pose(start_pose.coord, adjacent_blocks[i].orientation);
             travelToBlock(global_map, current_pose, desired_pose);
-
+            Serial.println("Mapping Block in front");
             current_pose = desired_pose;
 
-            mapBlockInFront(map_location, current_pose, start_mag, adjacent_blocks[i].coord);
+            mapBlockInFront(global_map, current_pose, start_mag, adjacent_blocks[i].coord);
         }
     }
     travelToBlock(global_map, current_pose, start_pose);
@@ -273,11 +284,64 @@ bool Main::isUnexplored(MapLocation global_map[][GLOBAL_COL], Coord coord) {
     return false;
 }
 
-void Main::mapBlockInFront(MapLocation &map_location, Pose pose, double start_mag, Coord block_in_front) {
-    /* Questions we want to answer:
-        How do we detect that we're at the edge of one block ? (Use ultrasonic sensors )
-    */
+void Main::checkForLandMark(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Coord block_to_map, double start_mag, Pose pose) {
 
+    MapLocation& map_location = global_map[block_to_map.row][block_to_map.col];
+    if (map_location.block_type == SAND && isFood(start_mag)) {
+        m_found_food = true;
+        LED::on();
+        delay(1000);
+        LED::off();
+        m_food_location = block_to_map;
+
+        // At this point, we found the food, now we want to see if we've already found the people
+        // if we've already found the group of people, then plan to deliver the food to
+        // that group of people straight away
+        if (m_found_people) {
+            m_deliver_food_to_group = true;
+        }
+    }
+
+    map_location.land_mark_spot = isLandmarkAhead(map_location, pose);
+    // TODO: Need to identify what type of landmark it is
+    if (map_location.land_mark_spot) {
+        map_location.landmark = identifyLandMark();
+
+        // Mark Task as finished
+        m_deliver_food_to_group = false;
+    }
+}
+
+void Main::mapBlockInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose, double start_mag, Coord block_to_map) {
+    //TODO: Remove after Testing
+    MapLocation MP(PARTICLE);
+    MapLocation MS(SAND);
+    MapLocation MW(WATER);
+    MapLocation MG(GRAVEL);
+    MapLocation MU(UNKNOWN);
+
+    MapLocation testGrid[GLOBAL_ROW][GLOBAL_COL] =
+    {
+    //    0, 1, 2, 3, 4, 5
+        { MP, MP, MP, MP, MP, MP}, // 0
+        { MP, MP, MP, MP, MP, MP}, // 1
+        { MP, MP, MP, MP, MS, MP}, // 2
+        { MP, MP, MS, MP, MS, MP}, // 3
+        { MP, MP, MW, MP, MP, MP}, // 4
+        { MP, MP, MW, MP, MP, MP}  // 5
+    };
+    delay(2000);
+    Serial.println("Mapped Block: ");
+    printCoord(block_to_map);
+    global_map[block_to_map.row][block_to_map.col] = testGrid[block_to_map.row][block_to_map.col];
+    Serial.println("New Map:");
+    printMap(global_map);
+    return;
+
+
+    /* Questions we want to answer:
+        How do we detect that we're at the edge of one block ? (Use ultrasonic sensors)
+    */
     double start_heading = m_imu_sensor.getEuler().x();
 
     // Try with ultrasonic - If this doesn't work, include encoder control
@@ -288,17 +352,14 @@ void Main::mapBlockInFront(MapLocation &map_location, Pose pose, double start_ma
     }
     m_motor_pair.stop();
 
-    map_location.block_type = m_color_down.getTerrainColor();
-
-    if (map_location.block_type == SAND && isFood(start_mag)) {
-        m_found_food = true;
-        LED::on();
-        delay(1000);
-        LED::off();
-        m_food_location = block_in_front;
+    // TODO: Get feedback to see if the terrain color is unknown, then keep trying
+    BlockType terrain_type = m_color_down.getTerrainColor();
+    while (terrain_type == UNKNOWN) {
+        global_map[block_to_map.row][block_to_map.col].block_type = terrain_type;
+        terrain_type = m_color_down.getTerrainColor();
     }
 
-    map_location.land_mark_spot = isLandmarkAhead(map_location, pose);
+    checkForLandMark(global_map, block_to_map, start_mag, pose);
 
     while (m_ultrasonic_front.getDistance() < start_distance) {
         // Move backwards
@@ -320,9 +381,6 @@ bool Main::isFood(double current_mag) {
 ************************/
 
 void Main::findFood(MapLocation global_map[][GLOBAL_COL], Pose current_pose) {
-    // Check to see if there are mapped sand blocks
-    //     if there are no mapped sand blocks, go explore
-
     // Search for closest sand block
     // travel to sand block
     // inspect sand block to see if a magnet is detected
@@ -357,9 +415,8 @@ void Main::findFood(MapLocation global_map[][GLOBAL_COL], Pose current_pose) {
     - the sandblock is already mapped
     */
 
-    //TODO: If the food is already found, don't we just need to go to the group of people ?
-    travelToBlock(global_map, current_pose, Pose(m_food_location, DONTCARE));
-
+    //TODO: Add a different finish orientation to face the peoples, REPLACE NORTH
+    travelToBlock(m_global_map, m_current_pose, Pose(m_food_location, NORTH));
 }
 
 Coord Main::getClosestSandBlock(MapLocation global_map[][GLOBAL_COL], Coord current_loc) {
@@ -388,12 +445,18 @@ int Main::getManhattanDistance(Coord c1, Coord c2) {
     return abs(c1.row - c2.row) + abs(c1.col - c2.col);
 }
 
-// TODO: Rigourous testing needed for this algorithm
+// TODO: Return bool to make sure this is succesful
 void Main::travelToBlock(MapLocation map[][GLOBAL_COL], Pose start_pose, Pose finish_pose) {
+
+    if (start_pose == finish_pose) {
+        Serial.println("already in position");
+        return;
+    }
+    Serial.print("Travelling from "); printPose(start_pose);
+    Serial.print(" to "); printPose(finish_pose); Serial.println("");
     // Path Plan from current_location to dest
     Stack<Coord> shortest_path =
         PathPlanning::findShortestPath(map, start_pose.coord, finish_pose.coord);
-    Serial.println("Calculated Shortest Path");
 
     // Handle Invalid Path errors
     if (shortest_path.size() == 1 &&
@@ -405,58 +468,49 @@ void Main::travelToBlock(MapLocation map[][GLOBAL_COL], Pose start_pose, Pose fi
 
     Queue<Instruction> maneuver_instructions =
         PathPlanning::generateTrajectories(shortest_path, start_pose.orientation, finish_pose.orientation);
-    Serial.println("Calculated Trajectories");
 
-    executeInstructions(maneuver_instructions);
-    Serial.println("Executed Maneuvers");
+    Orientation final_orientation = start_pose.orientation;
+    executeInstructions(maneuver_instructions, final_orientation);
 
-    //updateLocation(); possibly update location ?
+    updateLocation(Pose(finish_pose.coord, final_orientation));
 }
 
-//TODO: Replace this function
-bool Main::hasUnknownNeighbors(MapLocation global_map[][GLOBAL_COL], Coord start_loc) {
+void Main::updateLocation(Pose finish_pose) {
+    Serial.print("Updating Location to ");
+    printPose(finish_pose);
+    Serial.println("");
+    // Update
+    m_current_pose = finish_pose;
+}
+
+bool Main::hasMatchingNeighbors(MapLocation global_map[][GLOBAL_COL],
+                                MapLocation location_of_interest,
+                                Coord start_loc,
+                                Orientation &dir_towards) {
     if (!isValid(start_loc)) {
         Serial.println("Invalid start coordinate");
         return false;
     }
 
-    Coord adjacent[4];
-    adjacent[0] = Coord(start_loc.row - 1, start_loc.col);
-    adjacent[1] = Coord(start_loc.row + 1, start_loc.col);
-    adjacent[2] = Coord(start_loc.row, start_loc.col - 1);
-    adjacent[3] = Coord(start_loc.row, start_loc.col + 1);
+    Pose adjacent[4];
+    adjacent[0] = Pose(Coord(start_loc.row - 1, start_loc.col), NORTH); // NORTH
+    adjacent[1] = Pose(Coord(start_loc.row + 1, start_loc.col), SOUTH); // SOUTH
+    adjacent[2] = Pose(Coord(start_loc.row, start_loc.col - 1), WEST); // WEST
+    adjacent[3] = Pose(Coord(start_loc.row, start_loc.col + 1), EAST); // EAST
 
     for (int i = 0; i < 4; i++) {
         //TODO: Replace 2nd condition with neighborMatchesCondition
-        if (isValid(adjacent[i]) && global_map[adjacent[i].row][adjacent[i].col].block_type == UNKNOWN) // Unknown
+        if (neighborMatchesCondition(global_map, location_of_interest, adjacent[i].coord)) {
+            dir_towards = adjacent[i].orientation;
             return true;
+        }
     }
 
     return false;
 }
 
-bool Main::hasMatchingNeighbors(MapLocation global_map[][GLOBAL_COL], MapLocation location_of_interest, Coord start_loc) {
-    if (!isValid(start_loc)) {
-        Serial.println("Invalid start coordinate");
-        return false;
-    }
-
-    Coord adjacent[4];
-    adjacent[0] = Coord(start_loc.row - 1, start_loc.col);
-    adjacent[1] = Coord(start_loc.row + 1, start_loc.col);
-    adjacent[2] = Coord(start_loc.row, start_loc.col - 1);
-    adjacent[3] = Coord(start_loc.row, start_loc.col + 1);
-
-    for (int i = 0; i < 4; i++) {
-        //TODO: Replace 2nd condition with neighborMatchesCondition
-        if (neighborMatchesCondition(global_map, location_of_interest, start_loc))
-            return true;
-    }
-
-    return false;
-}
-
-bool Main::neighborMatchesCondition(MapLocation global_map[][GLOBAL_COL], MapLocation location_of_interest, Coord coord) {
+bool Main::neighborMatchesCondition(MapLocation global_map[][GLOBAL_COL],
+                                    MapLocation location_of_interest, Coord coord) {
     if (!isValid(coord))
         return false;
     // Searches for closest block that has a neighbor that matches the criteria:
@@ -466,16 +520,17 @@ bool Main::neighborMatchesCondition(MapLocation global_map[][GLOBAL_COL], MapLoc
         return (global_map[coord.row][coord.col].block_type == UNKNOWN);
 
     // OBJECTIVE MODE | Block w/ location of interest
-    if (location_of_interest.land_mark_spot)
-        return global_map[coord.row][coord.col].land_mark_spot;
+    if (location_of_interest.land_mark_spot) {
+        return global_map[coord.row][coord.col].landmark == location_of_interest.landmark;
+    }
 
     return false;
 }
 
-//TODO: This should already return the direction to the block of interest
 Coord Main::findClosestBlockToInterest(MapLocation global_map[][GLOBAL_COL],
-    MapLocation location_of_interest,
-    Coord start_loc) {
+                                       MapLocation location_of_interest,
+                                       Coord start_loc,
+                                       Orientation &dir_towards) {
 
     Coord invalid_coord = Coord(-1, -1);
     if (!isValid(start_loc)) {
@@ -502,13 +557,15 @@ Coord Main::findClosestBlockToInterest(MapLocation global_map[][GLOBAL_COL],
     visited[start_loc.row][start_loc.col] = true;
 
     Coord current;
+    dir_towards = DONTCARE;
 
     while (!to_visit.empty()) {
         current = to_visit.front();
         to_visit.pop();
         // TODO: Remove print statements
         // Serial.print("Current Block: ("); Serial.print(current.row); Serial.print(","); Serial.print(current.col); Serial.println(")");
-        if (hasMatchingNeighbors(global_map, location_of_interest, current)) // Found a coord with unknown neighbors
+
+        if (hasMatchingNeighbors(global_map, location_of_interest, current, dir_towards)) // Found a coord with unknown neighbors
             return current;
 
         // Explore all neighbors
@@ -530,66 +587,7 @@ Coord Main::findClosestBlockToInterest(MapLocation global_map[][GLOBAL_COL],
         }
     }
 
-    Serial.println("No block with interesting neighbors");
-    return invalid_coord;
-}
-
-//TODO: Delete COPY
-Coord Main::findClosestBlockWithUnknownNeighbors(MapLocation global_map[][GLOBAL_COL], Coord start_loc) {
-    Coord invalid_coord = Coord(-1, -1);
-    if (!isValid(start_loc)) {
-        Serial.println("Invalid start coordinate");
-        return invalid_coord;
-    }
-
-    // Implement a BFS
-    Queue<Coord> to_visit;
-
-    to_visit.push(start_loc);
-    // Initialize all to false (unvisited)
-    bool visited[GLOBAL_ROW][GLOBAL_COL] =
-        {
-            { 0, 0, 0, 0, 0, 0}, // 0
-            { 0, 0, 0, 0, 0, 0}, // 1
-            { 0, 0, 0, 0, 0, 0}, // 2
-            { 0, 0, 0, 0, 0, 0}, // 3
-            { 0, 0, 0, 0, 0, 0}, // 4
-            { 0, 0, 0, 0, 0, 0}  // 5
-            //0, 1, 2, 3, 4, 5
-        };
-
-    visited[start_loc.row][start_loc.col] = true;
-
-    Coord current;
-
-    while (!to_visit.empty()) {
-        current = to_visit.front();
-        to_visit.pop();
-        // TODO: Remove print statements
-        // Serial.print("Current Block: ("); Serial.print(current.row); Serial.print(","); Serial.print(current.col); Serial.println(")");
-        if (hasUnknownNeighbors(global_map, current)) // Found a coord with unknown neighbors
-            return current;
-
-        // Explore all neighbors
-        Coord adjacent[4];
-        adjacent[0] = Coord(current.row - 1, current.col);
-        adjacent[1] = Coord(current.row + 1, current.col);
-        adjacent[2] = Coord(current.row, current.col - 1);
-        adjacent[3] = Coord(current.row, current.col + 1);
-
-        for (int i = 0; i < 4; i++) {
-            int row = adjacent[i].row;
-            int col = adjacent[i].col;
-
-            // Validate traversable block
-            if (isValid(adjacent[i]) && !visited[row][col] && isUnblocked(global_map, adjacent[i])) {
-                visited[row][col] = true;
-                to_visit.push(adjacent[i]);
-            }
-        }
-    }
-
-    Serial.println("No block with unknown neighbors");
+    Serial.println("No block with unknown/interesting neighbors");
     return invalid_coord;
 }
 
@@ -651,22 +649,23 @@ void Main::turnLeft() {
 // Executes main batch of movement functions necessary for travelling
 // between two location blocks
 // By the end of this function, the robot should be at the destination location
-static void Main::executeInstructions(Queue<Instruction> instructions) {
+static void Main::executeInstructions(Queue<Instruction> instructions, Orientation& orientation) {
     // Validate instructions
     if (instructions.empty())
         return;
 
+    Orientation current_orientation = orientation;
+
+    Serial.println("Executing Instructions...");
     while (!instructions.empty()) {
         Instruction ins = instructions.front();
         instructions.pop();
 
-        // Retrieve the heading that we currently have
-        // m_imu_sensor.
-
         if (ins == MOVE_FORWARD) {
             Serial.print("FORWARDS->");
-            // Map -> moveForward()
-            moveForwardOneBlock();
+            //TODO:
+            // moveForwardOneBlock();
+            delay(1000);
         }
         else if (ins == MOVE_BACKWARD) {
             Serial.print("BACKWARDS->");
@@ -675,15 +674,20 @@ static void Main::executeInstructions(Queue<Instruction> instructions) {
         }
         else if (ins == ROTATE_RIGHT) {
             Serial.print("RIGHT->");
-            // Map -> turnRight()
+            current_orientation = (current_orientation + 1) % 4;
             // m_motor_pair.turnRight();
         }
         else if (ins == ROTATE_LEFT) {
             Serial.print("LEFT->");
+            current_orientation = (current_orientation - 1);
+            if (current_orientation < 0) current_orientation = 3;
             // Map -> turnLeft()
             // m_motor_pair.turnLeft();
         }
     }
+    Serial.println("");
+    orientation = current_orientation;
+    Serial.println("Last Orientation: "); printOrientation(orientation);
 }
 
 void Main::stopProgram() {
@@ -694,6 +698,10 @@ void Main::stopProgram() {
 
 void Main::extinguishFire() {
     Serial.println("extinguishFire()");
-    m_extinguished_fire = m_motor_pair.extinguishFireTurn();
+    // m_extinguished_fire = m_motor_pair.extinguishFireTurn(); //TODO: Uncomment, for testing just set it to true;
+
+    m_extinguished_fire = true;
+    delay(3000);
+
     Serial.println("Fire extinguished");
 }

@@ -2,7 +2,7 @@
 
 using namespace std;
 
-const int MAX_QUEUE_SIZE = 100;
+const int MAX_QUEUE_SIZE = 36;
 
 template<class T>
 class Queue {

@@ -42,7 +42,6 @@ MotorPair::MotorPair(Imu imu_sensor) {
 void MotorPair::setupMotorPair() {
 	m_orientation = m_imu_sensor.getEuler().x();
 
-	Serial.println("Setting Motor Pair");
 	// Set motor A pins
 	pinMode(enable_a, OUTPUT);
 	pinMode(input1, OUTPUT);

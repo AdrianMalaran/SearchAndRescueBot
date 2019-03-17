@@ -99,11 +99,14 @@ void setup() {
     // Tests test;
     // test.RunAllTests();
     Main main_engine(motor_pair, imu_sensor, color_front, color_down, ultrasonic_front, ultrasonic_right, ultrasonic_left, ultrasonic_back, controller);
+    main_engine.run();
+
     // main_engine.moveForwardOneBlock();
 
-    main_engine.turnLeft();
-    delay(900);
-    motor_pair.stop();
+    // main_engine.turnLeft();
+    // delay(900);
+    // motor_pair.stop();
+
     // imu_sensor.calibrate();
     //
     // motor_pair.setupMotorPair();

@@ -9,7 +9,7 @@ void Tests::RunAllTests() {
     // TestTrajectoryGeneration();
     // TestController();
     // TestTravel();
-    TestExplore();
+    // TestExplore();
 }
 /*
 static Stack<Coord> TestPathPlanning(MapLocation grid[][GLOBAL_COL], Coord start, Coord finish) {
@@ -174,7 +174,7 @@ void Tests::TestFindFood() {
     //TEST find closest sand block
     //TEST get manhattan distance
 }
-*/
+
 void Tests::TestExplore() {
     Serial.println("Running TestExplore:");
 
@@ -183,11 +183,15 @@ void Tests::TestExplore() {
     MapLocation X(WATER);
     MapLocation MG(GRAVEL);
     MapLocation U(UNKNOWN);
+    MapLocation I(PARTICLE);
+    I.land_mark_spot = true;
+    I.landmark = PEOPLE;
+    I.block_type = PARTICLE;
 
     MapLocation map[GLOBAL_ROW][GLOBAL_COL] =
     {
-        { O, O, O, O, O, O}, // O
-        { O, O, O, O, O, O}, // 1
+        { O, I, O, O, O, O}, // O
+        { O, O, X, O, O, X}, // 1
         { O, O, U, X, X, O}, // 2
         { O, O, X, X, O, O}, // 3
         { O, O, O, O, X, O}, // 4
@@ -200,11 +204,18 @@ void Tests::TestExplore() {
     Main m_main_engine;
 
     // Test hasUnknownNeighbors()
-    bool res = m_main_engine.hasUnknownNeighbors(map, start_loc);
+    Orientation finish_ori;
+    MapLocation unknownlocation;
+    MapLocation interestlocation;
+    interestlocation.block_type = PARTICLE;
+    interestlocation.land_mark_spot = true;
+    interestlocation.landmark = SURVIVOR;
+    bool res = m_main_engine.hasMatchingNeighbors(map, unknownlocation, start_loc, finish_ori);
     Serial.print("Has Unknown neighbors?: "); Serial.println(res);
 
-    Coord block = m_main_engine.findClosestBlockWithUnknownNeighbors(map, start_loc);
-    Serial.print("Closest: (");
-    Serial.print(block.row); Serial.print(","); Serial.print(block.col);
-    Serial.print(")");
+    Coord block = m_main_engine.findClosestBlockToInterest(map, interestlocation, start_loc, finish_ori);
+    Serial.print("Closest: ("); Serial.print(block.row); Serial.print(","); Serial.print(block.col); Serial.print(") Direction: ");
+    Serial.print(finish_ori); Serial.println("");
+    printMap(map);
 }
+*/

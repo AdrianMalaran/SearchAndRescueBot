@@ -67,7 +67,9 @@ enum BlockType {
     PARTICLE = 1, // Particle Board
     WATER = 2, // Water
     SAND = 3, // Sand
-    GRAVEL = 4 // Gravel
+    GRAVEL = 4, // Gravel
+    LANDMARK = 5
+
 };
 
 struct MapLocation {
@@ -90,20 +92,20 @@ enum Instruction {
 };
 
 enum Orientation {
-    NORTH,
-    EAST,
-    SOUTH,
-    WEST,
+    NORTH = 0,
+    EAST = 1,
+    SOUTH = 2,
+    WEST = 3,
     DONTCARE // Don't care which orientation
 };
 
 enum Task {
     EXTINGUISH_FIRE,
     DELIVER_FOOD,
+    FIND_FOOD,
+    FIND_GROUP_OF_PEOPLE,
+    FIND_SURVIVOR,
     OTHER
-    // FIND_FOOD,
-    // FIND_GROUP_OF_PEOPLE,
-    // FIND_SURVIVOR
 };
 
 struct Pose {
@@ -112,6 +114,10 @@ struct Pose {
 
     Pose () {};
     Pose (Coord c, Orientation o) : coord(c), orientation(o) {};
+
+    bool operator==(Pose p1) {
+        return coord.row == p1.coord.row && coord.col == p1.coord.col && orientation == p1.orientation;
+    }
 };
 
 inline bool isUnblocked(MapLocation grid[][GLOBAL_COL], Coord c) {
@@ -122,6 +128,72 @@ inline bool isUnblocked(MapLocation grid[][GLOBAL_COL], Coord c) {
 
 inline bool isValid(Coord c) {
   return c.row >= 0 && c.col >= 0 && c.row < GLOBAL_ROW && c.col < GLOBAL_COL;
+}
+
+inline void printMap(MapLocation global_map[][GLOBAL_COL]) {
+    Serial.println("");
+    for (int i = 0; i < GLOBAL_ROW; i++) {
+        for(int j = 0; j < GLOBAL_COL; j++) {
+            Serial.print(global_map[i][j].block_type);
+            Serial.print(" ");
+        }
+        Serial.println("");
+    }
+}
+
+/* Print Functions */
+inline void printCoord(Coord coord) {
+    Serial.print("("); Serial.print(coord.row); Serial.print(",");
+    Serial.print(coord.col); Serial.print(") ");
+}
+inline void printOrientation(Orientation ori) {
+    if (ori == NORTH)
+        Serial.print("NORTH");
+    else if (ori == SOUTH)
+        Serial.print("SOUTH");
+    else if (ori == EAST)
+        Serial.print("EAST");
+    else if (ori == WEST)
+        Serial.print("WEST");
+    else
+        Serial.print("DONTCARE");
+}
+
+inline void printPose(Pose pose) {
+    Serial.print("("); Serial.print(pose.coord.row); Serial.print(",");
+    Serial.print(pose.coord.col); Serial.print(", ");
+    printOrientation(pose.orientation);
+    Serial.print(")");
+}
+
+
+
+inline void printInstruction(Instruction ins) {
+    if (ins == MOVE_FORWARD)
+        Serial.print("MOVE FORWARD");
+    else if (ins == MOVE_BACKWARD)
+        Serial.print("MOVE BACK");
+    else if (ins == ROTATE_RIGHT)
+        Serial.print("TURN RIGHT");
+    else if (ins == ROTATE_LEFT)
+        Serial.print("TURN LEFT");
+}
+
+inline void printStack(Stack<Coord> stack) {
+    Serial.print("Path Size: ");
+    Serial.println(stack.size());
+
+    Serial.print("(START)");
+    while (!stack.empty()) {
+        Serial.print("(");
+        Serial.print(stack.top().row);
+        Serial.print(",");
+        Serial.print(stack.top().col);
+        Serial.print(") ");
+        if(stack.size() > 1) Serial.print(" -> ");
+        stack.pop();
+    }
+    Serial.println("(FINISH)");
 }
 
 // Starting Map:
