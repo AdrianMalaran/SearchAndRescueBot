@@ -202,58 +202,71 @@ uint16_t Color::calculateColorTemperature(uint16_t r, uint16_t g, uint16_t b) {
 }
 
 BlockType Color::getTerrainColor() {
-  uint16_t r_tot = 0, g_tot = 0, b_tot = 0;
+  uint16_t r_tot = 0, g_tot = 0, b_tot = 0, c_tot = 0;
   uint16_t r, g, b, c;
   for(int i = 0; i < 10; i++) {
       getRawData(&r, &g, &b, &c);
       r_tot+=r;
       g_tot+=g;
       b_tot+=b;
+      c_tot+=c;
   }
   r_tot/=10;
   g_tot/=10;
   b_tot/=10;
+  c_tot/=10;
 
   Serial.print("R: "); Serial.print(r_tot);
   Serial.print(" G: "); Serial.print(g_tot);
-  Serial.print(" B: "); Serial.println(b_tot);
+  Serial.print(" B: "); Serial.print(b_tot);
+  Serial.print(" C: "); Serial.println(c_tot);
 
 /*
 PARTICLE Board readings
     R: 180 - 290
     G: 170 - 255
-    B: 190 - 230
+    B: 170 - 230
+    C: 600 - 760
 
 SAND Board readings
-    R: 90 - 140
-    G: 95 - 135
-    B: 100 - 140
+    R: 75 - 110
+    G: 80 - 125
+    B: 100 - 130
+    C: 275 - 370
 
 GRAVEL Board readings
     R: 150 - 190
-    G: 155 - 195
+    G: 145 - 195
     B: 145 - 180
+    C: 500 - 580
 
-WATER Board readings
-    R: 185 - 260
+WATER Board readings - Casing
+    R: 190 - 275
     G: 160 - 210
-    B: 150 - 190
+    B: 130 - 225
+    C: 720 - 400
+
+WATER Board readings - No Casing
+    R: 200 - 250
+    G: 160 - 190
+    B: 140 - 160
+    C: 500 - 650
 */
 
   // TODO: All of these values need to be calibrated
- if (r_tot > 185 && r_tot < 260 && g_tot > 160 && g_tot < 210 && b_tot > 150 && b_tot < 190) {
+ if (r_tot > 185 && r_tot < 260 && g_tot > 160 && g_tot < 220 && b_tot > 130 && b_tot < 190) {
     Serial.println("WATER");
     return WATER; // Water
 }
-  else if (r_tot > 90 && r_tot < 140 && g_tot > 95 && g_tot < 135 && b_tot > 100 && b_tot < 140) {
+  else if (r_tot > 75 && r_tot < 110 && g_tot > 80 && g_tot < 125 && b_tot > 100 && b_tot < 130) {
     Serial.println("SAND");
     return SAND; // Sand
 }
-  else if (r_tot > 150 && r_tot < 200 && g_tot > 140 && g_tot < 195 && b_tot > 140 && b_tot < 180) {
+  else if (r_tot > 145 && r_tot < 200 && g_tot > 150 && g_tot < 195 && b_tot > 140 && b_tot < 190) {
     Serial.println("GRAVEL");
     return GRAVEL; // Gravel
 }
- else if (r_tot > 180 && r_tot < 290 && g_tot > 170 && g_tot < 255 && b_tot > 190 && b_tot < 230) {
+ else if (r_tot > 180 && r_tot < 290 && g_tot > 170 && g_tot < 255 && b_tot > 170 && b_tot < 230) {
   Serial.println("PARTICLE");
   return PARTICLE; // Particle Board
 }
@@ -264,21 +277,24 @@ WATER Board readings
 }
 
 int Color::getStructureColor() {
-  uint16_t r_tot = 0, g_tot = 0, b_tot = 0;
+  uint16_t r_tot = 0, g_tot = 0, b_tot = 0, c_tot = 0;
   uint16_t r, g, b, c;
   for(int i = 0; i < 10; i++) {
       getRawData(&r, &g, &b, &c);
       r_tot+=r;
       g_tot+=g;
       b_tot+=b;
+      c_tot+=c;
   }
   r_tot/=10;
   g_tot/=10;
   b_tot/=10;
+  c_tot/=10;
 
   Serial.print("R: "); Serial.print(r_tot);
   Serial.print(" G: "); Serial.print(g_tot);
-  Serial.print(" B: "); Serial.println(b_tot);
+  Serial.print(" B: "); Serial.print(b_tot);
+  Serial.print(" C: "); Serial.println(c_tot);
 
   // TODO: All of these values need to be calibrated
   if (r_tot > 100 && r_tot < 200 && g_tot > 100 && g_tot < 200 && b_tot > 100 && b_tot < 200)
