@@ -20,8 +20,6 @@ class MotorPair {
 
 		void turnLeft(int speed);
 		void turnRight();
-
-		bool extinguishFireTurn();
     private:
 		Imu m_imu_sensor;
 		// Ultrasonic m_ultrasonic_front;

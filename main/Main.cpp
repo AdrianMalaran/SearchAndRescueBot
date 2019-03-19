@@ -642,7 +642,6 @@ void Main::turnLeft() {
         while (m_imu_sensor.getEuler().x() > end_orientation) {}
     }
 
-	Serial.println("Stop Motors");
 	m_motor_pair.stop();
 }
 
@@ -662,8 +661,47 @@ void Main::turnRight() {
         while (m_imu_sensor.getEuler().x() > end_orientation) {}
     }
 
-    Serial.println("Stop Motors");
     m_motor_pair.stop();
+}
+
+void Main::extinguishFire() {
+    bool fire_extinguished = false;
+    if (Flame::getFireMagnitude() > 2) {
+        m_motor_pair.stop();
+        while (Flame::getFireMagnitude() > 2) {
+            LED::on();
+            Fan::on();
+        }
+        Fan::off();
+        LED::off();
+
+        fire_extinguished = true;
+    } else {
+        double start_orientation = m_imu_sensor.getEuler().x();
+
+        m_motor_pair.setMotorASpeed(-1.0*TURN_SPEED);
+        m_motor_pair.setMotorBSpeed(TURN_SPEED);
+
+        delay(100);
+
+        while (fabs(m_imu_sensor.getEuler().x() - start_orientation) > 1) {
+            if (Flame::getFireMagnitude() > 2) {
+                m_motor_pair.stop();
+                while (Flame::getFireMagnitude() > 2) {
+                    LED::on();
+                    Fan::on();
+                }
+                Fan::off();
+                LED::off();
+
+                fire_extinguished = true;
+            }
+        }
+
+        m_motor_pair.stop();
+    }
+
+    m_extinguished_fire = fire_extinguished;
 }
 
 // Executes main batch of movement functions necessary for travelling
@@ -714,14 +752,4 @@ void Main::stopProgram() {
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
     cli();  // Disable interrupts
     sleep_mode();
-}
-
-void Main::extinguishFire() {
-    Serial.println("extinguishFire()");
-    // m_extinguished_fire = m_motor_pair.extinguishFireTurn(); //TODO: Uncomment, for testing just set it to true;
-
-    m_extinguished_fire = true;
-    delay(3000);
-
-    Serial.println("Fire extinguished");
 }
