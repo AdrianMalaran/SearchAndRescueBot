@@ -11,19 +11,34 @@
 #include "Ultrasonic.h"
 #include "LED.h"
 
-#include "Encoder.h"
+#include <Encoder.h>
 
 #include <Arduino.h>
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
 
 /*
+    PRIORITY LIST:
+    - Add motor encoders
+    - Get point turn working (TURN LEFT/TURN RIGHT)
+
+    PERIPHERAL
+    - Localization function
+    - Validating/Invalidating the ultra-sonic values
+
+    - Validate electrical components:
+        - Ultrasonic sensors
+        - Color sensors
+        - IMU
+        - Motors
+        - Motor Encoders
+        - LED
+
     TODO:
-    - Add Localization
-    - Add Speed Controller
+    - Add Localization (when lost, use ultrasonic sensors to reorient oneself)
+    - Add Speed Controller (requires motor encoders)
     - Add a getHeading() to fix itself to before driving straight, and thats our desired direction
     - Possibly add fail-safe if the current heading is necessary (TEST to see if the heading resets for some reason)
-    - updateLocation()
     - Add an initialization function that orients true north, east, south, west within init() function
     - Define locomotion to work with driveStraight(), turnLeft(), turnRight()
     - For findClosestBlockToInterest, augment it to return the heading to where its supposed to get
@@ -34,7 +49,7 @@ class Main {
         Main();
         Main(MotorPair motor_pair, Imu imu_sensor, Color color_front, Color color_down,
             Ultrasonic ultrasonic_front, Ultrasonic ultrasonic_right, Ultrasonic ultrasonic_left,
-            Ultrasonic ultrasonic_back, Controller controller);
+            Ultrasonic ultrasonic_back, Controller controller, Encoder& encoder_A, Encoder& encoder_B);
         void init();
         void run();
         void returnToStart(MapLocation global_map[][GLOBAL_COL], Pose current_pose);
@@ -54,8 +69,13 @@ class Main {
         void mapBlockInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose, double start_mag, Coord block_to_map);
         bool isFood(double mag);
 
+        bool isStabilized(double& last_heading, double current_heading, double end_heading);
+
+        void findCorrectMap();
+        void setCorrectMap(MapLocation map[][GLOBAL_COL]);
+
         //TODO: Implement these functions
-        void findFood(MapLocation global_map[][GLOBAL_COL], Pose current_pose);
+        void travelToFood(MapLocation global_map[][GLOBAL_COL], Pose current_pose);
         Coord getClosestSandBlock(MapLocation global_map[][GLOBAL_COL], Coord current_loc); //TODO: Implement
 
         void extinguishFire();
@@ -74,8 +94,15 @@ class Main {
         Coord findClosestBlockToInterest(MapLocation global_map[][GLOBAL_COL], MapLocation location_of_interest, Coord start_loc, Orientation &dir_towards);
         bool neighborMatchesCondition(MapLocation global_map[][GLOBAL_COL], MapLocation location_of_interest, Coord coord);
 
-        // Locomotion Wrapper Functions
-        void moveForwardOneBlock();
+        // Using Ultrasonic readings, Heading controller
+        void moveForwardOneBlock(double distance);
+        // Using Encoder readings
+        void moveForwardSetDistance(double distance);
+        // Using Speed Control
+        void moveForwardSpeedControl(double distance);
+
+        // Debuggic Function
+        void moveMotorB(int speed);
         void turnLeft();
         void executeInstructions(Queue<Instruction> instructions, Orientation& orientation);
         void turnRight();
@@ -115,14 +142,18 @@ class Main {
 
         MotorPair m_motor_pair;
         Imu m_imu_sensor;
+
         Color m_color_front;
         Color m_color_down;
+
         Ultrasonic m_ultrasonic_front;
         Ultrasonic m_ultrasonic_right;
         Ultrasonic m_ultrasonic_left;
         Ultrasonic m_ultrasonic_back;
 
         Controller m_controller;
+        Encoder m_encoder_A;
+        Encoder m_encoder_B;
 };
 
 #endif

@@ -15,8 +15,8 @@ class MotorPair {
 		static void stop();
     	void standby();
 
-		static void setMotorASpeed(int speed);
-		static void setMotorBSpeed(int speed);
+		static void setMotorAPWM(int PWM);
+		static void setMotorBPWM(int PWM);
 
 		void turnLeft(int speed);
 		void turnRight();

@@ -14,6 +14,9 @@ const int INT_MIN = -999;
 
 const double TRAVEL_SPEED = 150;
 const double TURN_SPEED = 220;
+const double BLOCK_TRAVEL_DISTANCE = 30;
+
+const double distance_per_tick = ((3.14*8)/341.2)*(16.0/21.0);
 
 /* Data Structures */
 struct Coord {
@@ -82,6 +85,9 @@ struct MapLocation {
 
     MapLocation () {};
     MapLocation(BlockType blocktype) : block_type(blocktype) {};
+
+    MapLocation(BlockType blocktype, bool lm_spot, Landmark lm)
+        : block_type(blocktype), land_mark_spot(lm_spot), landmark(lm) {};
 };
 
 enum Instruction {
@@ -195,6 +201,56 @@ inline void printStack(Stack<Coord> stack) {
     }
     Serial.println("(FINISH)");
 }
+
+const MapLocation MP(PARTICLE);
+const MapLocation MS(SAND);
+const MapLocation MW(WATER);
+const MapLocation MG(GRAVEL);
+const MapLocation MU(UNKNOWN);
+
+const MapLocation potential_map1[GLOBAL_ROW][GLOBAL_COL] =
+{
+//    0, 1, 2, 3, 4, 5
+    { MP, MP, MP, MW, MP, MP}, // 0
+    { MP, MS, MP, MP, MG, MP}, // 1
+    { MG, MP, MP, MP, MP, MP}, // 2
+    { MP, MP, MS, MP, MP, MW}, // 3
+    { MP, MW, MP, MP, MS, MP}, // 4
+    { MP, MP, MG, MP, MP, MP}  // 5
+};
+
+const MapLocation potential_map2[GLOBAL_ROW][GLOBAL_COL] =
+{
+//    0, 1, 2, 3, 4, 5
+    { MP, MP, MP, MG, MP, MP}, // 0
+    { MP, MW, MP, MP, MS, MP}, // 1
+    { MG, MP, MS, MP, MP, MP}, // 2
+    { MP, MP, MP, MP, MP, MW}, // 3
+    { MP, MS, MP, MP, MG, MP}, // 4
+    { MP, MP, MW, MP, MP, MP}  // 5
+};
+
+const MapLocation potential_map3[GLOBAL_ROW][GLOBAL_COL] =
+{
+//    0, 1, 2, 3, 4, 5
+    { MP, MP, MP, MG, MP, MP}, // 0
+    { MP, MS, MP, MP, MW, MP}, // 1
+    { MW, MP, MP, MS, MP, MP}, // 2
+    { MP, MP, MP, MP, MP, MG}, // 3
+    { MP, MG, MP, MP, MS, MP}, // 4
+    { MP, MP, MW, MP, MP, MP}  // 5
+};
+
+const MapLocation potential_map4[GLOBAL_ROW][GLOBAL_COL] =
+{
+//    0, 1, 2, 3, 4, 5
+    { MP, MP, MP, MW, MP, MP}, // 0
+    { MP, MG, MP, MP, MS, MP}, // 1
+    { MW, MP, MP, MP, MP, MP}, // 2
+    { MP, MP, MP, MS, MP, MG}, // 3
+    { MP, MS, MP, MP, MW, MP}, // 4
+    { MP, MP, MG, MP, MP, MP}  // 5
+};
 
 // Starting Map:
 // BLOCK_TYPE global_map[GLOBAL_ROW][GLOBAL_COL] =

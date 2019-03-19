@@ -28,7 +28,8 @@
 Imu imu_sensor = Imu();
 
 // color(0xC0, 0x00, 22, 23)
-Color color_front(SDA1pin, SCL1pin, COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X), color_down(SDA2pin, SCL2pin, COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X);
+Color color_front(SDA1pin, SCL1pin, COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X),
+      color_down(SDA2pin, SCL2pin, COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X);
 
 // ultrasonic(trigPin, echoPin)
 Ultrasonic ultrasonic_front(49,48), ultrasonic_right(51,50), ultrasonic_left(47,46), ultrasonic_back(53,52);
@@ -38,56 +39,91 @@ MotorPair motor_pair(imu_sensor);
 
 // controller
 double input, output, set_point, Kp = 30;
-// PID pid(&input, &output, &set_point, 2, 5, 1, DIRECT);
+
+// fan
+Fan fan;
 
 // encoders
-// Encoder encoderA(encoderApin1, encoderApin2);
-// Encoder encoderB(encoderBpin1, encoderBpin2);
+Encoder encoderA(encoderApin1, encoderApin2);
+Encoder encoderB(encoderBpin1, encoderBpin2);
 // Controller controller(encoderA, encoderB);
 Controller controller;
-
-Tests test;
-
 double m_desired_heading;
 
-// Global Variable
-int m_motor_speed_A = 0;
-int m_motor_speed_B = 0;
-int last_encA_value = 0;
-int last_encB_value = 0;
+/*
+    Controller Math:
+    1 Revolution = (16/21) * 1 Revolution = 0.7619 Revolutions of Wheel/1 revolution of Motor
+    Therefore, 1 revolution of motor = (0.7691)*(8*pi) = 19.1487 centimeters travelled
+*/
+double calculateSpeed(long current_encoder_value, long last_encoder_value, long period) {
+    double wheel_circumference = 3.14*8;
+    double distancePerWheelTick = wheel_circumference / 341.2; // 341.2 counts/revolution of the wheel
+    double distancePerMotorTick = distancePerWheelTick * (16/21.0); // 1 Revolution of the motor = Gear Ratio = 16/21
 
-//Testing
-int current_encA_value = 0;
-int current_encB_value = 0;
-
-
-const int timer_micro_seconds = 1000000;
-
-double calculateSpeed(int current_encoder_value, int last_encoder_value, int period) {
-    double distance = 3.14*8;
-    double distancePerTick = distance / 341.2; // 341.2 counts/revolution
-
-    //TODO: check if need to wrap
-    //TODO: Test Encoder class input
     // Serial.print("Distance: "); Serial.println(distancePerTick * (current_encoder_value - last_encoder_value));
     // double speed = distancePerTick * (current_encoder_value - last_encoder_value) / (period/1000000.0); // Convert from microseconds to seconds
-    double speed = (current_encoder_value - last_encoder_value) / (period/1000000.0); // Convert from microseconds to seconds
+    long double speed = distancePerMotorTick * ((current_encoder_value - last_encoder_value) / (period / 1000000.0)); // Convert from microseconds to seconds
     return speed;
 }
 
+// Global Variables for encoders
+double m_motor_speed_A = 999;
+double m_motor_speed_B = 999;
+long last_encA_value = -100;
+long last_encB_value = -100;
+
+const long timer_micro_seconds = 50000; // Number of seconds
+long counter = 0;
+
 void updateActualSpeed() {
-    // int current_encA_value = encoderA.read();
-    // m_motor_speed_A = (current_encA_value - last_encA_value)/timer_micro_seconds;
+    long current_encA_value = encoderA.read();
     m_motor_speed_A = calculateSpeed(current_encA_value, last_encA_value, timer_micro_seconds);
     last_encA_value = current_encA_value;
 
-    // int current_encB_value = encoderB.read();
+    long current_encB_value = encoderB.read();
     m_motor_speed_B = calculateSpeed(current_encB_value, last_encB_value, timer_micro_seconds);
     last_encB_value = current_encB_value;
 
-    // Serial.print("MotorA Speed: "); Serial.print(m_motor_speed_A);
-    // Serial.print(" MotorB Speed: "); Serial.print(m_motor_speed_B);
-    // Serial.println("");
+    // Serial.print("Enc A: "); Serial.print(current_encA_value);
+    // Serial.print(" Enc B: "); Serial.print(current_encB_value);
+
+    // Serial.println("Updating Speed!");
+    Serial.print(" MA: "); Serial.print(m_motor_speed_A);
+    Serial.print(" MB: "); Serial.println(m_motor_speed_B);
+}
+
+void initializeTimers() {
+    // Timers
+    Timer1.initialize(timer_micro_seconds); // Microseconds
+    Timer1.attachInterrupt(updateActualSpeed);
+    // Timer1.setPeriod(timer_micro_seconds);
+}
+
+void testMoveForward(double PWM1, double PWM2) {
+    motor_pair.setMotorAPWM(PWM1);
+    motor_pair.setMotorBPWM(PWM2);
+
+    delay(5000);
+
+    motor_pair.stop();
+}
+
+void testLeftTurn(double PWM1, double PWM2) {
+    motor_pair.setMotorAPWM(-1*PWM1);
+    motor_pair.setMotorBPWM(PWM2);
+
+    delay(5000);
+
+    motor_pair.stop();
+}
+
+void testRightTurn(double PWM1, double PWM2) {
+    motor_pair.setMotorAPWM(PWM1);
+    motor_pair.setMotorBPWM(-1*PWM2);
+
+    delay(5000);
+
+    motor_pair.stop();
 }
 
 /**************
@@ -96,85 +132,74 @@ void updateActualSpeed() {
 void setup() {
     Serial.begin(9600);
     Serial.println("Running Tests");
-    // Tests test;
-    // test.RunAllTests();
-    Main main_engine(motor_pair, imu_sensor, color_front, color_down, ultrasonic_front, ultrasonic_right, ultrasonic_left, ultrasonic_back, controller);
-    main_engine.run();
 
-    // main_engine.moveForwardOneBlock();
-
-    // main_engine.turnLeft();
-    // delay(900);
+    long startA = 0;
+    long startB = 0;
+    // encoderA.write(startA);
+    // encoderB.write(startB);
+    // motor_pair.setupMotorPair();
+    // motor_pair.setMotorAPWM(170);
+    // motor_pair.setMotorBPWM(170);
     // motor_pair.stop();
 
-    // imu_sensor.calibrate();
-    //
-    // motor_pair.setupMotorPair();
-    // motor_pair.turnLeft();
+    // Tests test;
+    // test.RunAllTests();
+    Main main_engine(motor_pair, imu_sensor, color_front, color_down,
+                     ultrasonic_front, ultrasonic_right, ultrasonic_left,
+                     ultrasonic_back, controller, encoderA, encoderB);
+    // main_engine.moveForwardOneBlock(30.0);
+    main_engine.run();
 
-    // Timers
-    // Timer1.initialize(timer_micro_seconds); // Microseconds
-    // Timer1.attachInterrupt(updateActualSpeed);
-    // Timer1.setPeriod(timer_micro_seconds);
+    // initializeTimers();
+
+    // BEGIN - TEST INSTRUCTIONS ****
+        // testMoveForward(200, 200);
+    // END - TEST INSTRUCTIONS
+
+    // BEGIN - TEST INSTRUCTIONS ****
+        // Queue<Instruction> instructions;
+        // double orientation = DONTCARE;
+        // instructions.push(MOVE_FORWARD);
+        // instructions.push(ROTATE_RIGHT);
+        // instructions.push(MOVE_FORWARD);
+        // instructions.push(ROTATE_LEFT);
+        // main_engine.executeInstructions(instructions, orientation);
+    // END - TEST INSTRUCTIONS
 }
 
 /***************
 *     LOOP     *
 ****************/
 void loop() {
-    // Serial.print("Ultrasonic Front: "); Serial.println(ultrasonic_front.getDistance());
-    // current_encA_value ++;
-    // current_encB_value ++;
-    // motor_pair.setMotorBSpeed(160);
-    // Serial.print("Encoder: "); Serial.println(encoderB.read());
-    // Serial.print(current_encA_value); Serial.print(" "); Serial.println(current_encB_value);
-    // Serial.println("gangang");
-    // Serial.println(m_current_speed);
-/*
-    //Serial.println(ultrasonic.getDistance());
+    // Serial.println(ultrasonic_front.getDistance());
+    // Serial.println(imu_sensor.getEuler().x());
+    /* Encoder Stuff */
+    long encoder_a_val = encoderA.read();
+    long encoder_b_val = encoderB.read();
 
-    uint16_t r, g, b, c;
-    color1.getRawData(&r, &g, &b, &c);
-    Serial.print("R: "); Serial.print(r, DEC); Serial.print(" ");
-    Serial.print("G: "); Serial.print(g, DEC); Serial.print(" ");
-    Serial.print("B: "); Serial.print(b, DEC); Serial.println(" ");
+    // Serial.print("EncA: "); Serial.print(encoder_a_val);
+    // Serial.print(" EncB: "); Serial.print(encoder_b_val);
+    // Serial.print(" MA: "); Serial.print(m_motor_speed_A);
+    // Serial.print(" MB: "); Serial.println(m_motor_speed_B);
 
-    Serial.println(color1.getTerrainColor());
+    // if (encoder_a_val >= 341) {
+    //     encoderA.write(0);
+    //     motor_pair.setMotorAPWM(0);
+    //     counter = 0;
+    // }
+    // if (encoder_b_val >= 341) {
+    //     encoderB.write(0);
+    //     motor_pair.setMotorBPWM(0);
+    //     counter = 0;
+    // }
 
-    uint16_t r2, g2, b2, c2;
-    color2.getRawData(&r2, &g2, &b2, &c2);
-    Serial.print("R2: "); Serial.print(r2, DEC); Serial.print(" ");
-    Serial.print("G2: "); Serial.print(g2, DEC); Serial.print(" ");
-    Serial.print("B2: "); Serial.print(b2, DEC); Serial.println(" ");
+    // if (counter == 10000)
+    //     motor_pair.stop();
+    // counter+= 1;
+    // encoderA.write(counter);
+    // encoderB.write(counter);
 
-    // imu::Vector<3> euler = imu_sensor.getMag(); // Magnet
-    // Serial.print("Yaw: "); Serial.print(euler.x());
-    // Serial.print(" Pitch: "); Serial.print(euler.y());
-    // Serial.print(" Roll: "); Serial.println(euler.z());
-    imu::Vector<3> euler = imu_sensor.getEuler();
-    double desired_heading = m_desired_heading;
-    double current_heading = euler.x();
 
-    //Controller::DriveStraight(desired_heading, current_heading);
-    // MotorPair::moveForwards();
-    // Serial.println("Driving");
-    motor_pair.turnLeft();
-*/
-
-    // Controller::DriveStraight(m_desired_heading, imu_sensor.getEuler().x(), 140);
-
-    //Serial.print("Structure: "); Serial.println(color_front.getStructureColor());
-    //Serial.println(Flame::getFireMagnitude());
-    //if (Flame::getFireMagnitude() > 1) {
-    //    Fan::on();
-    //    delay(5000);
-    //}
-    //Fan::off();
-
-    // digitalWrite(33,HIGH);
-    // delay(3000);
-    // digitalWrite(33,LOW);
-    // delay(3000);
     /*
     MapLocation map_location = MapLocation(UNKNOWN);
     Serial.print("landmark ahead: "); Serial.println(main_engine.isLandmarkAhead(map_location, Pose(Coord(2,2), NORTH)));

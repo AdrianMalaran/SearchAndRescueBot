@@ -2,8 +2,8 @@
 #include <Arduino.h>
 
 // Code assumes:
-// Motor A is right
-// Motor B is left
+// Motor A is left
+// Motor B is right
 //
 // Motor speed is 0-255
 
@@ -67,21 +67,20 @@ static void MotorPair::standby() {
   digitalWrite(stand_by, LOW);
 }
 
-static void MotorPair::setMotorASpeed(int speed) {
-	if (speed > 0) {
+static void MotorPair::setMotorAPWM(int PWM) {
+	if (PWM > 0) {
 		digitalWrite(input1, LOW);
 		digitalWrite(input2, HIGH);
 	} else {
 		digitalWrite(input1, HIGH);
 		digitalWrite(input2, LOW);
 	}
-
 	// Continually Turn Motors
-	analogWrite(enable_a, min(fabs(speed), MAX_SPEED_A));
+	analogWrite(enable_a, min(fabs(PWM), MAX_SPEED_A));
 }
 
-static void MotorPair::setMotorBSpeed(int speed) {
-	if (speed > 0) {
+static void MotorPair::setMotorBPWM(int PWM) {
+	if (PWM > 0) {
 		digitalWrite(input3, LOW);
 		digitalWrite(input4, HIGH);
 	} else {
@@ -90,7 +89,7 @@ static void MotorPair::setMotorBSpeed(int speed) {
 	}
 	// Serial.println("Setting Motor Speed");
 	// Continually Turn Motors
-	analogWrite(enable_b, min(fabs(speed), MAX_SPEED_B));
+	analogWrite(enable_b, min(fabs(PWM), MAX_SPEED_B));
 }
 
 bool MotorPair::extinguishFireTurn() {

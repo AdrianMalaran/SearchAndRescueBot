@@ -1,13 +1,10 @@
 #include "Main.h"
 
-Main::Main() {
-    // Serial.println("Main Engine Constructor");
-    // Serial.println("Main Engine Constructor 2");
-}
+Main::Main() {}
 
 Main::Main(MotorPair motor_pair, Imu imu_sensor, Color color_front, Color color_down,
             Ultrasonic ultrasonic_front, Ultrasonic ultrasonic_right, Ultrasonic ultrasonic_left,
-            Ultrasonic ultrasonic_back, Controller controller) {
+            Ultrasonic ultrasonic_back, Controller controller, Encoder &encoder_A, Encoder &encoder_B) {
     m_motor_pair = motor_pair;
     m_imu_sensor = imu_sensor;
     m_color_front = color_front;
@@ -17,6 +14,8 @@ Main::Main(MotorPair motor_pair, Imu imu_sensor, Color color_front, Color color_
     m_ultrasonic_left = ultrasonic_left;
     m_ultrasonic_back = ultrasonic_back;
     m_controller = controller;
+    m_encoder_A = encoder_A;
+    m_encoder_B = encoder_B;
 
     init();
 }
@@ -26,9 +25,10 @@ void Main::init() {
     // (1) Initialize map
     // (2) Test Path Planning
     // (3) Calibrate sensors
-
+    Serial.println("Initializing Main Engine...");
     // Start the imu
     m_imu_sensor.begin();
+    Serial.println("Imu Sensor Reading");
 
     delay(1000);
 
@@ -46,7 +46,7 @@ void Main::init() {
     m_extinguished_fire = false;
 
     // Set start pose
-    m_start_coord = Coord(4, 5);
+    m_start_coord = Coord(5, 3);
     updateLocation(Pose(m_start_coord, NORTH));
 
     // Initialize Start Map
@@ -57,7 +57,10 @@ void Main::init() {
     }
 
     m_global_map[m_start_coord.row][m_start_coord.col].block_type = PARTICLE;
+    m_global_map[m_start_coord.row-1][m_start_coord.col].block_type = PARTICLE;
 
+    findCorrectMap();
+    Serial.println("Found correct map");
 }
 
 //TODO: This function will be run in the loop() function of the arduino (?)
@@ -78,10 +81,8 @@ void Main::run() {
         }
     }
 
+    // End program after returning to start
     returnToStart(m_global_map, m_current_pose);
-
-    Serial.println("Shutting Down Program.");
-    stopProgram();
 }
 
 bool Main::allTasksCompleted() {
@@ -125,10 +126,16 @@ bool Main::taskIsMapped(Task task) {
 void Main::engageExploreMode() {
     Serial.println("Enaging Explore Mode!");
 
-    //TODO: Test this
     MapLocation location_of_interest(UNKNOWN); // Initialize to unknown block
     Orientation finish_ori = DONTCARE;
     Coord explore_block = findClosestBlockToInterest(m_global_map, location_of_interest, m_current_pose.coord, finish_ori);
+
+    if (!isValid(explore_block)) { // No Path Found
+        Serial.println("No other blocks can be explored. Returning to start");
+        returnToStart(m_global_map, m_current_pose);
+        return;
+    }
+
     // Coord explore_block = findClosestBlockWithUnknownNeighbors(m_global_map, m_current_pose.coord);
     travelToBlock(m_global_map, m_current_pose, Pose(explore_block, DONTCARE));
     Serial.println("Mapping Adjacent Blocks");
@@ -147,13 +154,13 @@ void Main::engageObjectiveMode(Task task) {
             break;
         case FIND_FOOD:
             Serial.println("TASK: Finding Food");
-            // findFood();
+            // travelToFood();
             break;
         // TODO: Don't need these specific tasks, they will be discovered
         // May be needed if we have it pre-mapped and stuff, hehehehehehe
-        // case FIND_GROUP_OF_PEOPLE:
-        //     Serial.println("TASK: Finding Group of People");
-        //     break;
+        case FIND_GROUP_OF_PEOPLE:
+            Serial.println("TASK: Finding Group of People");
+            break;
         case DELIVER_FOOD:
             Serial.println("TASK: Delivering Food");
             // TODO: Implement this to
@@ -171,12 +178,80 @@ void Main::engageObjectiveMode(Task task) {
 void Main::returnToStart(MapLocation global_map[][GLOBAL_COL], Pose current_pose) {
     Serial.println("Travelling back to start");
     travelToBlock(global_map, current_pose, Pose(m_start_coord, DONTCARE));
+    Serial.println("Shutting Down Program.");
+    stopProgram();
 }
 
 void Main::deliverFoodToGroup() {
-    travelToBlock(m_global_map, m_current_pose, Pose(m_people_location, DONTCARE));
+    MapLocation interestlocation(PARTICLE, true, SURVIVOR);
+    Orientation finish_ori;
+    Coord block = findClosestBlockToInterest(m_global_map, interestlocation, m_current_pose.coord, finish_ori);
+    travelToBlock(m_global_map, m_current_pose, Pose(block, DONTCARE));
+    // Indicate that its been found
 }
 
+void Main::findCorrectMap() {
+    MapLocation west_location(UNKNOWN);
+    MapLocation north_east_location(UNKNOWN);
+
+    Coord west_block = Coord(m_current_pose.coord.row,m_current_pose.coord.col - 1);
+    Coord north_east_block = Coord(m_current_pose.coord.row - 1,m_current_pose.coord.col + 1);
+
+    double start_mag = m_imu_sensor.getMag().z();
+
+    travelToBlock(m_global_map, m_current_pose, Pose(m_current_pose.coord, WEST));
+    mapBlockInFront(m_global_map, m_current_pose, start_mag, west_block);
+    west_location = m_global_map[west_block.row][west_block.col];
+
+    start_mag = m_imu_sensor.getMag().z();
+
+    travelToBlock(m_global_map, m_current_pose, Pose(Coord(m_current_pose.coord.row - 1, m_current_pose.coord.col), EAST));
+    mapBlockInFront(m_global_map, m_current_pose, start_mag, north_east_block);
+    north_east_location = m_global_map[north_east_block.row][north_east_block.col];
+
+    // Identify Map
+
+    // TODO: Consider what happens if we detect food in the sand
+    if (west_location.block_type == GRAVEL) {
+        if (north_east_location.block_type == SAND)
+            // m_global_map = potential_map1;
+            setCorrectMap(potential_map1);
+        else if (north_east_location.block_type == WATER)
+            // m_global_map = potential_map4;
+            setCorrectMap(potential_map4);
+        else {
+            Serial.println("UNABLE TO IDENTIFY MAPPING");
+            engageExploreMode();
+        }
+    }
+    else if (west_location.block_type == WATER) {
+        if (north_east_location.block_type == SAND)
+            // m_global_map = potential_map3;
+            setCorrectMap(potential_map3);
+        else if (north_east_location.block_type == GRAVEL)
+            // m_global_map = potential_map2;
+            setCorrectMap(potential_map2);
+        else {
+            Serial.println("UNABLE TO IDENTIFdffksdf");
+            engageExploreMode();
+        }
+    } else {
+        Serial.println("UNABLE TO IDENTIFY MAPPING --");
+        engageExploreMode();
+    }
+
+    printMap(m_global_map);
+
+    Serial.println("Map Set");
+}
+
+void Main::setCorrectMap(MapLocation map[][GLOBAL_COL]) {
+    for (int i = 0; i < GLOBAL_ROW; i ++) {
+        for (int j = 0; j < GLOBAL_COL; j++) {
+            m_global_map[i][j].block_type = map[i][j].block_type;
+        }
+    }
+}
 /***********************
 * PERIPHERAL FUNCTIONS *
 ************************/
@@ -212,8 +287,13 @@ bool Main::isLandmarkAhead(MapLocation &map, Pose pose) {
 }
 
 Landmark identifyLandMark() {
-    // TODO: Implement this landmark
-    return PEOPLE;
+    // TODO: Implement this function using color sensor readings
+    if (true)
+        return SURVIVOR;
+    if (true)
+        return PEOPLE;
+
+    return FIRE;
 }
 
 Coord Main::getGlobalPosition(Pose pose) {
@@ -284,7 +364,10 @@ bool Main::isUnexplored(MapLocation global_map[][GLOBAL_COL], Coord coord) {
     return false;
 }
 
-void Main::checkForLandMark(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Coord block_to_map, double start_mag, Pose pose) {
+void Main::checkForLandMark(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL],
+                            Coord block_to_map,
+                            double start_mag,
+                            Pose pose) {
 
     MapLocation& map_location = global_map[block_to_map.row][block_to_map.col];
     if (map_location.block_type == SAND && isFood(start_mag)) {
@@ -313,26 +396,40 @@ void Main::checkForLandMark(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], C
 }
 
 void Main::mapBlockInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose, double start_mag, Coord block_to_map) {
+
     //TODO: Remove after Testing
-    MapLocation MP(PARTICLE);
-    MapLocation MS(SAND);
-    MapLocation MW(WATER);
-    MapLocation MG(GRAVEL);
-    MapLocation MU(UNKNOWN);
+    // MapLocation MP(PARTICLE);
+    // MapLocation MS(SAND);
+    // MapLocation MW(WATER);
+    // MapLocation MG(GRAVEL);
+    // MapLocation MU(UNKNOWN);
+
+    // MapLocation MLP(LANDMARK, true, PEOPLE);
+    // MapLocation MLS(LANDMARK, true, SURVIVOR);
+    // MapLocation MLC(LANDMARK, true, FIRE);
+    // MapLocation MLF(SAND, true, FOOD);
+
+    // MapLocation testGrid[GLOBAL_ROW][GLOBAL_COL] =
+    // {{ MP, MP, MP, MP, MP, MP}, // 0
+    //  { MP, MLF, MP, MLC, MP, MP}, // 1
+    //  { MP, MP, MP, MW, MS, MP}, // 2
+    //  { MP, MLP, MS, MP, MW, MW}, // 3
+    //  { MP, MP, MW, MP, MW, MP}, // 4
+    //  { MP, MLS, MW, MP, MP, MP}};// 5
 
     MapLocation testGrid[GLOBAL_ROW][GLOBAL_COL] =
     {
     //    0, 1, 2, 3, 4, 5
-        { MP, MP, MP, MP, MP, MP}, // 0
-        { MP, MP, MP, MP, MP, MP}, // 1
-        { MP, MP, MP, MP, MS, MP}, // 2
-        { MP, MP, MS, MP, MS, MP}, // 3
-        { MP, MP, MW, MP, MP, MP}, // 4
+        { MP, MP, MP, MG, MP, MP}, // 0
+        { MP, MS, MP, MP, MW, MP}, // 1
+        { MW, MP, MP, MS, MP, MP}, // 2
+        { MP, MP, MP, MP, MP, MG}, // 3
+        { MP, MG, MP, MP, MS, MP}, // 4
         { MP, MP, MW, MP, MP, MP}  // 5
     };
     delay(2000);
-    Serial.println("Mapped Block: ");
-    printCoord(block_to_map);
+    Serial.println("Mapped Block: "); printCoord(block_to_map);
+
     global_map[block_to_map.row][block_to_map.col] = testGrid[block_to_map.row][block_to_map.col];
     Serial.println("New Map:");
     printMap(global_map);
@@ -355,8 +452,8 @@ void Main::mapBlockInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Po
     // TODO: Get feedback to see if the terrain color is unknown, then keep trying
     BlockType terrain_type = m_color_down.getTerrainColor();
     while (terrain_type == UNKNOWN) {
-        global_map[block_to_map.row][block_to_map.col].block_type = terrain_type;
         terrain_type = m_color_down.getTerrainColor();
+        global_map[block_to_map.row][block_to_map.col].block_type = terrain_type;
     }
 
     checkForLandMark(global_map, block_to_map, start_mag, pose);
@@ -372,25 +469,11 @@ bool Main::isFood(double current_mag) {
     return (fabs(fabs(m_imu_sensor.getMag().z()) - fabs(current_mag)) > 5);
 }
 
-// static bool Main::isValid(Coord c) {
-//   return c.row >= 0 && c.col >= 0 && c.row < GLOBAL_ROW && c.col < GLOBAL_COL;
-// }
-
 /***********************
 *    TASK FUNCTIONS    *
 ************************/
 
-void Main::findFood(MapLocation global_map[][GLOBAL_COL], Pose current_pose) {
-    // Search for closest sand block
-    // travel to sand block
-    // inspect sand block to see if a magnet is detected
-    // In response to the above higher level plan, would it not be simpler to check the sand blocks
-    // as we traverse them, and if we are unsuccesful then go down this route - maybe a checked_for_magnet flag?
-
-    //TODO: Need to know if the robot can just stay in place and the IMU will detect
-    // that reading -> We would need to have the nominal stationary value and then
-    // compare this value to the nominal - so yes, this should be simple enough to do,
-    // we just need to characterize the magnetometer first.
+void Main::travelToFood(MapLocation global_map[][GLOBAL_COL], Pose current_pose) {
 
     //TODO: if we get close enough to sand block boundary to detect a magnet,
     // then we should automatically mark that spot as the food location -> this could be possible,
@@ -408,17 +491,16 @@ void Main::findFood(MapLocation global_map[][GLOBAL_COL], Pose current_pose) {
     }
     */
 
-    /*
-    This objective function assumes:
-    - that the IMU is already able to detect the magnets
-      in the area as soon as the terrain is detected
-    - the sandblock is already mapped
-    */
+    MapLocation location_of_interest(SAND, true, FOOD); // Initialize to unknown block
+    Orientation finish_ori = DONTCARE;
+    Coord explore_block = findClosestBlockToInterest(m_global_map, location_of_interest, m_current_pose.coord, finish_ori);
+    travelToBlock(m_global_map, m_current_pose, Pose(m_food_location, finish_ori));
 
-    //TODO: Add a different finish orientation to face the peoples, REPLACE NORTH
-    travelToBlock(m_global_map, m_current_pose, Pose(m_food_location, NORTH));
+    // Indicate that you've found the food
+    // blink LED
 }
 
+//TODO: Possibly delete this function
 Coord Main::getClosestSandBlock(MapLocation global_map[][GLOBAL_COL], Coord current_loc) {
     int min_distance = INT_MAX;
     Coord closest_sand_block = Coord(-1, -1); // Error coordinate
@@ -471,7 +553,6 @@ void Main::travelToBlock(MapLocation map[][GLOBAL_COL], Pose start_pose, Pose fi
 
     Orientation final_orientation = start_pose.orientation;
     executeInstructions(maneuver_instructions, final_orientation);
-
     updateLocation(Pose(finish_pose.coord, final_orientation));
 }
 
@@ -596,8 +677,8 @@ double Main::getCurrentOrientation() {
 
 }
 
-//TODO: Move to Main class
-void Main::moveForwardOneBlock() {
+// Uses Ultra-sonic sensors to detect distance
+void Main::moveForwardOneBlock(double distance) {
 	// Starting Pose
 	// TODO: Make a more intelligent design to drive forward one block
 	// by adding checks to validate which ultrasonic readings to get
@@ -606,19 +687,29 @@ void Main::moveForwardOneBlock() {
 
     Serial.print("Start Distance: "); Serial.print(start_distance);
     Serial.print(" Start Heading: "); Serial.println(start_heading);
-	//TODO: Change to the length of one block For now test for 10 cms
+
+    //TODO: Change to the length of one block for now test for 10 cms
 	// Want to end up 10 centimeters forward
-	double end_distance = start_distance - 27.0;
+	double end_distance = start_distance - distance;
 
 	// Moves forward one block using either
 	// A: ENCODERS
 	// OR
 	// B: ULTRASONICS
+    int counter = 0;
+    int ultra_sonic_reading = start_distance;
 
-	while (m_ultrasonic_front.getDistance() > end_distance) {
-	// while (true) {
-        //TODO: Add a check to see if IMU is working
-        m_controller.driveStraight(start_heading, m_imu_sensor.getEuler().x(), TRAVEL_SPEED);
+	while (true) {
+        if (counter >= 100) {
+            counter = 0;
+            ultra_sonic_reading = m_ultrasonic_front.getDistance();
+            if (ultra_sonic_reading <= end_distance)
+                break;
+        }
+        else {
+            m_controller.driveStraight(start_heading, m_imu_sensor.getEuler().x(), TRAVEL_SPEED);
+            counter ++;
+        }
 	}
 
     Serial.println("Stopping Motors");
@@ -626,14 +717,92 @@ void Main::moveForwardOneBlock() {
 	// Use ultrasonic sensors for now
 }
 
+// void Main::moveForwardSpeedControl() {
+//     double set_speed = 0;
+//
+//     while(true) {
+//
+//     }
+// }
+
+void Main::moveForwardSetDistance(double distance) {
+
+    // Using encoders
+    // long start_tick_a = m_encoder_A.read();
+    // long start_tick_b = m_encoder_B.read();
+
+    //TODO: TEST TO SEE IF WE CAN ZERO THE encoders
+    m_encoder_A.write(0);
+    m_encoder_B.write(0);
+
+    // m/tick
+    long distance_in_ticks = distance/distance_per_tick;
+    // Assume no slip
+
+    // m_motor_pair.setMotorAPWM(TRAVEL_SPEED);
+    // m_motor_pair.setMotorBPWM(TRAVEL_SPEED);
+
+    // Track each wheel separately
+    // Map distance to number of ticks that need to be range
+    // Encoder A and B should travel the same number of ticks
+    while (m_encoder_A.read() < distance_in_ticks || m_encoder_B.read() < distance_in_ticks) {
+
+        if (m_encoder_A.read() >= distance_in_ticks)
+            m_motor_pair.setMotorAPWM(0);
+        else if (m_encoder_B.read() >= distance_in_ticks)
+            m_motor_pair.setMotorBPWM(0);
+        // drivestraight
+    }
+
+    m_motor_pair.stop();
+
+
+    // Re-zero the encoders
+    m_encoder_A.write(0);
+    m_encoder_B.write(0);
+}
+
+bool Main::isStabilized(double& last_heading, double current_heading, double end_heading) {
+    double tolerance = 2;
+
+    double heading_change = last_heading - current_heading;
+    double heading_position = current_heading - end_heading;
+
+    if (heading_change > 180)
+        heading_change -= 360;
+    else if (heading_change < -180)
+        heading_change += 360;
+
+    if (heading_position > 180)
+        heading_position -= 360;
+    else if (heading_position < -180)
+        heading_position += 360;
+
+    if (abs(heading_change) <= 2 && abs(heading_position) <= 5)
+        return true;
+
+    return false;
+}
+
 void Main::turnLeft() {
 
-    double start_orientation = m_imu_sensor.getEuler().x();
-	double end_orientation = start_orientation - 90;
-    if (end_orientation < 0) end_orientation += 360;
+    double start_headings = m_imu_sensor.getEuler().x();
+	double end_heading = start_headings - 90;
+    if (end_heading < 0) end_heading += 360;
 
-    m_motor_pair.setMotorASpeed(-1.0*TURN_SPEED);
-	m_motor_pair.setMotorBSpeed(TURN_SPEED);
+    double last_heading = start_headings + 5; //TODO: Offset from heading change
+
+    while (!isStabilized(last_heading, m_imu_sensor.getEuler().x(), end_heading)) {
+        m_controller.turnController(end_heading, m_imu_sensor.getEuler().x(), 170, true);
+    }
+
+    m_motor_pair.stop();
+
+    /*
+    Serial.print("Starting Orientation: "); Serial.println(start_orientation);
+
+    m_motor_pair.setMotorAPWM(-1.0*TURN_SPEED);
+	m_motor_pair.setMotorBPWM(TURN_SPEED);
 
     if (start_orientation > end_orientation) {
         while (m_imu_sensor.getEuler().x() > end_orientation) {}
@@ -644,27 +813,44 @@ void Main::turnLeft() {
 
 	Serial.println("Stop Motors");
 	m_motor_pair.stop();
+    */
 }
 
 void Main::turnRight() {
 
-    double start_orientation = m_imu_sensor.getEuler().x();
-    double end_orientation = start_orientation + 90;
-    if (end_orientation > 360) end_orientation -= 360;
+    double start_heading = m_imu_sensor.getEuler().x();
+    double end_heading = start_heading + 90;
+    if (end_heading > 360) end_heading -= 360;
 
-    m_motor_pair.setMotorASpeed(TURN_SPEED);
-    m_motor_pair.setMotorBSpeed(-1.0*TURN_SPEED);
+    double last_heading = start_heading + 5; //TODO: Offset from heading change
 
-    if (start_orientation < end_orientation) {
-        while (m_imu_sensor.getEuler().x() < end_orientation) {}
-    } else {
-        while (m_imu_sensor.getEuler().x() < 360) {}
-        while (m_imu_sensor.getEuler().x() > end_orientation) {}
+    while (!isStabilized(last_heading, m_imu_sensor.getEuler().x(), end_heading)) {
+        m_controller.turnController(end_heading, m_imu_sensor.getEuler().x(), 170, false);
     }
 
-    Serial.println("Stop Motors");
     m_motor_pair.stop();
 }
+
+// void Main::turnRight() {
+//
+//     double start_orientation = m_imu_sensor.getEuler().x();
+//     double end_orientation = start_orientation + 90;
+//     if (end_orientation > 360) end_orientation -= 360;
+//
+//     m_motor_pair.setMotorAPWM(TURN_SPEED);
+//     m_motor_pair.setMotorBPWM(-1.0*TURN_SPEED);
+//
+//     if (start_orientation < end_orientation) {
+//         while (m_imu_sensor.getEuler().x() < end_orientation) {}
+//     } else {
+//         while (m_imu_sensor.getEuler().x() < 360) {}
+//         while (m_imu_sensor.getEuler().x() < end_orientation) {}
+//     }
+//     //TODO: Possibly implement a PI control for this
+//
+//     Serial.println("Stop Motors");
+//     m_motor_pair.stop();
+// }
 
 // Executes main batch of movement functions necessary for travelling
 // between two location blocks
@@ -684,18 +870,20 @@ static void Main::executeInstructions(Queue<Instruction> instructions, Orientati
         if (ins == MOVE_FORWARD) {
             Serial.print("FORWARDS->");
             //TODO:
-            // moveForwardOneBlock();
+            // moveForwardOneBlock(30.0);
             delay(1000);
         }
         else if (ins == MOVE_BACKWARD) {
             Serial.print("BACKWARDS->");
             // Map -> moveBackward()
             // moveBackwardOneBlock();
+            delay(1000);
         }
         else if (ins == ROTATE_RIGHT) {
             Serial.print("RIGHT->");
             current_orientation = (current_orientation + 1) % 4;
             // m_motor_pair.turnRight();
+            delay(1000);
         }
         else if (ins == ROTATE_LEFT) {
             Serial.print("LEFT->");
@@ -703,11 +891,12 @@ static void Main::executeInstructions(Queue<Instruction> instructions, Orientati
             if (current_orientation < 0) current_orientation = 3;
             // Map -> turnLeft()
             // m_motor_pair.turnLeft();
+            delay(1000);
         }
     }
     Serial.println("");
     orientation = current_orientation;
-    Serial.println("Last Orientation: "); printOrientation(orientation);
+    Serial.print("Last Orientation: "); printOrientation(orientation); Serial.println("");
 }
 
 void Main::stopProgram() {
