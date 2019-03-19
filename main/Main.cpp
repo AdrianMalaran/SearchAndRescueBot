@@ -666,14 +666,18 @@ void Main::turnRight() {
 
 void Main::extinguishFire() {
     bool fire_extinguished = false;
-    if (Flame::getFireMagnitude() > 2) {
+
+    if (Flame::getFireMagnitude() > 0) {
         m_motor_pair.stop();
-        while (Flame::getFireMagnitude() > 2) {
+        while (Flame::getFireMagnitude() > 0) {
             LED::on();
-            Fan::on();
+            //Fan::on();
         }
-        Fan::off();
+        //Fan::off();
         LED::off();
+
+        m_motor_pair.setMotorASpeed(-1.0*TURN_SPEED);
+        m_motor_pair.setMotorBSpeed(TURN_SPEED);
 
         fire_extinguished = true;
     } else {
@@ -682,20 +686,23 @@ void Main::extinguishFire() {
         m_motor_pair.setMotorASpeed(-1.0*TURN_SPEED);
         m_motor_pair.setMotorBSpeed(TURN_SPEED);
 
-        delay(100);
+        delay(1000);
 
         while (fabs(m_imu_sensor.getEuler().x() - start_orientation) > 1) {
-            if (Flame::getFireMagnitude() > 2) {
+            if (Flame::getFireMagnitude() > 0) {
                 m_motor_pair.stop();
-                while (Flame::getFireMagnitude() > 2) {
+                while (Flame::getFireMagnitude() > 0) {
                     LED::on();
-                    Fan::on();
+                    //Fan::on();
                 }
-                Fan::off();
+                //Fan::off();
                 LED::off();
 
                 fire_extinguished = true;
             }
+
+            m_motor_pair.setMotorASpeed(-1.0*TURN_SPEED);
+            m_motor_pair.setMotorBSpeed(TURN_SPEED);
         }
 
         m_motor_pair.stop();
