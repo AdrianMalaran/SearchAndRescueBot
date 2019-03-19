@@ -23,6 +23,17 @@
 #define encoderBpin1 2
 #define encoderBpin2 3
 
+// Ultrasonic Pins
+#define ultrasonicFrontTrig 49
+#define ultrasonicFrontEcho 48
+#define ultrasonicRightTrig 51
+#define ultrasonicRightEcho 50
+#define ultrasonicLeftTrig 47
+#define ultrasonicLeftEcho 46
+#define ultrasonicBackTrig 53
+#define ultrasonicBackEcho 52
+
+
 #define BNO055_SAMPLERATE_DELAY_MS 100
 
 Imu imu_sensor = Imu();
@@ -32,7 +43,8 @@ Color color_front(SDA1pin, SCL1pin, COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X),
       color_down(SDA2pin, SCL2pin, COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X);
 
 // ultrasonic(trigPin, echoPin)
-Ultrasonic ultrasonic_front(49,48), ultrasonic_right(51,50), ultrasonic_left(47,46), ultrasonic_back(53,52);
+Ultrasonic ultrasonic_front(ultrasonicFrontTrig, ultrasonicFrontEcho), ultrasonic_right(ultrasonicRightTrig, ultrasonicRightEcho), 
+                              ultrasonic_left(ultrasonicLeftTrig, ultrasonicLeftEcho), ultrasonic_back(ultrasonicBackTrig, ultrasonicBackEcho);
 
 // MotorPair declaration
 MotorPair motor_pair(imu_sensor);
