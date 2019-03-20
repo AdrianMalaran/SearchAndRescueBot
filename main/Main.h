@@ -90,6 +90,7 @@ class Main {
         void travelToFood(MapLocation global_map[][GLOBAL_COL], Pose current_pose);
         Coord getClosestSandBlock(MapLocation global_map[][GLOBAL_COL], Coord current_loc); //TODO: Implement
 
+        void findFire();
         void extinguishFire();
 
         void travelToBlock(MapLocation map[][GLOBAL_COL], Pose start_pose, Pose finish_pose);

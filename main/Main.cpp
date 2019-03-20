@@ -872,41 +872,23 @@ void Main::turnRight() {
 //     m_motor_pair.stop();
 // }
 
-void Main::extinguishFire() {
-    bool fire_extinguished = false;
-
+void Main::findFire() {
     if (Flame::getFireMagnitude() > 0) {
         m_motor_pair.stop();
-        while (Flame::getFireMagnitude() > 0) {
-            LED::on();
-            //Fan::on();
-        }
-        //Fan::off();
-        LED::off();
 
-        m_motor_pair.setMotorAPWM(-1.0*TURN_SPEED);
-        m_motor_pair.setMotorBPWM(TURN_SPEED);
-
-        fire_extinguished = true;
+        extinguishFire();
     } else {
         double start_orientation = m_imu_sensor.getEuler().x();
 
         m_motor_pair.setMotorAPWM(-1.0*TURN_SPEED);
         m_motor_pair.setMotorBPWM(TURN_SPEED);
 
-        delay(1000);
+        delay(500);
 
         while (fabs(m_imu_sensor.getEuler().x() - start_orientation) > 1) {
             if (Flame::getFireMagnitude() > 0) {
                 m_motor_pair.stop();
-                while (Flame::getFireMagnitude() > 0) {
-                    LED::on();
-                    //Fan::on();
-                }
-                //Fan::off();
-                LED::off();
-
-                fire_extinguished = true;
+                extinguishFire();
             }
 
             m_motor_pair.setMotorAPWM(-1.0*TURN_SPEED);
@@ -916,7 +898,21 @@ void Main::extinguishFire() {
         m_motor_pair.stop();
     }
 
-    m_extinguished_fire = fire_extinguished;
+    m_extinguished_fire = true;
+}
+
+void Main::extinguishFire() {
+    LED::on();
+    while (Flame::getFireMagnitude() > 0) {
+        Fan::on();
+
+        delay(1500);
+
+        Fan::off();
+
+        delay(1500);
+    }
+    LED::off();
 }
 
 // Executes main batch of movement functions necessary for travelling
