@@ -188,6 +188,15 @@ void setup() {
     // ins.push(ROTATE_LEFT);
     // ins.push(MOVE_FORWARD);
     // main_engine.executeInstructions(ins, orientation);
+
+    Pose our_pose(Coord(3,4), NORTH);
+    main_engine.getPossibleLandmarks(main_engine.m_global_map, our_pose);
+    for(int i = 0; i < 6; i++) {
+        for(int j = 0; j < 6; j++) {
+            Serial.print(main_engine.m_global_map[i][j].land_mark_spot); Serial.print(" ");
+        }
+        Serial.println("");
+    }
 }
 
 int counter = 0;
