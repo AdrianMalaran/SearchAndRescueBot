@@ -288,45 +288,24 @@ void Main::setCorrectMap(MapLocation map[][GLOBAL_COL]) {
         }
     }
 }
+
 /***********************
 * PERIPHERAL FUNCTIONS *
 ************************/
 
-bool Main::isLandmarkAhead(MapLocation &map, Pose pose) {
-    double front_distance = m_ultrasonic_front.getDistance();
-    double back_distance = m_ultrasonic_back.getDistance();
-    int row = pose.coord.row;
-    int col = pose.coord.col;
-
-    if (front_distance + back_distance < 155) {
-        switch (pose.orientation) {
-        case NORTH:
-             if (front_distance < 30)
-                return true;
-        case SOUTH:
-            if (front_distance < 30)
-                return true;
-        case EAST:
-            if (front_distance < 30)
-                return true;
-        case WEST:
-            if (front_distance < 30)
-                return true;
-        default:
-            // TODO: We should never hit this case.... but DONTCARE is a thing
-            Serial.println("UNKNOWN ORIENTATION");
-            return false;
-        }
-    }
-
-    return false;
+bool Main::isLandmarkAhead() {
+    double distance = m_ultrasonic_front.getDistance();
+    Serial.println(distance);
+    if (distance < 44 || distance > 160)
+        return true;
+    else
+        return false;
 }
 
-Landmark identifyLandMark() {
-    // TODO: Implement this function using color sensor readings
-    if (true)
+Landmark Main::identifyLandMark() {
+    if (m_color_front.getStructureColor() == 1)
         return SURVIVOR;
-    if (true)
+    if (m_color_front.getStructureColor() == 2)
         return PEOPLE;
 
     return FIRE;
@@ -473,7 +452,7 @@ void Main::checkForLandMark(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL],
         }
     }
 
-    map_location.land_mark_spot = isLandmarkAhead(map_location, pose);
+    map_location.land_mark_spot = isLandmarkAhead();
     // TODO: Need to identify what type of landmark it is
     if (map_location.land_mark_spot) {
         map_location.landmark = identifyLandMark();

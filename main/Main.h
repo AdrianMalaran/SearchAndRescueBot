@@ -77,7 +77,7 @@ class Main {
 
         double getTargetHeadingForOrientation(Orientation orientation);
         void deliverFoodToGroup();
-        bool isLandmarkAhead(MapLocation &location, Pose start_pose);
+        bool isLandmarkAhead();
         void checkForLandMark(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Coord block_to_map, double start_mag, Pose pose);
         Coord getGlobalPosition(Pose pose);
         void getPossibleLandmarks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose);
@@ -85,6 +85,7 @@ class Main {
         bool isUnexplored(MapLocation global_map[][GLOBAL_COL], Coord coord);
         void mapBlockInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose, double start_mag, Coord block_to_map);
         bool isFood(double mag);
+        Landmark identifyLandMark();
 
         bool isStabilized(double& last_heading, double current_heading, double end_heading);
 
