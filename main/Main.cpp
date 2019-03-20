@@ -311,7 +311,7 @@ Landmark Main::identifyLandMark() {
     return FIRE;
 }
 
-Coord Main::getGlobalPosition(Pose pose) {
+Coord Main::getGlobalPosition(Orientation orientation) {
     double left_distance = m_ultrasonic_left.getDistance() / 30.3;
     delay(500);
     double right_distance = m_ultrasonic_right.getDistance() / 30.3;
@@ -320,8 +320,8 @@ Coord Main::getGlobalPosition(Pose pose) {
     delay(500);
     double back_distance = m_ultrasonic_back.getDistance() / 30.3;
 
-    if (left_distance + right_distance > 155 && front_distance + back_distance > 155) {
-        switch (pose.orientation) {
+    if (fabs((left_distance + right_distance) - 5) < 1 && fabs((front_distance + back_distance) - 5) < 1) {
+        switch (orientation) {
         case NORTH:
             return Coord(floor(front_distance), floor(left_distance));
         case SOUTH:

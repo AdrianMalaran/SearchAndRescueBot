@@ -79,7 +79,7 @@ class Main {
         void deliverFoodToGroup();
         bool isLandmarkAhead();
         void checkForLandMark(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Coord block_to_map, double start_mag, Pose pose);
-        Coord getGlobalPosition(Pose pose);
+        Coord getGlobalPosition(Orientation orientation);
         void getPossibleLandmarks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose);
         void mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose start_pose);
         bool isUnexplored(MapLocation global_map[][GLOBAL_COL], Coord coord);
