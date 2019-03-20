@@ -187,7 +187,6 @@ void Color::getHSVData(double *h, double *s, double *v) {
   uint16_t r, g, b, c;
   getRawData(&r, &g, &b, &c);
 
-
   double r_prime = r / 65535.0;
   double g_prime = g / 65535.0;
   double b_prime = b / 65535.0;
@@ -326,10 +325,10 @@ int Color::getStructureColor() {
   Serial.print(" V: "); Serial.println(v_tot, 4);
 
   // TODO: All of these values need to be calibrated
-  if (h_tot > 80 && h_tot < 255 && s_tot > 0.18 && s_tot < 0.4 && v_tot > 0.003 && v_tot < 0.006)
-    return 1; // Red House
-  else if (h_tot > 50 && h_tot < 80 && s_tot > 0.02 && s_tot < 0.3 && v_tot > 0.003 && v_tot < 0.004)
-    return 2; // Yellow House
+  if (h_tot > 60 && h_tot < 190 && s_tot > 0.07 && s_tot < 0.12 && v_tot > 0.002 && v_tot < 0.004)
+    return 1; // Yellow House
+  else if (h_tot > 200 && h_tot < 300 && s_tot > 0.14 && s_tot < 0.35 && v_tot > 0.002 && v_tot < 0.004)
+    return 2; // Red House
   else
     return 0; // Unknown
 
