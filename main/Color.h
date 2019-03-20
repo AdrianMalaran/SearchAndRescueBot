@@ -50,7 +50,7 @@ public:
   void setIntegrationTime(color_integration_time_t it);
   void setGain(color_gain_t gain);
   void getRawData(uint16_t *r, uint16_t *g, uint16_t *b, uint16_t *c);
-  void getHSVData(uint16_t *h, uint16_t *s, uint16_t *v);
+  void getHSVData(double *h, double *s, double *v);
   uint16_t calculateColorTemperature(uint16_t r, uint16_t g, uint16_t b);
   uint16_t calculateLux(uint16_t r, uint16_t g, uint16_t b);
   void write8(uint8_t reg, uint32_t value);

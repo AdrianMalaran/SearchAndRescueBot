@@ -181,31 +181,31 @@ void Color::getRawData(uint16_t *r, uint16_t *g, uint16_t *b, uint16_t *c) {
   }
 }
 
-void Color::getHSVData(uint16_t *h, uint16_t *s, uint16_t *v) {
+void Color::getHSVData(double *h, double *s, double *v) {
   if (!m_color_initialised) begin();
 
   uint16_t r, g, b, c;
   getRawData(&r, &g, &b, &c);
 
-  uint16_t r_prime = r / 65535;
-  uint16_t g_prime = g / 65535;
-  uint16_t b_prime = b / 65535;
+  double r_prime = r / 65535.0;
+  double g_prime = g / 65535.0;
+  double b_prime = b / 65535.0;
 
-  uint16_t c_max = max(max(r_prime, g_prime), b_prime);
-  uint16_t c_min = min(min(r_prime, g_prime), b_prime);
-  uint16_t delta = c_max - c_min;
+  double c_max = max(max(r_prime, g_prime), b_prime);
+  double c_min = min(min(r_prime, g_prime), b_prime);
+  double delta = c_max - c_min;
 
   if (delta == 0)
-    *h = 0;
+    *h = 0.0;
   else if (c_max == r_prime)
-    *h = 60 * (((g_prime - b_prime) / delta) % 6);
+    *h = 60.0 * fmod(((g_prime - b_prime) / delta), 6.0);
   else if (c_max == g_prime)
-    *h = 60 * (((b_prime - r_prime) / delta) + 2);
+    *h = 60.0 * (((b_prime - r_prime) / delta) + 2.0);
   else
-    *h = 60 * (((r_prime - g_prime) / delta) + 4);
+    *h = 60.0 * (((r_prime - g_prime) / delta) + 4.0);
 
   if (c_max == 0)
-    *s = 0;
+    *s = 0.0;
   else
     *s = (delta / c_max);
 
@@ -308,8 +308,8 @@ WATER Board readings - No Casing
 }
 
 int Color::getStructureColor() {
-  uint16_t h_tot = 0, s_tot = 0, v_tot = 0;
-  uint16_t h, s, v;
+  double h_tot = 0, s_tot = 0, v_tot = 0;
+  double h, s, v;
   for(int i = 0; i < 10; i++) {
       getHSVData(&h, &s, &v);
       h_tot+=h;
@@ -322,13 +322,13 @@ int Color::getStructureColor() {
 
   Serial.print("H: "); Serial.print(h_tot);
   Serial.print(" S: "); Serial.print(s_tot);
-  Serial.print(" V: "); Serial.print(v_tot);
+  Serial.print(" V: "); Serial.println(v_tot, 4);
 
   // TODO: All of these values need to be calibrated
-  if (h_tot > 80 && h_tot < 255 && s_tot > 0.18 && s_tot < 0.4 && v_tot > 0.003 && v_tot < 0.006)
-    return 1; // Red House
-  else if (h_tot > 50 && h_tot < 80 && s_tot > 0.02 && s_tot < 0.3 && v_tot > 0.003 && v_tot < 0.004)
-    return 2; // Yellow House
+  if (h_tot > 60 && h_tot < 190 && s_tot > 0.07 && s_tot < 0.12 && v_tot > 0.002 && v_tot < 0.004)
+    return 1; // Yellow House
+  else if (h_tot > 200 && h_tot < 300 && s_tot > 0.14 && s_tot < 0.35 && v_tot > 0.002 && v_tot < 0.004)
+    return 2; // Red House
   else
     return 0; // Unknown
 

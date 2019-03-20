@@ -295,51 +295,30 @@ void Main::setCorrectMap(MapLocation map[][GLOBAL_COL]) {
         }
     }
 }
+
 /***********************
 * PERIPHERAL FUNCTIONS *
 ************************/
 
-bool Main::isLandmarkAhead(MapLocation &map, Pose pose) {
-    double front_distance = m_ultrasonic_front.getDistance();
-    double back_distance = m_ultrasonic_back.getDistance();
-    int row = pose.coord.row;
-    int col = pose.coord.col;
-
-    if (front_distance + back_distance < 155) {
-        switch (pose.orientation) {
-        case NORTH:
-             if (front_distance < 30)
-                return true;
-        case SOUTH:
-            if (front_distance < 30)
-                return true;
-        case EAST:
-            if (front_distance < 30)
-                return true;
-        case WEST:
-            if (front_distance < 30)
-                return true;
-        default:
-            // TODO: We should never hit this case.... but DONTCARE is a thing
-            Serial.println("UNKNOWN ORIENTATION");
-            return false;
-        }
-    }
-
-    return false;
+bool Main::isLandmarkAhead() {
+    double distance = m_ultrasonic_front.getDistance();
+    Serial.println(distance);
+    if (distance < 44 || distance > 160)
+        return true;
+    else
+        return false;
 }
 
-Landmark identifyLandMark() {
-    // TODO: Implement this function using color sensor readings
-    if (true)
+Landmark Main::identifyLandMark() {
+    if (m_color_front.getStructureColor() == 1)
         return SURVIVOR;
-    if (true)
+    if (m_color_front.getStructureColor() == 2)
         return PEOPLE;
 
     return FIRE;
 }
 
-Coord Main::getGlobalPosition(Pose pose) {
+Coord Main::getGlobalPosition(Orientation orientation) {
     double left_distance = m_ultrasonic_left.getDistance() / 30.3;
     delay(500);
     double right_distance = m_ultrasonic_right.getDistance() / 30.3;
@@ -348,8 +327,8 @@ Coord Main::getGlobalPosition(Pose pose) {
     delay(500);
     double back_distance = m_ultrasonic_back.getDistance() / 30.3;
 
-    if (left_distance + right_distance > 155 && front_distance + back_distance > 155) {
-        switch (pose.orientation) {
+    if (fabs((left_distance + right_distance) - 5) < 1 && fabs((front_distance + back_distance) - 5) < 1) {
+        switch (orientation) {
         case NORTH:
             return Coord(floor(front_distance), floor(left_distance));
         case SOUTH:
@@ -494,7 +473,7 @@ void Main::checkForLandMark(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL],
         }
     }
 
-    map_location.land_mark_spot = isLandmarkAhead(map_location, pose);
+    map_location.land_mark_spot = isLandmarkAhead();
     // TODO: Need to identify what type of landmark it is
     if (map_location.land_mark_spot) {
         map_location.landmark = identifyLandMark();
@@ -1018,6 +997,8 @@ void Main::findFire() {
         double last_heading = start_heading + 5;
 
         while (!isStabilized(last_heading, m_imu_sensor.getEuler().x(), end_heading)) {
+            // TODO: needs to be changed to do continuous left motion,
+            //this function will only perform a 90 degree turn
             m_controller.turnLeftController(end_heading, m_imu_sensor.getEuler().x(), 200);
 
             if (Flame::getFireMagnitude() > 0) {
