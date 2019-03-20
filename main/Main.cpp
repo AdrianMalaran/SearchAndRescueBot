@@ -6,14 +6,14 @@ Encoder m_encoder_A(19, 18);
 Encoder m_encoder_B(2,3);
 
 // Global Variables for encoders
-double m_motor_speed_A = 999;
-double m_motor_speed_B = 999;
-long last_encA_value = -100;
-long last_encB_value = -100;
-long timer_micro_seconds = 1000; // every 1 millisecond
+// double m_motor_speed_A = 999;
+// double m_motor_speed_B = 999;
+// long last_encA_value = -100;
+// long last_encB_value = -100;
+// long timer_micro_seconds = 1000; // every 1 millisecond
 
-extern Encoder testEncoderA(encoderAPin1, encoderAPin2);
-extern Encoder testEncoderB(encoderBPin1, encoderBPin2);
+// extern Encoder testEncoderA(encoderAPin1, encoderAPin2);
+// extern Encoder testEncoderB(encoderBPin1, encoderBPin2);
 
 Main::Main(MotorPair motor_pair, Imu imu_sensor, Color color_front, Color color_down,
             Ultrasonic ultrasonic_front, Ultrasonic ultrasonic_right, Ultrasonic ultrasonic_left,
@@ -73,8 +73,13 @@ void Main::init() {
         }
     }
 
+    // START COORDINATE
     m_global_map[m_start_coord.row][m_start_coord.col].block_type = PARTICLE;
+    m_global_map[m_start_coord.row][m_start_coord.col].searched = PARTICLE;
+
+    // BLOCK IMMEDIATELY NORTH - Assume these 2 blocks are unsearched
     m_global_map[m_start_coord.row-1][m_start_coord.col].block_type = PARTICLE;
+    m_global_map[m_start_coord.row][m_start_coord.col].searched = PARTICLE;
 
     // initialize global headings
     m_global_north_heading = m_imu_sensor.getEuler().x();
@@ -157,9 +162,11 @@ bool Main::taskIsMapped(Task task) {
 void Main::engageExploreMode() {
     Serial.println("Enaging Explore Mode!");
 
-    MapLocation location_of_interest(UNKNOWN); // Initialize to unknown block
+    // MapLocation location_of_interest(UNKNOWN); // Initialize to unknown block
+    MapLocation unsearched_type_location(PARTICLE, false , NONE, false);
+
     Orientation finish_ori = DONTCARE;
-    Coord explore_block = findClosestBlockToInterest(m_global_map, location_of_interest, m_current_pose.coord, finish_ori);
+    Coord explore_block = findClosestBlockToInterest(m_global_map, unsearched_type_location, m_current_pose.coord, finish_ori);
 
     if (!isValid(explore_block)) { // No Path Found
         Serial.println("No other blocks can be explored. Returning to start");
@@ -233,13 +240,13 @@ void Main::findCorrectMap() {
     double start_mag = m_imu_sensor.getMag().z();
 
     travelToBlock(m_global_map, m_current_pose, Pose(m_current_pose.coord, WEST));
-    mapBlockInFront(m_global_map, m_current_pose, start_mag, west_block);
+    mapBlockTerrainInFront(m_global_map, m_current_pose, start_mag, west_block);
     west_location = m_global_map[west_block.row][west_block.col];
 
     start_mag = m_imu_sensor.getMag().z();
 
     travelToBlock(m_global_map, m_current_pose, Pose(Coord(m_current_pose.coord.row - 1, m_current_pose.coord.col), EAST));
-    mapBlockInFront(m_global_map, m_current_pose, start_mag, north_east_block);
+    mapBlockTerrainInFront(m_global_map, m_current_pose, start_mag, north_east_block);
     north_east_location = m_global_map[north_east_block.row][north_east_block.col];
 
     // Identify Map
@@ -266,7 +273,7 @@ void Main::findCorrectMap() {
             // m_global_map = potential_map2;
             setCorrectMap(potential_map2);
         else {
-            Serial.println("UNABLE TO IDENTIFdffksdf");
+            Serial.println("Water block detected for left location, unknown north east block");
             m_map_discovered = false;
             engageExploreMode();
         }
@@ -433,14 +440,28 @@ void Main::mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], 
         int col = adjacent_blocks[i].coord.col;
         MapLocation map_location = global_map[row][col];
 
-        if (isValid(adjacent_blocks[i].coord) && map_location.block_type == UNKNOWN) {
+        // Update: this function is obselete
+        // if (isValid(adjacent_blocks[i].coord) && map_location.block_type == UNKNOWN) {
+        //     desired_pose = Pose(start_pose.coord, adjacent_blocks[i].orientation);
+        //     travelToBlock(global_map, current_pose, desired_pose);
+        //     Serial.println("Mapping Block in front");
+        //     current_pose = desired_pose;
+        //
+        //     mapBlockTerrainInFront(global_map, current_pose, start_mag, adjacent_blocks[i].coord);
+        // }
+
+        //TODO: Unsearched block
+        //TODO: Set the global map coordinates that are not particle to searched
+        if (isValid(adjacent_blocks[i].coord) && map_location.block_type == PARTICLE && !map_location.searched) {
             desired_pose = Pose(start_pose.coord, adjacent_blocks[i].orientation);
             travelToBlock(global_map, current_pose, desired_pose);
             Serial.println("Mapping Block in front");
             current_pose = desired_pose;
 
-            mapBlockInFront(global_map, current_pose, start_mag, adjacent_blocks[i].coord);
+            // TODO: add mapLandMarksAhead();
+            // mapBlockTerrainInFront(global_map, current_pose, start_mag, adjacent_blocks[i].coord);
         }
+
     }
     travelToBlock(global_map, current_pose, start_pose);
 }
@@ -483,7 +504,7 @@ void Main::checkForLandMark(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL],
     }
 }
 
-void Main::mapBlockInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose, double start_mag, Coord block_to_map) {
+void Main::mapBlockTerrainInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose, double start_mag, Coord block_to_map) {
 
     //TODO: Remove after Testing
     // MapLocation MP(PARTICLE);
@@ -531,10 +552,16 @@ void Main::mapBlockInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Po
 
     // Try with ultrasonic - If this doesn't work, include encoder control
     double start_distance = m_ultrasonic_front.getDistance();
-    while (m_ultrasonic_front.getDistance() > start_distance - 7) {
-        // Move forwards
-        m_controller.driveStraightController(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), 180);
-    }
+    // while (m_ultrasonic_front.getDistance() > start_distance - 7) {
+    //     // Move forwards
+    //     m_controller.driveStraightController(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), 180);
+    // }
+
+    // We need a corrective action check using ultra-sonic sensors to read
+
+    // TODO: Make this
+    double distance_to_edge_block = start_distance - 7.0; //TODO: add an arbitrary distance
+    moveForwardSetDistance(distance_to_edge_block, m_current_pose.orientation); // Need to calculate this distance based off of ultrasonic readings
     m_motor_pair.stop();
 
     // TODO: Get feedback to see if the terrain color is unknown, then keep trying
@@ -685,8 +712,17 @@ bool Main::neighborMatchesCondition(MapLocation global_map[][GLOBAL_COL],
     // Searches for closest block that has a neighbor that matches the criteria:
 
     // EXPLORE MODE | Block w/ unknown neighbor
+    // UPDATE: This function will almost always
     if (location_of_interest.block_type == UNKNOWN)
         return (global_map[coord.row][coord.col].block_type == UNKNOWN);
+
+    // UPDATE: New mapping function to make sure that this undiscovered
+    // TODO: Possibly update the m_global_map to already have filtered the gravel/sandblocks
+    // to not have possible landmarks
+    if (location_of_interest.searched == false) {
+        // Serial.println("Location of interest is false");
+        return (global_map[coord.row][coord.col].searched == false);
+    }
 
     // OBJECTIVE MODE | Block w/ location of interest
     if (location_of_interest.land_mark_spot) {
@@ -816,16 +852,13 @@ void Main::moveForwardSpeedControl() {
     }
 }
 
-void Main::moveForwardSetDistance(double distance) {
+void Main::moveForwardSetDistance(double distance, Orientation orientation) {
     // Using encoders
     long start_tick_a = m_encoder_A.read();
     long start_tick_b = m_encoder_B.read();
 
-    //TODO: TEST TO SEE IF WE CAN ZERO THE encoders
-    // m_encoder_A.write(0);
-    // m_encoder_B.write(0);
-
-    double start_heading = m_imu_sensor.getEuler().x();
+    // double start_heading = m_imu_sensor.getEuler().x();
+    double start_heading = getTargetHeadingForOrientation(orientation);
 
     long distance_in_ticks = distance/distance_per_tick;
     // long distance_in_ticks = 2160; // 1905 ticks per rev
@@ -852,6 +885,7 @@ void Main::moveForwardSetDistance(double distance) {
 
     m_motor_pair.stop();
 
+    //TODO: isthere a possibility the encoders will ever overflow ?
     // Re-zero the encoders
     // m_encoder_A.write(0);
     // m_encoder_B.write(0);
@@ -875,7 +909,7 @@ bool Main::isStabilized(double& last_heading, double current_heading, double end
 
     Serial.print(heading_change); Serial.print(" "); Serial.println(heading_position);
 
-    if (abs(heading_change) <= 2 && abs(heading_position) <= 2)
+    if (abs(heading_change) <= 2 && abs(heading_position) <= 4)
         return true;
 
     last_heading = current_heading;
@@ -909,7 +943,7 @@ void Main::turnLeft(Orientation target_orientation) {
 
     // Add a counter that breaks it if
     while (!isStabilized(last_heading, m_imu_sensor.getEuler().x(), end_heading)) {
-        m_controller.turnLeftController(end_heading, m_imu_sensor.getEuler().x(), 200, true);
+        m_controller.turnLeftController(end_heading, m_imu_sensor.getEuler().x(), 200);
     }
 
     m_motor_pair.stop();
@@ -984,7 +1018,7 @@ void Main::findFire() {
         double last_heading = start_heading + 5;
 
         while (!isStabilized(last_heading, m_imu_sensor.getEuler().x(), end_heading)) {
-            m_controller.turnController(end_heading, m_imu_sensor.getEuler().x(), 170, true);
+            m_controller.turnLeftController(end_heading, m_imu_sensor.getEuler().x(), 200);
 
             if (Flame::getFireMagnitude() > 0) {
                 m_motor_pair.stop();
@@ -1030,8 +1064,9 @@ static void Main::executeInstructions(Queue<Instruction> instructions, Orientati
         if (ins == MOVE_FORWARD) {
             Serial.print("FORWARDS->");
             //TODO:
-            // moveForwardOneBlock(30.0);
-            moveForwardSetDistance(30.0);
+            // moveForwardOneBlock(30.0
+
+            // moveForwardSetDistance(30.0, current_orientation);
             delay(1000);
         }
         else if (ins == MOVE_BACKWARD) {
@@ -1044,21 +1079,18 @@ static void Main::executeInstructions(Queue<Instruction> instructions, Orientati
             Serial.print("RIGHT->");
             current_orientation = (current_orientation + 1) % 4;
             // m_motor_pair.turnRight();
-            turnRight(current_orientation);
+            // turnRight(current_orientation);
             delay(1000);
         }
         else if (ins == ROTATE_LEFT) {
             Serial.print("LEFT->");
             current_orientation = (current_orientation - 1);
             if (current_orientation < 0) current_orientation = 3;
-
+            // turnLeft(current_orientation);
             // MotorPair::setMotorAPWM(-255);
             // MotorPair::setMotorBPWM(223);
-            // delay(1000);
+            delay(1000);
             // MotorPair::stop();
-            turnLeft(current_orientation);
-            // Map -> turnLeft()
-            // m_motor_pair.turnLeft();
         }
     }
     Serial.println("");
@@ -1066,21 +1098,21 @@ static void Main::executeInstructions(Queue<Instruction> instructions, Orientati
     Serial.print("Last Orientation: "); printOrientation(orientation); Serial.println("");
 }
 
-static void Main::updateActualSpeed() {
-    long current_encA_value = testEncoderA.read();
-    m_motor_speed_A = calculateSpeed(current_encA_value, last_encA_value, timer_micro_seconds);
-    last_encA_value = current_encA_value;
-
-    long current_encB_value = testEncoderB.read();
-    m_motor_speed_B = calculateSpeed(current_encB_value, last_encB_value, timer_micro_seconds);
-    last_encB_value = current_encB_value;
-
-    // Serial.print("Enc A: "); Serial.print(current_encA_value);
-    // Serial.print(" Enc B: "); Serial.print(current_encB_value);
-    // Serial.println("Updating Speed!");
-    Serial.print(" MA: "); Serial.print(m_motor_speed_A);
-    Serial.print(" MB: "); Serial.println(m_motor_speed_B);
-}
+// static void Main::updateActualSpeed() {
+//     long current_encA_value = testEncoderA.read();
+//     m_motor_speed_A = calculateSpeed(current_encA_value, last_encA_value, timer_micro_seconds);
+//     last_encA_value = current_encA_value;
+//
+//     long current_encB_value = testEncoderB.read();
+//     m_motor_speed_B = calculateSpeed(current_encB_value, last_encB_value, timer_micro_seconds);
+//     last_encB_value = current_encB_value;
+//
+//     // Serial.print("Enc A: "); Serial.print(current_encA_value);
+//     // Serial.print(" Enc B: "); Serial.print(current_encB_value);
+//     // Serial.println("Updating Speed!");
+//     Serial.print(" MA: "); Serial.print(m_motor_speed_A);
+//     Serial.print(" MB: "); Serial.println(m_motor_speed_B);
+// }
 
 /*
     Controller Math:

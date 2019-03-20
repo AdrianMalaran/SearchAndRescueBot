@@ -43,17 +43,17 @@
     - For findClosestBlockToInterest, augment it to return the heading to where its supposed to get
 */
 
-const int encoderAPin1;
-const int encoderAPin2;
-const int encoderBPin1;
-const int encoderBPin2;
-
-// Global Variables for encoders
-extern double m_motor_speed_A;
-extern double m_motor_speed_B;
-extern long last_encA_value;
-extern long last_encB_value;
-extern long timer_micro_seconds;  // every 1 millisecond
+// const int encoderAPin1;
+// const int encoderAPin2;
+// const int encoderBPin1;
+// const int encoderBPin2;
+//
+// // Global Variables for encoders
+// extern double m_motor_speed_A;
+// extern double m_motor_speed_B;
+// extern long last_encA_value;
+// extern long last_encB_value;
+// extern long timer_micro_seconds;  // every 1 millisecond
 
 // extern Encoder m_encoder_A(19, 18);
 // extern Encoder m_encoder_B(2,3);
@@ -83,7 +83,9 @@ class Main {
         void getPossibleLandmarks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose);
         void mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose start_pose);
         bool isUnexplored(MapLocation global_map[][GLOBAL_COL], Coord coord);
-        void mapBlockInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose, double start_mag, Coord block_to_map);
+        void mapBlockTerrainInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose, double start_mag, Coord block_to_map);
+        void mapBlockLandmarksInfront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL]);
+        // void mapLandMarkInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose, double start_mag, Coord block_to_map);
         bool isFood(double mag);
 
         bool isStabilized(double& last_heading, double current_heading, double end_heading);
@@ -112,7 +114,7 @@ class Main {
         // Using Ultrasonic readings, Heading controller
         void moveForwardOneBlock(double distance);
         // Using Encoder readings
-        void moveForwardSetDistance(double distance);
+        void moveForwardSetDistance(double distance, Orientation orientation);
         // Using Speed Control
         void moveForwardSpeedControl();
 
@@ -133,9 +135,9 @@ class Main {
         double m_global_east_heading;
         double m_global_south_heading;
         double m_global_west_heading;
-    private:
         MapLocation m_global_map[GLOBAL_ROW][GLOBAL_COL];
 
+    private:
         Coord m_start_coord;
         Pose m_current_pose; // updatePose
 

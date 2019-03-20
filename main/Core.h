@@ -83,14 +83,18 @@ struct MapLocation {
 
     bool searched = false;
     bool land_mark_spot = false;
+    bool food_searched = false;
 
     Landmark landmark = NONE;
 
     MapLocation () {};
-    MapLocation(BlockType blocktype) : block_type(blocktype) {};
+    MapLocation(BlockType blocktype) : block_type(blocktype) {}
 
     MapLocation(BlockType blocktype, bool lm_spot, Landmark lm)
-        : block_type(blocktype), land_mark_spot(lm_spot), landmark(lm) {};
+        : block_type(blocktype), land_mark_spot(lm_spot), landmark(lm) {}
+
+    MapLocation(BlockType blocktype, bool lm_spot, Landmark lm, bool is_already_searched)
+        : block_type(blocktype), land_mark_spot(lm_spot), landmark(lm), searched(is_already_searched) {}
 };
 
 enum Instruction {
@@ -131,9 +135,13 @@ struct Pose {
 };
 
 inline bool isUnblocked(MapLocation grid[][GLOBAL_COL], Coord c) {
-     return grid[c.row][c.col].block_type == PARTICLE ||
-            grid[c.row][c.col].block_type == SAND ||
-            grid[c.row][c.col].block_type == GRAVEL;
+    // UPDATE: Removed sand and gravel as traversable
+     // return grid[c.row][c.col].block_type == PARTICLE ||
+     //        grid[c.row][c.col].block_type == SAND ||
+     //        grid[c.row][c.col].block_type == GRAVEL;
+
+     // Only see a block as unblocked if it has been scanned to not have
+     return grid[c.row][c.col].block_type == PARTICLE && grid[c.row][c.col].searched == true;
 }
 
 inline bool isValid(Coord c) {
@@ -141,10 +149,35 @@ inline bool isValid(Coord c) {
 }
 
 inline void printMap(MapLocation global_map[][GLOBAL_COL]) {
-    Serial.println("");
+    Serial.println("BlockType Map");
     for (int i = 0; i < GLOBAL_ROW; i++) {
         for(int j = 0; j < GLOBAL_COL; j++) {
-            Serial.print(global_map[i][j].block_type);
+            BlockType bt = global_map[i][j].block_type;
+            if (bt == PARTICLE) {
+                Serial.print("O");
+            } else if (bt == WATER) {
+                Serial.print("X");
+            } else if (bt == GRAVEL) {
+                Serial.print("X");
+            } else if (bt == SAND) {
+                Serial.print("S");
+            } else if (bt == LANDMARK) {
+                Serial.print("L");
+            }
+            else {
+                Serial.print("?");
+            }
+            Serial.print(" ");
+        }
+        Serial.println("");
+    }
+}
+
+inline void printSearchedMap(MapLocation global_map[][GLOBAL_COL]) {
+    Serial.println("Searched Block Locations");
+    for (int i = 0; i < GLOBAL_ROW; i++) {
+        for(int j = 0; j < GLOBAL_COL; j++) {
+            Serial.print(global_map[i][j].searched);
             Serial.print(" ");
         }
         Serial.println("");

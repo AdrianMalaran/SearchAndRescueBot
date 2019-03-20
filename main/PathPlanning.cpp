@@ -183,8 +183,8 @@ static void PathPlanning::addReorientation(Queue<Instruction>& instructions,
         // Opposite direction
         // TODO: Consider having another maneuver called: turn around
         // TODO: This is so ugly, redo this shit
-        instructions.push(ROTATE_RIGHT);
-        instructions.push(ROTATE_RIGHT);
+        instructions.push(ROTATE_LEFT);
+        instructions.push(ROTATE_LEFT);
     } else {
         if (curr_orientation == NORTH) {
             if (new_orientation == EAST)

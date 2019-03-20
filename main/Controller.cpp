@@ -51,8 +51,14 @@ void Controller::headingControl(double &pwm_a, double &pwm_b, double desired_hea
 }
 
 //TODO: Rename to headingController => outputs a PWM for both motors
-void Controller::turnLeftController(double desired_heading, double current_heading, double nominal_pwm, bool turn_left) {
-    double Kp = 0.9;
+void Controller::turnLeftController(double desired_heading, double current_heading, double nominal_pwm) {
+    /* Most Promising Parameters to date
+        double Kp = 0.9;
+        double Ki = 0.0001;
+        MotorPair::setMotorAPWM(polarity*10*(bias - 4));
+        MotorPair::setMotorBPWM(polarity*-10 * (bias - 4));
+    */
+    double Kp = 0.5;
     double Ki = 0.0001;
 
     double error = desired_heading - current_heading;
@@ -68,11 +74,9 @@ void Controller::turnLeftController(double desired_heading, double current_headi
     last_time = current_time;
 
     double polarity = 1;
-    if (!turn_left)
-        polarity = -1;
 
-    MotorPair::setMotorAPWM(polarity*10*(bias - 4));
-    MotorPair::setMotorBPWM(polarity*-10 * (bias - 4));
+    MotorPair::setMotorAPWM(polarity*10*(bias - 15));
+    MotorPair::setMotorBPWM(polarity*-10 * (bias + 4));
 }
 
 //TODO: Rename to headingController => outputs a PWM for both motors
@@ -92,7 +96,7 @@ void Controller::turnRightController(double desired_heading, double current_head
     double bias = (Kp * error) + (Ki * total_error);
     last_time = current_time;
 
-    MotorPair::setMotorAPWM(10*(bias + 3));
+    MotorPair::setMotorAPWM(10*(bias + 10));
     MotorPair::setMotorBPWM(-10 * (bias + 3));
 }
 

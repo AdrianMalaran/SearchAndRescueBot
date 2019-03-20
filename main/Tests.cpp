@@ -9,7 +9,7 @@ void Tests::RunAllTests() {
     // TestTrajectoryGeneration();
     // TestController();
     // TestTravel();
-    // TestExplore();
+    TestExplore();
 }
 /*
 static Stack<Coord> TestPathPlanning(MapLocation grid[][GLOBAL_COL], Coord start, Coord finish) {
@@ -174,16 +174,15 @@ void Tests::TestFindFood() {
     //TEST find closest sand block
     //TEST get manhattan distance
 }
+*/
 
 void Tests::TestExplore() {
     Serial.println("Running TestExplore:");
 
-    MapLocation MP(PARTICLE);
-    MapLocation O(SAND);
+    MapLocation O(PARTICLE);
     MapLocation X(WATER);
-    MapLocation MG(GRAVEL);
     MapLocation U(UNKNOWN);
-    MapLocation I(PARTICLE);
+    MapLocation I(SAND);
     I.land_mark_spot = true;
     I.landmark = PEOPLE;
     I.block_type = PARTICLE;
@@ -206,16 +205,30 @@ void Tests::TestExplore() {
     // Test hasUnknownNeighbors()
     Orientation finish_ori;
     MapLocation unknownlocation;
-    MapLocation interestlocation;
-    interestlocation.block_type = PARTICLE;
-    interestlocation.land_mark_spot = true;
-    interestlocation.landmark = SURVIVOR;
-    bool res = m_main_engine.hasMatchingNeighbors(map, unknownlocation, start_loc, finish_ori);
-    Serial.print("Has Unknown neighbors?: "); Serial.println(res);
 
-    Coord block = m_main_engine.findClosestBlockToInterest(map, interestlocation, start_loc, finish_ori);
+    MapLocation unsearched_location;
+    unsearched_location.block_type = PARTICLE;
+    unsearched_location.searched = false;
+
+    MapLocation interest_location(PARTICLE);
+    // interest_location.land_mark_spot = true;
+    // interest_location.landmark = SURVIVOR;
+
+    // Test Unsearched Locations
+    for (int i = 0; i < GLOBAL_ROW; i++) {
+        for (int j = 0; j < GLOBAL_COL; j++) {
+            map[i][j].searched = true;
+        }
+    }
+    map[0][0].searched = false;
+    // map[3][4].searched = false;
+
+    bool res = m_main_engine.hasMatchingNeighbors(map, unsearched_location, start_loc, finish_ori);
+    Serial.print("Has Unsearched neighbors?: "); Serial.println(res);
+
+    Coord block = m_main_engine.findClosestBlockToInterest(map, unsearched_location, start_loc, finish_ori);
     Serial.print("Closest: ("); Serial.print(block.row); Serial.print(","); Serial.print(block.col); Serial.print(") Direction: ");
     Serial.print(finish_ori); Serial.println("");
-    printMap(map);
+    // printMap(map);
+    // printSearchedMap(map);
 }
-*/

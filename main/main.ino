@@ -53,15 +53,10 @@ MotorPair motor_pair(imu_sensor);
 // fan
 Fan fan;
 
-// controller
-double input, output, set_point, Kp = 30;
-// PID pid(&input, &output, &set_point, 2, 5, 1, DIRECT);
-
 // encoders
-// Encoder encoderA(encoderApin1, encoderApin2);
-// Encoder encoderB(encoderBpin1, encoderBpin2);
-Encoder encoderA;
-Encoder encoderB;
+Encoder encoderA(encoderApin1, encoderApin2);
+Encoder encoderB(encoderBpin1, encoderBpin2);
+
 // Controller controller(encoderA, encoderB);
 Controller controller;
 
@@ -138,17 +133,27 @@ void testRightTurn(double PWM1, double PWM2) {
 void setup() {
     Serial.begin(9600);
     Serial.println("Running Tests");
-    // Tests test;
-    // test.RunAllTests();
+    Tests test;
+    test.RunAllTests();
+
     Main main_engine(motor_pair, imu_sensor, color_front, color_down,
                      ultrasonic_front, ultrasonic_right, ultrasonic_left,
                      ultrasonic_back, controller, encoderA, encoderB);
 
-                     // testRightTurn(200, 200);
+    // Coord current_position = main_engine.getGlobalPosition(Pose(Coord(-2, -2), NORTH));
+    // printCoord(current_position);
+                     // testRightTurn(255, 223);
+                     // testLeftTurn(230, 200);
                      // testLeftTurn(200, 200);
-                     // testLeftTurn(200, 200);
-    // main_engine.run();
-    // main_engine.moveForwardSetDistance(90.0);
+    main_engine.run();
+    // main_engine.moveForwardSetDistance(60.0, NORTH);
+    // main_engine.turnLeft(WEST); //
+    // main_engine.turnLeft(SOUTH); //
+    // main_engine.moveForwardSetDistance(60.0, SOUTH);
+    // main_engine.turnLeft(EAST); //
+    // main_engine.turnLeft(NORTH); //
+    // main_engine.turnRight(EAST);
+
     // main_engine.turnRight(EAST);
     // main_engine.turnRight(SOUTH);
     // main_engine.moveForwardSetDistance(90.0);
@@ -195,5 +200,26 @@ void loop() {
         // Serial.println(encoderA.read());
         counter = 0;
     }
+
     counter ++;
+    // Serial.println("Getting Possible Landmarks");
+    // Coord our_pos = Coord(2,3);
+    // main_engine.getPossibleLandmarks(main_engine.m_global_map, Pose(our_pos, NORTH));
+    // // printMap(main_engine.m_global_map);
+    //
+    // for (int i = 0; i < GLOBAL_ROW; i ++) {
+    //     for (int j = 0; j < GLOBAL_COL; j++) {
+    //         Serial.print(main_engine.m_global_map[i][j].land_mark_spot); Serial.print(" ");
+    //     }
+    //     Serial.println("");
+    //
+    // }
+    // Serial.println("");
+    // Serial.println("");
+
+
+    // Serial.print("Front: "); Serial.print(ultrasonic_front.getDistance());
+    // Serial.print(" Back: "); Serial.print(ultrasonic_back.getDistance());
+    // Serial.print(" Left: "); Serial.print(ultrasonic_left.getDistance());
+    // Serial.print(" Right: "); Serial.println(ultrasonic_right.getDistance());
 }
