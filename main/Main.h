@@ -11,12 +11,11 @@
 #include "Ultrasonic.h"
 #include "LED.h"
 
-#include <Encoder.h>
-
 #include <Arduino.h>
 #include <avr/interrupt.h>
 #include <avr/sleep.h>
 
+#include <TimerOne.h>
 /*
     PRIORITY LIST:
     - Add motor encoders
@@ -43,6 +42,19 @@
     - Define locomotion to work with driveStraight(), turnLeft(), turnRight()
     - For findClosestBlockToInterest, augment it to return the heading to where its supposed to get
 */
+
+const int encoderAPin1;
+const int encoderAPin2;
+const int encoderBPin1;
+const int encoderBPin2;
+
+// Global Variables for encoders
+extern double m_motor_speed_A;
+extern double m_motor_speed_B;
+extern long last_encA_value;
+extern long last_encB_value;
+extern long timer_micro_seconds;  // every 1 millisecond
+
 /* Core Class */
 class Main {
     public:
@@ -99,7 +111,7 @@ class Main {
         // Using Encoder readings
         void moveForwardSetDistance(double distance);
         // Using Speed Control
-        void moveForwardSpeedControl(double distance);
+        void moveForwardSpeedControl();
 
         // Debuggic Function
         void moveMotorB(int speed);
@@ -108,6 +120,9 @@ class Main {
         void turnRight();
 
         double getCurrentOrientation();
+
+        static void updateActualSpeed();
+        static double calculateSpeed(long current_encoder_value, long last_encoder_value, long period);
 
         void stopProgram();
     private:

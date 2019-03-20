@@ -8,6 +8,7 @@ class LED {
 		LED();
 		static void on();
 		static void off();
+		static void onAndOff();
 };
 
 #endif

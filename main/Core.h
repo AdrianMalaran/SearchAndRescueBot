@@ -172,8 +172,6 @@ inline void printPose(Pose pose) {
     Serial.print(")");
 }
 
-
-
 inline void printInstruction(Instruction ins) {
     if (ins == MOVE_FORWARD)
         Serial.print("MOVE FORWARD");

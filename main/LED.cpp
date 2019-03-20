@@ -15,3 +15,9 @@ static void LED::on() {
 static void LED::off() {
 	digitalWrite(LEDPin, LOW);
 }
+
+static void LED::onAndOff() {
+    LED::on();
+    delay(1000);
+    LED::off();
+}

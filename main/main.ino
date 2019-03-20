@@ -43,14 +43,11 @@ Color color_front(SDA1pin, SCL1pin, COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X),
       color_down(SDA2pin, SCL2pin, COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X);
 
 // ultrasonic(trigPin, echoPin)
-Ultrasonic ultrasonic_front(ultrasonicFrontTrig, ultrasonicFrontEcho), ultrasonic_right(ultrasonicRightTrig, ultrasonicRightEcho), 
+Ultrasonic ultrasonic_front(ultrasonicFrontTrig, ultrasonicFrontEcho), ultrasonic_right(ultrasonicRightTrig, ultrasonicRightEcho),
                               ultrasonic_left(ultrasonicLeftTrig, ultrasonicLeftEcho), ultrasonic_back(ultrasonicBackTrig, ultrasonicBackEcho);
 
 // MotorPair declaration
 MotorPair motor_pair(imu_sensor);
-
-// controller
-double input, output, set_point, Kp = 30;
 
 // fan
 Fan fan;
@@ -60,56 +57,44 @@ Encoder encoderA(encoderApin1, encoderApin2);
 Encoder encoderB(encoderBpin1, encoderBpin2);
 // Controller controller(encoderA, encoderB);
 Controller controller;
-double m_desired_heading;
 
-/*
-    Controller Math:
-    1 Revolution = (16/21) * 1 Revolution = 0.7619 Revolutions of Wheel/1 revolution of Motor
-    Therefore, 1 revolution of motor = (0.7691)*(8*pi) = 19.1487 centimeters travelled
-*/
-double calculateSpeed(long current_encoder_value, long last_encoder_value, long period) {
-    double wheel_circumference = 3.14*8;
-    double distancePerWheelTick = wheel_circumference / 341.2; // 341.2 counts/revolution of the wheel
-    double distancePerMotorTick = distancePerWheelTick * (16/21.0); // 1 Revolution of the motor = Gear Ratio = 16/21
+// /*
+//     Controller Math:
+//     1 Revolution = (16/21) * 1 Revolution = 0.7619 Revolutions of Wheel/1 revolution of Motor
+//     Therefore, 1 revolution of motor = (0.7691)*(8*pi) = 19.1487 centimeters travelled
+// */
+// double calculateSpeed(long current_encoder_value, long last_encoder_value, long period) {
+//     double wheel_circumference = 3.14*8;
+//     double distancePerWheelTick = wheel_circumference / 341.2; // 341.2 counts/revolution of the wheel
+//     double distancePerMotorTick = distancePerWheelTick * (16/21.0); // 1 Revolution of the motor = Gear Ratio = 16/21
+//
+//     // Serial.print("Distance: "); Serial.println(distancePerTick * (current_encoder_value - last_encoder_value));
+//     // double speed = distancePerTick * (current_encoder_value - last_encoder_value) / (period/1000000.0); // Convert from microseconds to seconds
+//     long double speed = distancePerMotorTick * ((current_encoder_value - last_encoder_value) / (period / 1000000.0)); // Convert from microseconds to seconds
+//     return speed;
+// }
 
-    // Serial.print("Distance: "); Serial.println(distancePerTick * (current_encoder_value - last_encoder_value));
-    // double speed = distancePerTick * (current_encoder_value - last_encoder_value) / (period/1000000.0); // Convert from microseconds to seconds
-    long double speed = distancePerMotorTick * ((current_encoder_value - last_encoder_value) / (period / 1000000.0)); // Convert from microseconds to seconds
-    return speed;
-}
+// void updateActualSpeed() {
+//     long current_encA_value = encoderA.read();
+//     m_motor_speed_A = calculateSpeed(current_encA_value, last_encA_value, timer_micro_seconds);
+//     last_encA_value = current_encA_value;
+//
+//     long current_encB_value = encoderB.read();
+//     m_motor_speed_B = calculateSpeed(current_encB_value, last_encB_value, timer_micro_seconds);
+//     last_encB_value = current_encB_value;
+//
+//     // Serial.print("Enc A: "); Serial.print(current_encA_value);
+//     // Serial.print(" Enc B: "); Serial.print(current_encB_value);
+//     // Serial.println("Updating Speed!");
+//     Serial.print(" MA: "); Serial.print(m_motor_speed_A);
+//     Serial.print(" MB: "); Serial.println(m_motor_speed_B);
+// }
 
-// Global Variables for encoders
-double m_motor_speed_A = 999;
-double m_motor_speed_B = 999;
-long last_encA_value = -100;
-long last_encB_value = -100;
-
-const long timer_micro_seconds = 50000; // Number of seconds
-long counter = 0;
-
-void updateActualSpeed() {
-    long current_encA_value = encoderA.read();
-    m_motor_speed_A = calculateSpeed(current_encA_value, last_encA_value, timer_micro_seconds);
-    last_encA_value = current_encA_value;
-
-    long current_encB_value = encoderB.read();
-    m_motor_speed_B = calculateSpeed(current_encB_value, last_encB_value, timer_micro_seconds);
-    last_encB_value = current_encB_value;
-
-    // Serial.print("Enc A: "); Serial.print(current_encA_value);
-    // Serial.print(" Enc B: "); Serial.print(current_encB_value);
-
-    // Serial.println("Updating Speed!");
-    Serial.print(" MA: "); Serial.print(m_motor_speed_A);
-    Serial.print(" MB: "); Serial.println(m_motor_speed_B);
-}
-
-void initializeTimers() {
-    // Timers
-    Timer1.initialize(timer_micro_seconds); // Microseconds
-    Timer1.attachInterrupt(updateActualSpeed);
-    // Timer1.setPeriod(timer_micro_seconds);
-}
+// void initializeTimers() {
+//     // Timers
+//     Timer1.initialize(timer_micro_seconds); // Microseconds
+//     Timer1.attachInterrupt(updateActualSpeed);
+// }
 
 void testMoveForward(double PWM1, double PWM2) {
     motor_pair.setMotorAPWM(PWM1);

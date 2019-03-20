@@ -2,6 +2,16 @@
 
 Main::Main() {}
 
+// Global Variables for encoders
+double m_motor_speed_A = 999;
+double m_motor_speed_B = 999;
+long last_encA_value = -100;
+long last_encB_value = -100;
+long timer_micro_seconds = 1000; // every 1 millisecond
+
+extern Encoder testEncoderA(encoderAPin1, encoderAPin2);
+extern Encoder testEncoderB(encoderBPin1, encoderBPin2);
+
 Main::Main(MotorPair motor_pair, Imu imu_sensor, Color color_front, Color color_down,
             Ultrasonic ultrasonic_front, Ultrasonic ultrasonic_right, Ultrasonic ultrasonic_left,
             Ultrasonic ultrasonic_back, Controller controller, Encoder &encoder_A, Encoder &encoder_B) {
@@ -61,6 +71,12 @@ void Main::init() {
 
     findCorrectMap();
     Serial.println("Found correct map");
+
+    // Initialize timers
+    Timer1.initialize(timer_micro_seconds); // Microseconds
+    Timer1.attachInterrupt(updateActualSpeed);
+
+    /* Initialize Speed Control*/
 }
 
 //TODO: This function will be run in the loop() function of the arduino (?)
@@ -101,6 +117,7 @@ Task Main::getNextTask() {
     // In this case when, we find the food then we should find the people
     if (m_deliver_food_to_group)
         return DELIVER_FOOD;
+
 
     return OTHER;
 }
@@ -372,9 +389,7 @@ void Main::checkForLandMark(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL],
     MapLocation& map_location = global_map[block_to_map.row][block_to_map.col];
     if (map_location.block_type == SAND && isFood(start_mag)) {
         m_found_food = true;
-        LED::on();
-        delay(1000);
-        LED::off();
+        LED::onAndOff();
         m_food_location = block_to_map;
 
         // At this point, we found the food, now we want to see if we've already found the people
@@ -445,7 +460,7 @@ void Main::mapBlockInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Po
     double start_distance = m_ultrasonic_front.getDistance();
     while (m_ultrasonic_front.getDistance() > start_distance - 7) {
         // Move forwards
-        m_controller.driveStraight(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), 180);
+        m_controller.driveStraightController(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), 180);
     }
     m_motor_pair.stop();
 
@@ -460,7 +475,7 @@ void Main::mapBlockInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Po
 
     while (m_ultrasonic_front.getDistance() < start_distance) {
         // Move backwards
-        m_controller.driveStraight(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), -180);
+        m_controller.driveStraightController(m_imu_sensor.getEuler().x(), m_imu_sensor.getEuler().x(), -180);
     }
     m_motor_pair.stop();
 }
@@ -707,7 +722,7 @@ void Main::moveForwardOneBlock(double distance) {
                 break;
         }
         else {
-            m_controller.driveStraight(start_heading, m_imu_sensor.getEuler().x(), TRAVEL_SPEED);
+            m_controller.driveStraightController(start_heading, m_imu_sensor.getEuler().x(), TRAVEL_SPEED);
             counter ++;
         }
 	}
@@ -717,16 +732,18 @@ void Main::moveForwardOneBlock(double distance) {
 	// Use ultrasonic sensors for now
 }
 
-// void Main::moveForwardSpeedControl() {
-//     double set_speed = 0;
-//
-//     while(true) {
-//
-//     }
-// }
+void Main::moveForwardSpeedControl() {
+    // Overarching Function to be called
+    double set_speed = 0;
+
+    double motor_a_pwm;
+
+    while (true) {
+        // speedControl(motor_a_pwm,  180, m_motor_speed_A, 180);
+    }
+}
 
 void Main::moveForwardSetDistance(double distance) {
-
     // Using encoders
     // long start_tick_a = m_encoder_A.read();
     // long start_tick_b = m_encoder_B.read();
@@ -735,10 +752,8 @@ void Main::moveForwardSetDistance(double distance) {
     m_encoder_A.write(0);
     m_encoder_B.write(0);
 
-    // m/tick
     long distance_in_ticks = distance/distance_per_tick;
     // Assume no slip
-
     // m_motor_pair.setMotorAPWM(TRAVEL_SPEED);
     // m_motor_pair.setMotorBPWM(TRAVEL_SPEED);
 
@@ -746,16 +761,14 @@ void Main::moveForwardSetDistance(double distance) {
     // Map distance to number of ticks that need to be range
     // Encoder A and B should travel the same number of ticks
     while (m_encoder_A.read() < distance_in_ticks || m_encoder_B.read() < distance_in_ticks) {
-
-        if (m_encoder_A.read() >= distance_in_ticks)
-            m_motor_pair.setMotorAPWM(0);
-        else if (m_encoder_B.read() >= distance_in_ticks)
-            m_motor_pair.setMotorBPWM(0);
+        // if (m_encoder_A.read() >= distance_in_ticks)
+        //     m_motor_pair.setMotorAPWM(0);
+        // else if (m_encoder_B.read() >= distance_in_ticks)
+        //     m_motor_pair.setMotorBPWM(0);
         // drivestraight
     }
 
     m_motor_pair.stop();
-
 
     // Re-zero the encoders
     m_encoder_A.write(0);
@@ -863,15 +876,15 @@ void Main::extinguishFire() {
         //Fan::off();
         LED::off();
 
-        m_motor_pair.setMotorASpeed(-1.0*TURN_SPEED);
-        m_motor_pair.setMotorBSpeed(TURN_SPEED);
+        m_motor_pair.setMotorAPWM(-1.0*TURN_SPEED);
+        m_motor_pair.setMotorBPWM(TURN_SPEED);
 
         fire_extinguished = true;
     } else {
         double start_orientation = m_imu_sensor.getEuler().x();
 
-        m_motor_pair.setMotorASpeed(-1.0*TURN_SPEED);
-        m_motor_pair.setMotorBSpeed(TURN_SPEED);
+        m_motor_pair.setMotorAPWM(-1.0*TURN_SPEED);
+        m_motor_pair.setMotorBPWM(TURN_SPEED);
 
         delay(1000);
 
@@ -888,8 +901,8 @@ void Main::extinguishFire() {
                 fire_extinguished = true;
             }
 
-            m_motor_pair.setMotorASpeed(-1.0*TURN_SPEED);
-            m_motor_pair.setMotorBSpeed(TURN_SPEED);
+            m_motor_pair.setMotorAPWM(-1.0*TURN_SPEED);
+            m_motor_pair.setMotorBPWM(TURN_SPEED);
         }
 
         m_motor_pair.stop();
@@ -943,6 +956,38 @@ static void Main::executeInstructions(Queue<Instruction> instructions, Orientati
     Serial.println("");
     orientation = current_orientation;
     Serial.print("Last Orientation: "); printOrientation(orientation); Serial.println("");
+}
+
+static void Main::updateActualSpeed() {
+    long current_encA_value = testEncoderA.read();
+    m_motor_speed_A = calculateSpeed(current_encA_value, last_encA_value, timer_micro_seconds);
+    last_encA_value = current_encA_value;
+
+    long current_encB_value = testEncoderB.read();
+    m_motor_speed_B = calculateSpeed(current_encB_value, last_encB_value, timer_micro_seconds);
+    last_encB_value = current_encB_value;
+
+    // Serial.print("Enc A: "); Serial.print(current_encA_value);
+    // Serial.print(" Enc B: "); Serial.print(current_encB_value);
+    // Serial.println("Updating Speed!");
+    Serial.print(" MA: "); Serial.print(m_motor_speed_A);
+    Serial.print(" MB: "); Serial.println(m_motor_speed_B);
+}
+
+/*
+    Controller Math:
+    1 Revolution = (16/21) * 1 Revolution = 0.7619 Revolutions of Wheel/1 revolution of Motor
+    Therefore, 1 revolution of motor = (0.7691)*(8*pi) = 19.1487 centimeters travelled
+*/
+static double Main::calculateSpeed(long current_encoder_value, long last_encoder_value, long period) {
+    double wheel_circumference = 3.14*8;
+    double distancePerWheelTick = wheel_circumference / 341.2; // 341.2 counts/revolution of the wheel
+    double distancePerMotorTick = distancePerWheelTick * (16/21.0); // 1 Revolution of the motor = Gear Ratio = 16/21
+
+    // Serial.print("Distance: "); Serial.println(distancePerTick * (current_encoder_value - last_encoder_value));
+    // double speed = distancePerTick * (current_encoder_value - last_encoder_value) / (period/1000000.0); // Convert from microseconds to seconds
+    long double speed = distancePerMotorTick * ((current_encoder_value - last_encoder_value) / (period / 1000000.0)); // Convert from microseconds to seconds
+    return speed;
 }
 
 void Main::stopProgram() {
