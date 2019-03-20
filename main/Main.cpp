@@ -984,7 +984,7 @@ void Main::findFire() {
         double last_heading = start_heading + 5;
 
         while (!isStabilized(last_heading, m_imu_sensor.getEuler().x(), end_heading)) {
-            m_controller.turnController(end_heading, m_imu_sensor.getEuler().x(), 170, true);
+            m_controller.turnLeftController(end_heading, m_imu_sensor.getEuler().x(), 180, true);
 
             if (Flame::getFireMagnitude() > 0) {
                 m_motor_pair.stop();
