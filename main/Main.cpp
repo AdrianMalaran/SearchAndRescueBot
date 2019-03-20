@@ -61,7 +61,6 @@ void Main::init() {
 
     // Set flame pins
     Flame::setupFlame();
-    m_extinguished_fire = false;
 
     // Set start pose
     m_start_coord = Coord(5, 3);
@@ -335,8 +334,11 @@ Landmark identifyLandMark() {
 
 Coord Main::getGlobalPosition(Pose pose) {
     double left_distance = m_ultrasonic_left.getDistance() / 30.3;
+    delay(500);
     double right_distance = m_ultrasonic_right.getDistance() / 30.3;
+    delay(500);
     double front_distance = m_ultrasonic_front.getDistance() / 30.3;
+    delay(500);
     double back_distance = m_ultrasonic_back.getDistance() / 30.3;
 
     if (left_distance + right_distance > 155 && front_distance + back_distance > 155) {
@@ -356,6 +358,57 @@ Coord Main::getGlobalPosition(Pose pose) {
     } else {
         // There is some sort of obstruction - return invalid coord
         return Coord(-1,-1);
+    }
+}
+
+void Main::getPossibleLandmarks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose) {
+    double left_distance = m_ultrasonic_left.getDistance() / 30.3;
+    delay(500);
+    double right_distance = m_ultrasonic_right.getDistance() / 30.3;
+    delay(500);
+    double front_distance = m_ultrasonic_front.getDistance() / 30.3;
+    delay(500);
+    double back_distance = m_ultrasonic_back.getDistance() / 30.3;
+
+    switch (pose.orientation) {
+    case NORTH:
+        if(floor(front_distance) != pose.coord.row)
+            global_map[(int)floor(front_distance)][pose.coord.col].land_mark_spot = true;
+        if(ceil(back_distance) != pose.coord.row)
+            global_map[(int)ceil(front_distance)][pose.coord.col].land_mark_spot = true;
+        if(floor(left_distance) != pose.coord.col)
+            global_map[pose.coord.row][(int)floor(left_distance)].land_mark_spot = true;
+        if(ceil(right_distance) != pose.coord.col)
+            global_map[pose.coord.row][(int)ceil(right_distance)].land_mark_spot = true;
+    case SOUTH:
+        if(ceil(front_distance) != pose.coord.row)
+            global_map[(int)ceil(front_distance)][pose.coord.col].land_mark_spot = true;
+        if(floor(back_distance) != pose.coord.row)
+            global_map[(int)floor(front_distance)][pose.coord.col].land_mark_spot = true;
+        if(ceil(left_distance) != pose.coord.col)
+            global_map[pose.coord.row][(int)ceil(left_distance)].land_mark_spot = true;
+        if(floor(right_distance) != pose.coord.col)
+            global_map[pose.coord.row][(int)floor(right_distance)].land_mark_spot = true;
+    case EAST:
+        if(floor(front_distance) != pose.coord.col)
+            global_map[pose.coord.row][(int)floor(front_distance)].land_mark_spot = true;
+        if(ceil(back_distance) != pose.coord.col)
+            global_map[pose.coord.row][(int)ceil(front_distance)].land_mark_spot = true;
+        if(ceil(left_distance) != pose.coord.row)
+            global_map[(int)ceil(left_distance)][pose.coord.col].land_mark_spot = true;
+        if(floor(right_distance) != pose.coord.row)
+            global_map[(int)floor(right_distance)][pose.coord.col].land_mark_spot = true;
+    case WEST:
+        if(ceil(front_distance) != pose.coord.col)
+            global_map[pose.coord.row][(int)ceil(front_distance)].land_mark_spot = true;
+        if(floor(back_distance) != pose.coord.col)
+            global_map[pose.coord.row][(int)floor(front_distance)].land_mark_spot = true;
+        if(floor(left_distance) != pose.coord.row)
+            global_map[(int)floor(left_distance)][pose.coord.col].land_mark_spot = true;
+        if(ceil(right_distance) != pose.coord.row)
+            global_map[(int)ceil(right_distance)][pose.coord.col].land_mark_spot = true;
+    default:
+        Serial.println("UNKNOWN ORIENTATION");
     }
 }
 
@@ -926,21 +979,17 @@ void Main::findFire() {
 
         extinguishFire();
     } else {
-        double start_orientation = m_imu_sensor.getEuler().x();
+        double start_heading = m_imu_sensor.getEuler().x();
+        double end_heading = start_heading;
+        double last_heading = start_heading + 5;
 
-        m_motor_pair.setMotorAPWM(-1.0*TURN_SPEED);
-        m_motor_pair.setMotorBPWM(TURN_SPEED);
+        while (!isStabilized(last_heading, m_imu_sensor.getEuler().x(), end_heading)) {
+            m_controller.turnController(end_heading, m_imu_sensor.getEuler().x(), 170, true);
 
-        delay(500);
-
-        while (fabs(m_imu_sensor.getEuler().x() - start_orientation) > 1) {
             if (Flame::getFireMagnitude() > 0) {
                 m_motor_pair.stop();
                 extinguishFire();
             }
-
-            m_motor_pair.setMotorAPWM(-1.0*TURN_SPEED);
-            m_motor_pair.setMotorBPWM(TURN_SPEED);
         }
 
         m_motor_pair.stop();
