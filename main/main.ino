@@ -52,9 +52,13 @@ MotorPair motor_pair(imu_sensor);
 // fan
 Fan fan;
 
+// controller
+double input, output, set_point, Kp = 30;
+// PID pid(&input, &output, &set_point, 2, 5, 1, DIRECT);
+
 // encoders
-Encoder encoderA(encoderApin1, encoderApin2);
-Encoder encoderB(encoderBpin1, encoderBpin2);
+// Encoder encoderA(encoderApin1, encoderApin2);
+// Encoder encoderB(encoderBpin1, encoderBpin2);
 // Controller controller(encoderA, encoderB);
 Controller controller;
 
@@ -129,84 +133,16 @@ void testRightTurn(double PWM1, double PWM2) {
 void setup() {
     Serial.begin(9600);
     Serial.println("Running Tests");
-
-    long startA = 0;
-    long startB = 0;
-    // encoderA.write(startA);
-    // encoderB.write(startB);
-    // motor_pair.setupMotorPair();
-    // motor_pair.setMotorAPWM(170);
-    // motor_pair.setMotorBPWM(170);
-    // motor_pair.stop();
-
     // Tests test;
     // test.RunAllTests();
-    Main main_engine(motor_pair, imu_sensor, color_front, color_down,
-                     ultrasonic_front, ultrasonic_right, ultrasonic_left,
-                     ultrasonic_back, controller, encoderA, encoderB);
-    // main_engine.moveForwardOneBlock(30.0);
-    main_engine.run();
+    Main main_engine(motor_pair, imu_sensor, color_front, color_down, ultrasonic_front, ultrasonic_right, ultrasonic_left, ultrasonic_back, controller);
 
-    // initializeTimers();
-
-    // BEGIN - TEST INSTRUCTIONS ****
-        // testMoveForward(200, 200);
-    // END - TEST INSTRUCTIONS
-
-    // BEGIN - TEST INSTRUCTIONS ****
-        // Queue<Instruction> instructions;
-        // double orientation = DONTCARE;
-        // instructions.push(MOVE_FORWARD);
-        // instructions.push(ROTATE_RIGHT);
-        // instructions.push(MOVE_FORWARD);
-        // instructions.push(ROTATE_LEFT);
-        // main_engine.executeInstructions(instructions, orientation);
-    // END - TEST INSTRUCTIONS
+    //main_engine.extinguishFire();
 }
 
 /***************
 *     LOOP     *
 ****************/
 void loop() {
-    // Serial.println(ultrasonic_front.getDistance());
-    // Serial.println(imu_sensor.getEuler().x());
-    /* Encoder Stuff */
-    long encoder_a_val = encoderA.read();
-    long encoder_b_val = encoderB.read();
 
-    // Serial.print("EncA: "); Serial.print(encoder_a_val);
-    // Serial.print(" EncB: "); Serial.print(encoder_b_val);
-    // Serial.print(" MA: "); Serial.print(m_motor_speed_A);
-    // Serial.print(" MB: "); Serial.println(m_motor_speed_B);
-
-    // if (encoder_a_val >= 341) {
-    //     encoderA.write(0);
-    //     motor_pair.setMotorAPWM(0);
-    //     counter = 0;
-    // }
-    // if (encoder_b_val >= 341) {
-    //     encoderB.write(0);
-    //     motor_pair.setMotorBPWM(0);
-    //     counter = 0;
-    // }
-
-    // if (counter == 10000)
-    //     motor_pair.stop();
-    // counter+= 1;
-    // encoderA.write(counter);
-    // encoderB.write(counter);
-
-
-    /*
-    MapLocation map_location = MapLocation(UNKNOWN);
-    Serial.print("landmark ahead: "); Serial.println(main_engine.isLandmarkAhead(map_location, Pose(Coord(2,2), NORTH)));
-    */
-
-    /*
-    main_engine.extinguishFire();
-    */
-
-    /*
-    Serial.print("global position: "); printCoord(main_engine.getGlobalPosition(Pose(Coord(2,2), NORTH))); Serial.println("");
-    */
 }
