@@ -99,11 +99,8 @@ class Main {
 
         int getManhattanDistance(Coord c1, Coord c2);
 
-        bool hasUnknownNeighbors(MapLocation global_map[][GLOBAL_COL], Coord start_loc);
-        Coord findClosestBlockWithUnknownNeighbors(MapLocation grid[][GLOBAL_COL], Coord start_loc);
-
-        bool hasMatchingNeighbors(MapLocation global_map[][GLOBAL_COL], MapLocation location_of_interest, Coord start_loc, Orientation &dir_towards);
         Coord findClosestBlockToInterest(MapLocation global_map[][GLOBAL_COL], MapLocation location_of_interest, Coord start_loc, Orientation &dir_towards);
+        bool hasMatchingNeighbors(MapLocation global_map[][GLOBAL_COL], MapLocation location_of_interest, Coord start_loc, Orientation &dir_towards);
         bool neighborMatchesCondition(MapLocation global_map[][GLOBAL_COL], MapLocation location_of_interest, Coord coord);
 
         // Using Ultrasonic readings, Heading controller
@@ -140,6 +137,7 @@ class Main {
         double true_east;
 
         // TODO: Add these flags
+        bool m_map_discovered;
         bool m_extinguished_fire;
         bool m_found_food;
         bool m_found_people;

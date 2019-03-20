@@ -17,13 +17,13 @@ const int MIN_SPEED_B = 0;
 
 // Motor A
 const int enable_a = 9;
-const int input1 = 28;
-const int input2 = 29;
+const int input1 = 29;
+const int input2 = 28;
 
 // Motor B
 const int enable_b = 10;
-const int input3 = 31;
-const int input4 = 30;
+const int input3 = 30;
+const int input4 = 31;
 
 // standby pin
 const int stand_by = 34;

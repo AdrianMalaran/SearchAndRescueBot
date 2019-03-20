@@ -138,7 +138,7 @@ bool Imu::begin(adafruit_bno055_opmode_t mode) {
       if (abs(prev_yaw - getEuler().x()) < 10)
         break;
   }
-  Serial.println("Reached end of begin()");
+
   return true;
 }
 

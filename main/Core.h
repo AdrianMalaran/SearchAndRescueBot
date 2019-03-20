@@ -12,7 +12,7 @@ const int FLT_MAX = -2;
 const int INT_MAX = 999;
 const int INT_MIN = -999;
 
-const double TRAVEL_SPEED = 150;
+const double TRAVEL_SPEED = 200;
 const double TURN_SPEED = 220;
 const double BLOCK_TRAVEL_DISTANCE = 30;
 
@@ -106,6 +106,7 @@ enum Orientation {
 };
 
 enum Task {
+    DISCOVER_MAP,
     EXTINGUISH_FIRE,
     DELIVER_FOOD,
     FIND_FOOD,

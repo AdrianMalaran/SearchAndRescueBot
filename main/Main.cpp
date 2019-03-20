@@ -47,6 +47,7 @@ void Main::init() {
     m_found_people = false;
     m_found_survivor = false;
     m_extinguished_fire = false;
+    m_map_discovered = false;
 
     // Set motor pins
     m_motor_pair.setupMotorPair();
@@ -69,12 +70,9 @@ void Main::init() {
     m_global_map[m_start_coord.row][m_start_coord.col].block_type = PARTICLE;
     m_global_map[m_start_coord.row-1][m_start_coord.col].block_type = PARTICLE;
 
-    findCorrectMap();
-    Serial.println("Found correct map");
-
     // Initialize timers
-    Timer1.initialize(timer_micro_seconds); // Microseconds
-    Timer1.attachInterrupt(updateActualSpeed);
+    // Timer1.initialize(timer_micro_seconds); // Microseconds
+    // Timer1.attachInterrupt(updateActualSpeed);
 
     /* Initialize Speed Control*/
 }
@@ -109,6 +107,9 @@ bool Main::allTasksCompleted() {
 }
 
 Task Main::getNextTask() {
+    if (!m_map_discovered)
+        return DISCOVER_MAP;
+
     if (!m_extinguished_fire)
         return EXTINGUISH_FIRE;
 
@@ -123,6 +124,8 @@ Task Main::getNextTask() {
 }
 
 bool Main::taskIsMapped(Task task) {
+    if (task == DISCOVER_MAP)
+        return true;
     // TODO: I'm not sure if we want to add this as a task if we plan
     // to put out the fire immediately when we start, may take out later
     if (task == EXTINGUISH_FIRE)
@@ -153,7 +156,6 @@ void Main::engageExploreMode() {
         return;
     }
 
-    // Coord explore_block = findClosestBlockWithUnknownNeighbors(m_global_map, m_current_pose.coord);
     travelToBlock(m_global_map, m_current_pose, Pose(explore_block, DONTCARE));
     Serial.println("Mapping Adjacent Blocks");
     mapAdjacentBlocks(m_global_map, m_current_pose);
@@ -163,6 +165,9 @@ void Main::engageObjectiveMode(Task task) {
     Serial.println("Enaging Objective Mode!");
 
     switch (task) {
+        case DISCOVER_MAP:
+            Serial.println("Discovering Correct Map ...");
+            findCorrectMap();
         case EXTINGUISH_FIRE:
             // Assume there is some sort of Path Planning (Adrian) that gets us within
             // the flame sensors range of the candle.
@@ -227,7 +232,7 @@ void Main::findCorrectMap() {
     north_east_location = m_global_map[north_east_block.row][north_east_block.col];
 
     // Identify Map
-
+    m_map_discovered = true;
     // TODO: Consider what happens if we detect food in the sand
     if (west_location.block_type == GRAVEL) {
         if (north_east_location.block_type == SAND)
@@ -238,6 +243,7 @@ void Main::findCorrectMap() {
             setCorrectMap(potential_map4);
         else {
             Serial.println("UNABLE TO IDENTIFY MAPPING");
+            m_map_discovered = false;
             engageExploreMode();
         }
     }
@@ -250,10 +256,12 @@ void Main::findCorrectMap() {
             setCorrectMap(potential_map2);
         else {
             Serial.println("UNABLE TO IDENTIFdffksdf");
+            m_map_discovered = false;
             engageExploreMode();
         }
     } else {
         Serial.println("UNABLE TO IDENTIFY MAPPING --");
+        m_map_discovered = false;
         engageExploreMode();
     }
 
@@ -806,7 +814,7 @@ void Main::turnLeft() {
     double last_heading = start_headings + 5; //TODO: Offset from heading change
 
     while (!isStabilized(last_heading, m_imu_sensor.getEuler().x(), end_heading)) {
-        m_controller.turnController(end_heading, m_imu_sensor.getEuler().x(), 170, true);
+        m_controller.turnController(end_heading, m_imu_sensor.getEuler().x(), 230, true);
     }
 
     m_motor_pair.stop();
@@ -929,7 +937,7 @@ static void Main::executeInstructions(Queue<Instruction> instructions, Orientati
         if (ins == MOVE_FORWARD) {
             Serial.print("FORWARDS->");
             //TODO:
-            // moveForwardOneBlock(30.0);
+            moveForwardOneBlock(30.0);
             delay(1000);
         }
         else if (ins == MOVE_BACKWARD) {
@@ -948,9 +956,13 @@ static void Main::executeInstructions(Queue<Instruction> instructions, Orientati
             Serial.print("LEFT->");
             current_orientation = (current_orientation - 1);
             if (current_orientation < 0) current_orientation = 3;
+
+            MotorPair::setMotorAPWM(-255);
+            MotorPair::setMotorBPWM(223);
+            delay(1000);
+            MotorPair::stop();
             // Map -> turnLeft()
             // m_motor_pair.turnLeft();
-            delay(1000);
         }
     }
     Serial.println("");

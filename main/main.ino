@@ -36,6 +36,7 @@
 
 #define BNO055_SAMPLERATE_DELAY_MS 100
 
+// imu
 Imu imu_sensor = Imu();
 
 // color(0xC0, 0x00, 22, 23)
@@ -46,7 +47,7 @@ Color color_front(SDA1pin, SCL1pin, COLOR_INTEGRATIONTIME_154MS, COLOR_GAIN_1X),
 Ultrasonic ultrasonic_front(ultrasonicFrontTrig, ultrasonicFrontEcho), ultrasonic_right(ultrasonicRightTrig, ultrasonicRightEcho),
                               ultrasonic_left(ultrasonicLeftTrig, ultrasonicLeftEcho), ultrasonic_back(ultrasonicBackTrig, ultrasonicBackEcho);
 
-// MotorPair declaration
+// motors
 MotorPair motor_pair(imu_sensor);
 
 // fan
@@ -57,10 +58,12 @@ double input, output, set_point, Kp = 30;
 // PID pid(&input, &output, &set_point, 2, 5, 1, DIRECT);
 
 // encoders
-// Encoder encoderA(encoderApin1, encoderApin2);
-// Encoder encoderB(encoderBpin1, encoderBpin2);
+Encoder encoderA(encoderApin1, encoderApin2);
+Encoder encoderB(encoderBpin1, encoderBpin2);
 // Controller controller(encoderA, encoderB);
 Controller controller;
+
+// Encoders
 
 // /*
 //     Controller Math:
@@ -104,7 +107,7 @@ void testMoveForward(double PWM1, double PWM2) {
     motor_pair.setMotorAPWM(PWM1);
     motor_pair.setMotorBPWM(PWM2);
 
-    delay(5000);
+    delay(2000);
 
     motor_pair.stop();
 }
@@ -135,9 +138,39 @@ void setup() {
     Serial.println("Running Tests");
     // Tests test;
     // test.RunAllTests();
-    Main main_engine(motor_pair, imu_sensor, color_front, color_down, ultrasonic_front, ultrasonic_right, ultrasonic_left, ultrasonic_back, controller);
+    Main main_engine(motor_pair, imu_sensor, color_front, color_down,
+                     ultrasonic_front, ultrasonic_right, ultrasonic_left,
+                     ultrasonic_back, controller, encoderA, encoderB);
 
-    //main_engine.extinguishFire();
+    // main_engine.run();
+
+    // motor_pair.setupMotorPair();
+    // testMoveForward(255, 223);
+    // testLeftTurn(255, 223);
+    // testRightTurn(255, 255);
+    // main_engine.moveForwardOneBlock(60.0);
+    // main_engine.turnLeft();
+    // motor_pair.stop();
+
+    // test
+
+    /* Max PWM for both motors to provide the same torque:
+        MAX: Motor A: 255, Motor B: 223
+        MIN: Motor A: 180, MOTOR B: 155
+        MIN: Motor A: 160, Motor B: 130
+        MIN: Motor A: 135, Motor B: 120
+
+        Right Turns are garbage
+        Left Turns are pretty good at 255, 223 speed
+        Right Turns
+    */
+
+    // Orientation orientation;
+    // Queue<Instruction> ins;
+    // ins.push(MOVE_FORWARD);
+    // ins.push(ROTATE_LEFT);
+    // ins.push(MOVE_FORWARD);
+    // main_engine.executeInstructions(ins, orientation);
 }
 
 /***************

@@ -68,6 +68,12 @@ void Controller::turnController(double desired_heading, double current_heading, 
     last_time = current_time;
 
     //TODO: Change to different polarity
+    Serial.print("Desired: "); Serial.print(desired_heading);
+    Serial.print(", Current: "); Serial.print(current_heading);
+    Serial.print(", Error: "); Serial.print(error);
+    Serial.print(", bias: "); Serial.print(bias); Serial.print(" | ");
+    Serial.print(" SpeedA: "); Serial.print(nominal_pwm - bias);
+    Serial.print(" SpeedB: "); Serial.println(nominal_pwm + bias);
 
     double polarity = 1;
     if (turn_left)
