@@ -878,27 +878,21 @@ void Main::findFire() {
 
         extinguishFire();
     } else {
-        double start_orientation = m_imu_sensor.getEuler().x();
+        double start_heading = m_imu_sensor.getEuler().x();
+        double end_heading = start_heading;
+        double last_heading = start_headings + 5;
 
-        m_motor_pair.setMotorAPWM(-1.0*TURN_SPEED);
-        m_motor_pair.setMotorBPWM(TURN_SPEED);
+        while (!isStabilized(last_heading, m_imu_sensor.getEuler().x(), end_heading)) {
+            m_controller.turnController(end_heading, m_imu_sensor.getEuler().x(), 170, true);
 
-        delay(500);
-
-        while (fabs(m_imu_sensor.getEuler().x() - start_orientation) > 1) {
             if (Flame::getFireMagnitude() > 0) {
                 m_motor_pair.stop();
                 extinguishFire();
             }
-
-            m_motor_pair.setMotorAPWM(-1.0*TURN_SPEED);
-            m_motor_pair.setMotorBPWM(TURN_SPEED);
         }
 
         m_motor_pair.stop();
     }
-
-    m_extinguished_fire = true;
 }
 
 void Main::extinguishFire() {
@@ -913,6 +907,7 @@ void Main::extinguishFire() {
         delay(1500);
     }
     LED::off();
+    m_extinguished_fire = true;
 }
 
 // Executes main batch of movement functions necessary for travelling
