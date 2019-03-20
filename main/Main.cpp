@@ -2,6 +2,9 @@
 
 Main::Main() {}
 
+Encoder m_encoder_A(19, 18);
+Encoder m_encoder_B(2,3);
+
 // Global Variables for encoders
 double m_motor_speed_A = 999;
 double m_motor_speed_B = 999;
@@ -14,7 +17,7 @@ extern Encoder testEncoderB(encoderBPin1, encoderBPin2);
 
 Main::Main(MotorPair motor_pair, Imu imu_sensor, Color color_front, Color color_down,
             Ultrasonic ultrasonic_front, Ultrasonic ultrasonic_right, Ultrasonic ultrasonic_left,
-            Ultrasonic ultrasonic_back, Controller controller, Encoder &encoder_A, Encoder &encoder_B) {
+            Ultrasonic ultrasonic_back, Controller controller, Encoder encoder_A, Encoder encoder_B) {
     m_motor_pair = motor_pair;
     m_imu_sensor = imu_sensor;
     m_color_front = color_front;
@@ -24,8 +27,12 @@ Main::Main(MotorPair motor_pair, Imu imu_sensor, Color color_front, Color color_
     m_ultrasonic_left = ultrasonic_left;
     m_ultrasonic_back = ultrasonic_back;
     m_controller = controller;
-    m_encoder_A = encoder_A;
-    m_encoder_B = encoder_B;
+    // m_encoder_A = encoder_A;
+    // m_encoder_B = encoder_B;
+
+    // m_encoder_A = Encoder(19,18);
+    // m_encoder_B = Encoder(2,3);
+
 
     init();
 }
@@ -70,10 +77,15 @@ void Main::init() {
     m_global_map[m_start_coord.row][m_start_coord.col].block_type = PARTICLE;
     m_global_map[m_start_coord.row-1][m_start_coord.col].block_type = PARTICLE;
 
+    // initialize global headings
+    m_global_north_heading = m_imu_sensor.getEuler().x();
+    m_global_east_heading = m_global_north_heading + 90;
+    m_global_south_heading = m_global_north_heading + 180;
+    m_global_west_heading = m_global_north_heading + 270;
+
     // Initialize timers
     // Timer1.initialize(timer_micro_seconds); // Microseconds
     // Timer1.attachInterrupt(updateActualSpeed);
-
     /* Initialize Speed Control*/
 }
 
@@ -172,7 +184,7 @@ void Main::engageObjectiveMode(Task task) {
             // Assume there is some sort of Path Planning (Adrian) that gets us within
             // the flame sensors range of the candle.
             Serial.println("TASK: Extinguishing Fire");
-            extinguishFire();
+            findFire();
             break;
         case FIND_FOOD:
             Serial.println("TASK: Finding Food");
@@ -753,14 +765,21 @@ void Main::moveForwardSpeedControl() {
 
 void Main::moveForwardSetDistance(double distance) {
     // Using encoders
-    // long start_tick_a = m_encoder_A.read();
-    // long start_tick_b = m_encoder_B.read();
+    long start_tick_a = m_encoder_A.read();
+    long start_tick_b = m_encoder_B.read();
 
     //TODO: TEST TO SEE IF WE CAN ZERO THE encoders
-    m_encoder_A.write(0);
-    m_encoder_B.write(0);
+    // m_encoder_A.write(0);
+    // m_encoder_B.write(0);
+
+    double start_heading = m_imu_sensor.getEuler().x();
 
     long distance_in_ticks = distance/distance_per_tick;
+    // long distance_in_ticks = 2160; // 1905 ticks per rev
+    Serial.print("Num Ticks to go by: ");
+    Serial.println(distance_in_ticks);
+    Serial.print("Start tick: ");
+    Serial.println(start_tick_b);
     // Assume no slip
     // m_motor_pair.setMotorAPWM(TRAVEL_SPEED);
     // m_motor_pair.setMotorBPWM(TRAVEL_SPEED);
@@ -768,7 +787,9 @@ void Main::moveForwardSetDistance(double distance) {
     // Track each wheel separately
     // Map distance to number of ticks that need to be range
     // Encoder A and B should travel the same number of ticks
-    while (m_encoder_A.read() < distance_in_ticks || m_encoder_B.read() < distance_in_ticks) {
+    while (abs(m_encoder_A.read() - start_tick_a) < distance_in_ticks && abs(m_encoder_B.read() - start_tick_b) < distance_in_ticks) {
+        // Serial.println(abs(m_encoder_B.read()));
+        m_controller.driveStraightController(start_heading, m_imu_sensor.getEuler().x(), 200);
         // if (m_encoder_A.read() >= distance_in_ticks)
         //     m_motor_pair.setMotorAPWM(0);
         // else if (m_encoder_B.read() >= distance_in_ticks)
@@ -779,8 +800,8 @@ void Main::moveForwardSetDistance(double distance) {
     m_motor_pair.stop();
 
     // Re-zero the encoders
-    m_encoder_A.write(0);
-    m_encoder_B.write(0);
+    // m_encoder_A.write(0);
+    // m_encoder_B.write(0);
 }
 
 bool Main::isStabilized(double& last_heading, double current_heading, double end_heading) {
@@ -799,22 +820,43 @@ bool Main::isStabilized(double& last_heading, double current_heading, double end
     else if (heading_position < -180)
         heading_position += 360;
 
-    if (abs(heading_change) <= 2 && abs(heading_position) <= 5)
+    Serial.print(heading_change); Serial.print(" "); Serial.println(heading_position);
+
+    if (abs(heading_change) <= 2 && abs(heading_position) <= 2)
         return true;
 
+    last_heading = current_heading;
     return false;
 }
 
-void Main::turnLeft() {
+double Main::getTargetHeadingForOrientation(Orientation orientation) {
+    if (orientation == NORTH)
+        return m_global_north_heading;
+    if (orientation == EAST)
+        return m_global_east_heading;
+    if (orientation == SOUTH)
+        return m_global_south_heading;
+    if (orientation == WEST)
+        return m_global_west_heading;
 
+    // Orientation: DONTCARE
+    return m_global_north_heading;
+}
+
+void Main::turnLeft(Orientation target_orientation) {
+
+    double end_heading = getTargetHeadingForOrientation(target_orientation);
     double start_headings = m_imu_sensor.getEuler().x();
-	double end_heading = start_headings - 90;
-    if (end_heading < 0) end_heading += 360;
+	// double end_heading = start_headings - 90;
+    // if (end_heading < 0) end_heading += 360;
 
+    Serial.print("Start Heading: "); Serial.print(start_headings);
+    Serial.print(" End Heading: "); Serial.println(end_heading);
     double last_heading = start_headings + 5; //TODO: Offset from heading change
 
+    // Add a counter that breaks it if
     while (!isStabilized(last_heading, m_imu_sensor.getEuler().x(), end_heading)) {
-        m_controller.turnController(end_heading, m_imu_sensor.getEuler().x(), 230, true);
+        m_controller.turnLeftController(end_heading, m_imu_sensor.getEuler().x(), 200, true);
     }
 
     m_motor_pair.stop();
@@ -836,16 +878,21 @@ void Main::turnLeft() {
     */
 }
 
-void Main::turnRight() {
+void Main::turnRight(Orientation target_orientation) {
+
+    double end_heading = getTargetHeadingForOrientation(target_orientation);
 
     double start_heading = m_imu_sensor.getEuler().x();
-    double end_heading = start_heading + 90;
-    if (end_heading > 360) end_heading -= 360;
+    // double end_heading = start_heading + 90;
+    // if (end_heading > 360) end_heading -= 360;
 
-    double last_heading = start_heading + 5; //TODO: Offset from heading change
+    Serial.print("Start Heading: "); Serial.print(start_heading);
+    Serial.print(" End Heading: "); Serial.println(end_heading);
+
+    double last_heading = start_heading - 5; //TODO: Offset from heading change
 
     while (!isStabilized(last_heading, m_imu_sensor.getEuler().x(), end_heading)) {
-        m_controller.turnController(end_heading, m_imu_sensor.getEuler().x(), 170, false);
+        m_controller.turnRightController(end_heading, m_imu_sensor.getEuler().x(), 200, false);
     }
 
     m_motor_pair.stop();
@@ -873,6 +920,7 @@ void Main::turnRight() {
 // }
 
 void Main::findFire() {
+    Serial.println("Finding Fire");
     if (Flame::getFireMagnitude() > 0) {
         m_motor_pair.stop();
 
@@ -897,8 +945,7 @@ void Main::findFire() {
 
         m_motor_pair.stop();
     }
-
-    m_extinguished_fire = true;
+    Serial.println("Fire Extinguished.");
 }
 
 void Main::extinguishFire() {
@@ -913,6 +960,7 @@ void Main::extinguishFire() {
         delay(1500);
     }
     LED::off();
+    m_extinguished_fire = true;
 }
 
 // Executes main batch of movement functions necessary for travelling
@@ -933,7 +981,8 @@ static void Main::executeInstructions(Queue<Instruction> instructions, Orientati
         if (ins == MOVE_FORWARD) {
             Serial.print("FORWARDS->");
             //TODO:
-            moveForwardOneBlock(30.0);
+            // moveForwardOneBlock(30.0);
+            moveForwardSetDistance(30.0);
             delay(1000);
         }
         else if (ins == MOVE_BACKWARD) {
@@ -946,6 +995,7 @@ static void Main::executeInstructions(Queue<Instruction> instructions, Orientati
             Serial.print("RIGHT->");
             current_orientation = (current_orientation + 1) % 4;
             // m_motor_pair.turnRight();
+            turnRight(current_orientation);
             delay(1000);
         }
         else if (ins == ROTATE_LEFT) {
@@ -953,10 +1003,11 @@ static void Main::executeInstructions(Queue<Instruction> instructions, Orientati
             current_orientation = (current_orientation - 1);
             if (current_orientation < 0) current_orientation = 3;
 
-            MotorPair::setMotorAPWM(-255);
-            MotorPair::setMotorBPWM(223);
-            delay(1000);
-            MotorPair::stop();
+            // MotorPair::setMotorAPWM(-255);
+            // MotorPair::setMotorBPWM(223);
+            // delay(1000);
+            // MotorPair::stop();
+            turnLeft(current_orientation);
             // Map -> turnLeft()
             // m_motor_pair.turnLeft();
         }

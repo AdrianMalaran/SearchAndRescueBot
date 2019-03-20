@@ -18,8 +18,8 @@
 #define SCL2pin 25
 
 // Encoder Pins
-#define encoderApin1 18
-#define encoderApin2 19
+#define encoderApin1 19
+#define encoderApin2 18
 #define encoderBpin1 2
 #define encoderBpin2 3
 
@@ -58,8 +58,10 @@ double input, output, set_point, Kp = 30;
 // PID pid(&input, &output, &set_point, 2, 5, 1, DIRECT);
 
 // encoders
-Encoder encoderA(encoderApin1, encoderApin2);
-Encoder encoderB(encoderBpin1, encoderBpin2);
+// Encoder encoderA(encoderApin1, encoderApin2);
+// Encoder encoderB(encoderBpin1, encoderBpin2);
+Encoder encoderA;
+Encoder encoderB;
 // Controller controller(encoderA, encoderB);
 Controller controller;
 
@@ -142,10 +144,20 @@ void setup() {
                      ultrasonic_front, ultrasonic_right, ultrasonic_left,
                      ultrasonic_back, controller, encoderA, encoderB);
 
+                     // testRightTurn(200, 200);
+                     // testLeftTurn(200, 200);
+                     // testLeftTurn(200, 200);
     // main_engine.run();
+    // main_engine.moveForwardSetDistance(90.0);
+    // main_engine.turnRight(EAST);
+    // main_engine.turnRight(SOUTH);
+    // main_engine.moveForwardSetDistance(90.0);
+    // main_engine.turnRight(WEST);
+    // main_engine.turnRight(NORTH);
+    // main_engine.turnRight();
 
     // motor_pair.setupMotorPair();
-    // testMoveForward(255, 223);
+    // testMoveForward(180, 160);
     // testLeftTurn(255, 223);
     // testRightTurn(255, 255);
     // main_engine.moveForwardOneBlock(60.0);
@@ -173,9 +185,15 @@ void setup() {
     // main_engine.executeInstructions(ins, orientation);
 }
 
+int counter = 0;
 /***************
 *     LOOP     *
 ****************/
 void loop() {
-
+    if (counter == 100) {
+        // Serial.print(encoderA.read()); Serial.print(" ");
+        // Serial.println(encoderA.read());
+        counter = 0;
+    }
+    counter ++;
 }

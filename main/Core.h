@@ -13,10 +13,13 @@ const int INT_MAX = 999;
 const int INT_MIN = -999;
 
 const double TRAVEL_SPEED = 200;
-const double TURN_SPEED = 220;
+const double TURN_SPEED = 160;
 const double BLOCK_TRAVEL_DISTANCE = 30;
 
-const double distance_per_tick = ((3.14*8)/341.2)*(16.0/21.0);
+// const double distance_per_tick = ((3.14*8)/1905)*(16.0/21.0);
+// const double distance_per_tick = ((3.14*8)/1905)*(0.60);
+const double distance_per_tick = ((3.14*8)/1514.8)*(16.0/21.0);
+// const double num_ticks_per_rev = 1905; //
 
 /* Data Structures */
 struct Coord {

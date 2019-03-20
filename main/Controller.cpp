@@ -15,7 +15,7 @@ void Controller::headingControl(double &pwm_a, double &pwm_b, double desired_hea
     //     return;
     // }
 
-    double Kp = 15;
+    double Kp = 35;
     double Ki = 0.0;
 
     double error = desired_heading - current_heading;
@@ -51,9 +51,9 @@ void Controller::headingControl(double &pwm_a, double &pwm_b, double desired_hea
 }
 
 //TODO: Rename to headingController => outputs a PWM for both motors
-void Controller::turnController(double desired_heading, double current_heading, double nominal_pwm, bool turn_left) {
-    double Kp = 0.5;
-    double Ki = 0.0;
+void Controller::turnLeftController(double desired_heading, double current_heading, double nominal_pwm, bool turn_left) {
+    double Kp = 0.9;
+    double Ki = 0.0001;
 
     double error = desired_heading - current_heading;
     double current_time = micros();
@@ -67,20 +67,33 @@ void Controller::turnController(double desired_heading, double current_heading, 
     double bias = (Kp * error) + (Ki * total_error);
     last_time = current_time;
 
-    //TODO: Change to different polarity
-    Serial.print("Desired: "); Serial.print(desired_heading);
-    Serial.print(", Current: "); Serial.print(current_heading);
-    Serial.print(", Error: "); Serial.print(error);
-    Serial.print(", bias: "); Serial.print(bias); Serial.print(" | ");
-    Serial.print(" SpeedA: "); Serial.print(nominal_pwm - bias);
-    Serial.print(" SpeedB: "); Serial.println(nominal_pwm + bias);
-
     double polarity = 1;
-    if (turn_left)
+    if (!turn_left)
         polarity = -1;
 
-    MotorPair::setMotorAPWM(polarity * (nominal_pwm + bias));
-    MotorPair::setMotorBPWM(-1 * polarity * (nominal_pwm + bias));
+    MotorPair::setMotorAPWM(polarity*10*(bias - 4));
+    MotorPair::setMotorBPWM(polarity*-10 * (bias - 4));
+}
+
+//TODO: Rename to headingController => outputs a PWM for both motors
+void Controller::turnRightController(double desired_heading, double current_heading, double nominal_pwm, bool turn_left) {
+    double Kp = 1.0;
+    double Ki = 0.0001;
+
+    double error = desired_heading - current_heading;
+    double current_time = micros();
+    total_error += error * (current_time - last_time)/1000000;
+
+    if (error > 180)
+        error -= 360;
+    else if (error < -180)
+        error += 360;
+
+    double bias = (Kp * error) + (Ki * total_error);
+    last_time = current_time;
+
+    MotorPair::setMotorAPWM(10*(bias + 3));
+    MotorPair::setMotorBPWM(-10 * (bias + 3));
 }
 
 double mapMotorASpeedToPWM(double speed) {

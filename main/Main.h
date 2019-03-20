@@ -55,13 +55,16 @@ extern long last_encA_value;
 extern long last_encB_value;
 extern long timer_micro_seconds;  // every 1 millisecond
 
+// extern Encoder m_encoder_A(19, 18);
+// extern Encoder m_encoder_B(2,3);
+
 /* Core Class */
 class Main {
     public:
         Main();
         Main(MotorPair motor_pair, Imu imu_sensor, Color color_front, Color color_down,
             Ultrasonic ultrasonic_front, Ultrasonic ultrasonic_right, Ultrasonic ultrasonic_left,
-            Ultrasonic ultrasonic_back, Controller controller, Encoder& encoder_A, Encoder& encoder_B);
+            Ultrasonic ultrasonic_back, Controller controller, Encoder encoder_A, Encoder encoder_B);
         void init();
         void run();
         void returnToStart(MapLocation global_map[][GLOBAL_COL], Pose current_pose);
@@ -72,6 +75,7 @@ class Main {
         Task getNextTask();
         bool taskIsMapped(Task task);
 
+        double getTargetHeadingForOrientation(Orientation orientation);
         void deliverFoodToGroup();
         bool isLandmarkAhead(MapLocation &location, Pose start_pose);
         void checkForLandMark(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Coord block_to_map, double start_mag, Pose pose);
@@ -113,9 +117,9 @@ class Main {
 
         // Debuggic Function
         void moveMotorB(int speed);
-        void turnLeft();
+        void turnLeft(Orientation target_orientation);
         void executeInstructions(Queue<Instruction> instructions, Orientation& orientation);
-        void turnRight();
+        void turnRight(Orientation target_orientation);
 
         double getCurrentOrientation();
 
@@ -123,6 +127,11 @@ class Main {
         static double calculateSpeed(long current_encoder_value, long last_encoder_value, long period);
 
         void stopProgram();
+
+        double m_global_north_heading;
+        double m_global_east_heading;
+        double m_global_south_heading;
+        double m_global_west_heading;
     private:
         MapLocation m_global_map[GLOBAL_ROW][GLOBAL_COL];
 
@@ -166,8 +175,6 @@ class Main {
         Ultrasonic m_ultrasonic_back;
 
         Controller m_controller;
-        Encoder m_encoder_A;
-        Encoder m_encoder_B;
 };
 
 #endif
