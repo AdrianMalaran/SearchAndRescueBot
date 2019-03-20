@@ -57,8 +57,8 @@ double input, output, set_point, Kp = 30;
 // PID pid(&input, &output, &set_point, 2, 5, 1, DIRECT);
 
 // encoders
-// Encoder encoderA(encoderApin1, encoderApin2);
-// Encoder encoderB(encoderBpin1, encoderBpin2);
+Encoder encoderA(encoderApin1, encoderApin2);
+Encoder encoderB(encoderBpin1, encoderBpin2);
 // Controller controller(encoderA, encoderB);
 Controller controller;
 
@@ -135,7 +135,7 @@ void setup() {
     Serial.println("Running Tests");
     // Tests test;
     // test.RunAllTests();
-    Main main_engine(motor_pair, imu_sensor, color_front, color_down, ultrasonic_front, ultrasonic_right, ultrasonic_left, ultrasonic_back, controller);
+    Main main_engine(motor_pair, imu_sensor, color_front, color_down, ultrasonic_front, ultrasonic_right, ultrasonic_left, ultrasonic_back, controller, encoderA, encoderB);
 
     //main_engine.extinguishFire();
 }
