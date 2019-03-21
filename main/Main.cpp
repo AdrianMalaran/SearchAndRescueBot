@@ -1062,7 +1062,7 @@ void Main::turnRight(Orientation target_orientation) {
     double last_heading = start_heading - 5; //TODO: Offset from heading change
 
     while (!isStabilized(last_heading, m_imu_sensor.getEuler().x(), end_heading)) {
-        m_controller.turnRightController(end_heading, m_imu_sensor.getEuler().x(), 200, false);
+        m_controller.turnRightController(end_heading, m_imu_sensor.getEuler().x(), 200);
     }
 
     m_motor_pair.stop();
