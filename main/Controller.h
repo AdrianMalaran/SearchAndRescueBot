@@ -12,7 +12,7 @@ class Controller {
         Controller(Encoder encA, Encoder encB);
 
         void turnLeftController(double desired_heading, double current_heading, double nominal_pwm);
-        void turnRightController(double desired_heading, double current_heading, double nominal_pwm, bool turn_left);
+        void turnRightController(double desired_heading, double current_heading, double nominal_pwm);
         void driveStraightController(double desired_heading, double current_heading, double nominal_pwm = 180);
 
         void headingControl(double &pwm_a, double &pwm_b, double desired_heading, double current_heading, double nominal_pwm);

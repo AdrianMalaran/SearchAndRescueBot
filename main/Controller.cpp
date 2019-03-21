@@ -91,7 +91,7 @@ void Controller::turnLeftController(double desired_heading, double current_headi
 }
 
 //TODO: Rename to headingController => outputs a PWM for both motors
-void Controller::turnRightController(double desired_heading, double current_heading, double nominal_pwm, bool turn_left) {
+void Controller::turnRightController(double desired_heading, double current_heading, double nominal_pwm) {
     double Kp = 1.0;
     double Ki = 0.0001;
 

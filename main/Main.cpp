@@ -383,10 +383,15 @@ bool Main::isLandmarkAhead() {
 }
 
 Landmark Main::identifyLandMark() {
-    if (m_color_front.getStructureColor() == 1)
+    if (m_color_front.getStructureColor() == 1) {
+        LED::onAndOff();
         return SURVIVOR;
-    if (m_color_front.getStructureColor() == 2)
+    }
+    if (m_color_front.getStructureColor() == 2) {
+        LED::onAndOff();
+        LED::onAndOff();
         return PEOPLE;
+    }
 
     return FIRE;
 }
@@ -473,7 +478,7 @@ void Main::getPossibleLandmarks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL
     if(floor(front_distance) != pose.coord.row) {
         global_map[pose.coord.row - (int)ceil(front_distance)][pose.coord.col].land_mark_spot = true;
 
-        for(int i = (int)ceil(front_distance); i < pose.coord.row; i++) {
+        for(int i = 0 + (pose.coord.row - (int)floor(front_distance)); i < pose.coord.row; i++) {
             global_map[i][pose.coord.col].searched = true;
         }
     } else {
@@ -498,17 +503,17 @@ void Main::getPossibleLandmarks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL
             global_map[pose.coord.row][i].searched = true;
         }
     } else {
-        for(int i = 0; i < pose.coord.row; i++) {
+        for(int i = 0; i < pose.coord.col; i++) {
             global_map[pose.coord.row][i].searched = true;
         }
     }
     if(5 - floor(right_distance) != pose.coord.col) {
         global_map[pose.coord.row][(int)ceil(right_distance) + pose.coord.col].land_mark_spot = true;
-        for(int i = (int)ceil(right_distance); i > pose.coord.row; i--) {
+        for(int i = (int)ceil(right_distance); i > pose.coord.col; i--) {
             global_map[pose.coord.row][i].searched = true;
         }
     } else {
-        for(int i = 5; i > pose.coord.row; i--) {
+        for(int i = 5; i > pose.coord.col; i--) {
             global_map[pose.coord.row][i].searched = true;
         }
     }
@@ -705,7 +710,11 @@ void Main::mapBlockTerrainInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_C
 }
 
 bool Main::isFood(double current_mag) {
-    return (fabs(fabs(m_imu_sensor.getMag().z()) - fabs(current_mag)) > 5);
+    double mag_sum = 0;
+    for(int i = 0; i < 1000; i++) {
+        mag_sum+=m_imu_sensor.getMag().z();
+    }
+    return (fabs(fabs(mag_sum/1000) - fabs(current_mag)) > 5);
 }
 
 /***********************
@@ -1167,7 +1176,7 @@ void Main::turnRight(Orientation target_orientation) {
     double last_heading = start_heading - 5; //TODO: Offset from heading change
     int wait_counter = 0;
     while (!isStabilized(last_heading, m_imu_sensor.getEuler().x(), end_heading) && wait_counter <= 1000) {
-        m_controller.turnRightController(end_heading, m_imu_sensor.getEuler().x(), 200, false);
+        m_controller.turnRightController(end_heading, m_imu_sensor.getEuler().x(), 200);
         wait_counter ++;
     }
 
