@@ -78,13 +78,14 @@ class Main {
         double getTargetHeadingForOrientation(Orientation orientation);
         void deliverFoodToGroup();
         bool isLandmarkAhead();
-        void checkForLandMark(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Coord block_to_map, double start_mag, Pose pose);
+        void checkForLandMark(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Coord block_to_map, Pose pose);
         Coord getGlobalPosition(Orientation orientation);
         void getPossibleLandmarks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose);
         void mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose start_pose);
-        bool isUnexplored(MapLocation global_map[][GLOBAL_COL], Coord coord);
+
         void mapBlockTerrainInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose, double start_mag, Coord block_to_map);
-        void mapBlockLandMarkInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose, double start_mag, Coord block_to_map);;
+        void mapBlockLandmarkInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose, Coord block_to_map);
+        void runSearchInPlace();
         // void mapLandMarkInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose, double start_mag, Coord block_to_map);
         bool isFood(double mag);
         Landmark identifyLandMark();
@@ -98,6 +99,11 @@ class Main {
         void travelToFood(MapLocation global_map[][GLOBAL_COL], Pose current_pose);
         Coord getClosestSandBlock(MapLocation global_map[][GLOBAL_COL], Coord current_loc); //TODO: Implement
 
+        void investigateClosestLandmark();
+        bool checkClosestSandBlock();
+        bool gotoClosestPossibleLandmark();
+        void checkForFood(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Coord block_to_map, double start_mag);
+
         void findFire();
         void extinguishFire();
 
@@ -108,7 +114,7 @@ class Main {
 
         int getManhattanDistance(Coord c1, Coord c2);
 
-        Coord findClosestBlockToInterest(MapLocation global_map[][GLOBAL_COL], MapLocation location_of_interest, Coord start_loc, Orientation &dir_towards);
+        Coord findClosestBlockToInterest(MapLocation global_map[][GLOBAL_COL], Coord& closest_block, MapLocation location_of_interest, Coord start_loc, Orientation &dir_towards);
         bool hasMatchingNeighbors(MapLocation global_map[][GLOBAL_COL], MapLocation location_of_interest, Coord start_loc, Orientation &dir_towards);
         bool neighborMatchesCondition(MapLocation global_map[][GLOBAL_COL], MapLocation location_of_interest, Coord coord);
 
@@ -116,6 +122,7 @@ class Main {
         void moveForwardOneBlock(double distance);
         // Using Encoder readings
         void moveForwardSetDistance(double distance, Orientation orientation);
+        void moveBackwardSetDistance(double distance, Orientation orientation);
         // Using Speed Control
         void moveForwardSpeedControl();
 

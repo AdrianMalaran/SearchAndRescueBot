@@ -20,4 +20,5 @@ static void LED::onAndOff() {
     LED::on();
     delay(1000);
     LED::off();
+    delay(500);
 }

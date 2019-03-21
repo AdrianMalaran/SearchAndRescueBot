@@ -60,46 +60,6 @@ Encoder encoderB(encoderBpin1, encoderBpin2);
 // Controller controller(encoderA, encoderB);
 Controller controller;
 
-// Encoders
-
-// /*
-//     Controller Math:
-//     1 Revolution = (16/21) * 1 Revolution = 0.7619 Revolutions of Wheel/1 revolution of Motor
-//     Therefore, 1 revolution of motor = (0.7691)*(8*pi) = 19.1487 centimeters travelled
-// */
-// double calculateSpeed(long current_encoder_value, long last_encoder_value, long period) {
-//     double wheel_circumference = 3.14*8;
-//     double distancePerWheelTick = wheel_circumference / 341.2; // 341.2 counts/revolution of the wheel
-//     double distancePerMotorTick = distancePerWheelTick * (16/21.0); // 1 Revolution of the motor = Gear Ratio = 16/21
-//
-//     // Serial.print("Distance: "); Serial.println(distancePerTick * (current_encoder_value - last_encoder_value));
-//     // double speed = distancePerTick * (current_encoder_value - last_encoder_value) / (period/1000000.0); // Convert from microseconds to seconds
-//     long double speed = distancePerMotorTick * ((current_encoder_value - last_encoder_value) / (period / 1000000.0)); // Convert from microseconds to seconds
-//     return speed;
-// }
-
-// void updateActualSpeed() {
-//     long current_encA_value = encoderA.read();
-//     m_motor_speed_A = calculateSpeed(current_encA_value, last_encA_value, timer_micro_seconds);
-//     last_encA_value = current_encA_value;
-//
-//     long current_encB_value = encoderB.read();
-//     m_motor_speed_B = calculateSpeed(current_encB_value, last_encB_value, timer_micro_seconds);
-//     last_encB_value = current_encB_value;
-//
-//     // Serial.print("Enc A: "); Serial.print(current_encA_value);
-//     // Serial.print(" Enc B: "); Serial.print(current_encB_value);
-//     // Serial.println("Updating Speed!");
-//     Serial.print(" MA: "); Serial.print(m_motor_speed_A);
-//     Serial.print(" MB: "); Serial.println(m_motor_speed_B);
-// }
-
-// void initializeTimers() {
-//     // Timers
-//     Timer1.initialize(timer_micro_seconds); // Microseconds
-//     Timer1.attachInterrupt(updateActualSpeed);
-// }
-
 void testMoveForward(double PWM1, double PWM2) {
     motor_pair.setMotorAPWM(PWM1);
     motor_pair.setMotorBPWM(PWM2);
@@ -126,6 +86,13 @@ void testRightTurn(double PWM1, double PWM2) {
 
     motor_pair.stop();
 }
+/*
+TEST PRIORITY:
+- [] mapBlockLandmarkInFront()
+- [x] findFire()
+- [] moveToPossibleFireLocation
+
+*/
 
 /**************
 *    SETUP    *
@@ -133,21 +100,46 @@ void testRightTurn(double PWM1, double PWM2) {
 void setup() {
     Serial.begin(9600);
     Serial.println("Running Tests");
-    Tests test;
-    test.RunAllTests();
+    // Tests test;
+    // test.RunAllTests();
 
     Main main_engine(motor_pair, imu_sensor, color_front, color_down,
                      ultrasonic_front, ultrasonic_right, ultrasonic_left,
                      ultrasonic_back, controller, encoderA, encoderB);
+
+    // main_engine.run();
+    // main_engine.findFire();
+
+    // motor_pair.setupMotorPair();
 
     // Coord current_position = main_engine.getGlobalPosition(Pose(Coord(-2, -2), NORTH));
     // printCoord(current_position);
                      // testRightTurn(255, 223);
                      // testLeftTurn(230, 200);
                      // testLeftTurn(200, 200);
-    main_engine.run();
+    // main_engine.run();
+
+    // main_engine.moveForwardSetDistance(30.0, NORTH);
+    // delay(1000);
+    // main_engine.moveBackwardSetDistance(30.0, NORTH);
+    // delay(500);
+    // main_engine.turnRight(EAST);
+    // delay(500);
+
     // main_engine.moveForwardSetDistance(60.0, NORTH);
-    // main_engine.turnLeft(WEST); //
+
+    // motor_pair.stop();
+
+//  WORKING COMBINATIONS
+    main_engine.turnLeft(WEST); //
+    main_engine.moveBackwardSetDistance(4.0, WEST);
+    main_engine.turnLeft(SOUTH); //
+    main_engine.moveBackwardSetDistance(4.0, SOUTH);
+    main_engine.turnLeft(EAST); //
+    main_engine.moveBackwardSetDistance(4.0, EAST);
+    // main_engine.turnLeft(NORTH); //
+    // main_engine.moveBackwardSetDistance(4.0, NORTH);
+
     // main_engine.turnLeft(SOUTH); //
     // main_engine.moveForwardSetDistance(60.0, SOUTH);
     // main_engine.turnLeft(EAST); //
@@ -161,37 +153,40 @@ void setup() {
     // main_engine.turnRight(NORTH);
     // main_engine.turnRight();
 
-    // motor_pair.setupMotorPair();
+
     // testMoveForward(180, 160);
     // testLeftTurn(255, 223);
-    // testRightTurn(255, 255);
+    // testRightTurn(255, 223);
     // main_engine.moveForwardOneBlock(60.0);
     // main_engine.turnLeft();
     // motor_pair.stop();
 
-    // Orientation orientation;
+    // EXECUTE INSTRUCTIONS TEST----
+    // Orientation finish_ori = NORTH;
     // Queue<Instruction> ins;
-    // ins.push(MOVE_FORWARD);
     // ins.push(ROTATE_LEFT);
+    // ins.push(ROTATE_RIGHT);
     // ins.push(MOVE_FORWARD);
-    // main_engine.executeInstructions(ins, orientation);
+    // ins.push(ROTATE_RIGHT);
+    // main_engine.executeInstructions(ins, finish_ori);
+    // main_engine.mapBlockTerrainInFront(main_engine.m_global_map, Pose(Coord(4,3), EAST), 0.0, Coord(4,4));
 
-    Pose our_pose(Coord(3,4), NORTH);
-    main_engine.getPossibleLandmarks(main_engine.m_global_map, our_pose);
-    for(int i = 0; i < 6; i++) {
-        for(int j = 0; j < 6; j++) {
-            Serial.print(main_engine.m_global_map[i][j].land_mark_spot); Serial.print(" ");
-        }
-        Serial.println("");
-    }
-    Serial.println("");
-
-    for(int i = 0; i < 6; i++) {
-        for(int j = 0; j < 6; j++) {
-            Serial.print(main_engine.m_global_map[i][j].searched); Serial.print(" ");
-        }
-        Serial.println("");
-    }
+    // Pose our_pose(Coord(4,4), WEST);
+    // main_engine.getPossibleLandmarks(main_engine.m_global_map, our_pose);
+    // for(int i = 0; i < 6; i++) {
+    //     for(int j = 0; j < 6; j++) {
+    //         Serial.print(main_engine.m_global_map[i][j].land_mark_spot); Serial.print(" ");
+    //     }
+    //     Serial.println("");
+    // }
+    // Serial.println("");
+    //
+    // for(int i = 0; i < 6; i++) {
+    //     for(int j = 0; j < 6; j++) {
+    //         Serial.print(main_engine.m_global_map[i][j].searched); Serial.print(" ");
+    //     }
+    //     Serial.println("");
+    // }
 }
 
 int counter = 0;
@@ -207,9 +202,9 @@ void loop() {
 
     counter ++;
 
-    Serial.println(color_front.getStructureColor());
+    // Serial.println(color_front.getStructureColor());
 
-    // Serial.print("Front: "); Serial.print(ultrasonic_front.getDistance());
+    // Serial.println("Front: "); Serial.print(ultrasonic_front.getDistance());
     // Serial.print(" Back: "); Serial.print(ultrasonic_back.getDistance());
     // Serial.print(" Left: "); Serial.print(ultrasonic_left.getDistance());
     // Serial.print(" Right: "); Serial.println(ultrasonic_right.getDistance());

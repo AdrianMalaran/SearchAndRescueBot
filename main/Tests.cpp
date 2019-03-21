@@ -225,8 +225,8 @@ void Tests::TestExplore() {
 
     bool res = m_main_engine.hasMatchingNeighbors(map, unsearched_location, start_loc, finish_ori);
     Serial.print("Has Unsearched neighbors?: "); Serial.println(res);
-
-    Coord block = m_main_engine.findClosestBlockToInterest(map, unsearched_location, start_loc, finish_ori);
+    Coord block_of_interest;
+    Coord block = m_main_engine.findClosestBlockToInterest(map, block_of_interest, unsearched_location, start_loc, finish_ori);
     Serial.print("Closest: ("); Serial.print(block.row); Serial.print(","); Serial.print(block.col); Serial.print(") Direction: ");
     Serial.print(finish_ori); Serial.println("");
     // printMap(map);

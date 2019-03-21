@@ -14,7 +14,8 @@ const int INT_MIN = -999;
 
 const double TRAVEL_SPEED = 200;
 const double TURN_SPEED = 160;
-const double BLOCK_TRAVEL_DISTANCE = 30;
+
+const int FRONT_ARM_LENGTH = 6.5;
 
 // const double distance_per_tick = ((3.14*8)/1905)*(16.0/21.0);
 // const double distance_per_tick = ((3.14*8)/1905)*(0.60);
@@ -83,6 +84,7 @@ struct MapLocation {
 
     bool searched = false;
     bool land_mark_spot = false;
+    bool possible_land_mark = false;
     bool food_searched = false;
 
     Landmark landmark = NONE;
@@ -119,7 +121,7 @@ enum Task {
     FIND_FOOD,
     FIND_GROUP_OF_PEOPLE,
     FIND_SURVIVOR,
-    OTHER
+    INVESTIGATE_CLOSEST_LANDMARK
 };
 
 struct Pose {
@@ -171,6 +173,17 @@ inline void printMap(MapLocation global_map[][GLOBAL_COL]) {
         }
         Serial.println("");
     }
+}
+
+inline void printBlocktype(BlockType blocktype) {
+    if (blocktype == WATER)
+        Serial.print("WATER");
+    if (blocktype == PARTICLE)
+        Serial.print("PARTICLE");
+    if (blocktype == GRAVEL)
+        Serial.print("GRAVEL");
+    if (blocktype == SAND)
+        Serial.print("SAND");
 }
 
 inline void printSearchedMap(MapLocation global_map[][GLOBAL_COL]) {
