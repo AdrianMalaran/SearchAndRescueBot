@@ -403,7 +403,7 @@ void Main::getPossibleLandmarks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL
     if(floor(front_distance) != pose.coord.row) {
         global_map[pose.coord.row - (int)ceil(front_distance)][pose.coord.col].land_mark_spot = true;
 
-        for(int i = (int)ceil(front_distance); i < pose.coord.row; i++) {
+        for(int i = 0 + (pose.coord.row - (int)floor(front_distance)); i < pose.coord.row; i++) {
             global_map[i][pose.coord.col].searched = true;
         }
     } else {
@@ -428,17 +428,17 @@ void Main::getPossibleLandmarks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL
             global_map[pose.coord.row][i].searched = true;
         }
     } else {
-        for(int i = 0; i < pose.coord.row; i++) {
+        for(int i = 0; i < pose.coord.col; i++) {
             global_map[pose.coord.row][i].searched = true;
         }
     }
     if(5 - floor(right_distance) != pose.coord.col) {
         global_map[pose.coord.row][(int)ceil(right_distance) + pose.coord.col].land_mark_spot = true;
-        for(int i = (int)ceil(right_distance); i > pose.coord.row; i--) {
+        for(int i = (int)ceil(right_distance); i > pose.coord.col; i--) {
             global_map[pose.coord.row][i].searched = true;
         }
     } else {
-        for(int i = 5; i > pose.coord.row; i--) {
+        for(int i = 5; i > pose.coord.col; i--) {
             global_map[pose.coord.row][i].searched = true;
         }
     }
