@@ -313,10 +313,15 @@ bool Main::isLandmarkAhead() {
 }
 
 Landmark Main::identifyLandMark() {
-    if (m_color_front.getStructureColor() == 1)
+    if (m_color_front.getStructureColor() == 1) {
+        LED::onAndOff();
         return SURVIVOR;
-    if (m_color_front.getStructureColor() == 2)
+    }
+    if (m_color_front.getStructureColor() == 2) {
+        LED::onAndOff();
+        LED::onAndOff();
         return PEOPLE;
+    }
 
     return FIRE;
 }
@@ -650,7 +655,11 @@ void Main::mapBlockTerrainInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_C
 }
 
 bool Main::isFood(double current_mag) {
-    return (fabs(fabs(m_imu_sensor.getMag().z()) - fabs(current_mag)) > 5);
+    double mag_sum = 0;
+    for(int i = 0; i < 1000; i++) {
+        mag_sum+=m_imu_sensor.getMag().z();
+    }
+    return (fabs(fabs(mag_sum/1000) - fabs(current_mag)) > 5);
 }
 
 /***********************

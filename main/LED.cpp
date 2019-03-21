@@ -1,7 +1,7 @@
 #include "LED.h"
 #include <Arduino.h>
 
-const int LEDPin = 32;
+const int LEDPin = 13;
 
 LED::LED() {
     pinMode(LEDPin, OUTPUT);
