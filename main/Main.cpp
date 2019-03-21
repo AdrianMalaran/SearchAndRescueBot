@@ -412,6 +412,7 @@ void Main::getPossibleLandmarks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL
     } else {
         for(int i = 5; i > pose.coord.row; i--) {
             global_map[i][pose.coord.col].searched = true;
+        }
     }
     if(floor(left_distance) != pose.coord.col) {
         global_map[pose.coord.row][pose.coord.col - (int)ceil(left_distance)].land_mark_spot = true;
@@ -421,6 +422,7 @@ void Main::getPossibleLandmarks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL
     } else {
         for(int i = 0; i < pose.coord.row; i++) {
             global_map[pose.coord.row][i].searched = true;
+        }
     }
     if(5 - floor(right_distance) != pose.coord.col) {
         global_map[pose.coord.row][(int)ceil(right_distance) + pose.coord.col].land_mark_spot = true;
@@ -430,6 +432,7 @@ void Main::getPossibleLandmarks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL
     } else {
         for(int i = 5; i > pose.coord.row; i--) {
             global_map[pose.coord.row][i].searched = true;
+        }
     }
 }
 
