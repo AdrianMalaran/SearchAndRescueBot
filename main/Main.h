@@ -104,6 +104,7 @@ class Main {
         bool gotoClosestPossibleLandmark();
         void checkForFood(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Coord block_to_map, double start_mag);
 
+        void travelToFireExtinguishLocation();
         void findFire();
         void extinguishFire();
 

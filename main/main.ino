@@ -88,10 +88,11 @@ void testRightTurn(double PWM1, double PWM2) {
 }
 /*
 TEST PRIORITY:
+- [] leftturn control
 - [] mapBlockLandmarkInFront()
 - [x] findFire()
 - [] moveToPossibleFireLocation
-
+- [] moveForwardSetDistance w/ Ultrasonic feedback
 */
 
 /**************
@@ -132,11 +133,11 @@ void setup() {
 
 //  WORKING COMBINATIONS
     main_engine.turnLeft(WEST); //
-    main_engine.moveBackwardSetDistance(4.0, WEST);
-    main_engine.turnLeft(SOUTH); //
-    main_engine.moveBackwardSetDistance(4.0, SOUTH);
-    main_engine.turnLeft(EAST); //
-    main_engine.moveBackwardSetDistance(4.0, EAST);
+    main_engine.moveBackwardSetDistance(5.0, WEST);
+    // main_engine.turnLeft(SOUTH); //
+    // main_engine.moveBackwardSetDistance(5.0, SOUTH);
+    // main_engine.turnLeft(EAST); //
+    // main_engine.moveBackwardSetDistance(5.0, EAST);
     // main_engine.turnLeft(NORTH); //
     // main_engine.moveBackwardSetDistance(4.0, NORTH);
 

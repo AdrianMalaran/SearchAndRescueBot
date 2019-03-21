@@ -197,7 +197,7 @@ void Main::engageObjectiveMode(Task task) {
             // Assume there is some sort of Path Planning (Adrian) that gets us within
             // the flame sensors range of the candle.
             Serial.println("TASK: Extinguishing Fire");
-            findFire();
+            travelToFireExtinguishLocation();
             break;
         case INVESTIGATE_CLOSEST_LANDMARK:
             Serial.println("TASK: Finding Food");
@@ -351,7 +351,12 @@ bool Main::checkClosestSandBlock() {
 
 bool Main::gotoClosestPossibleLandmark() {
     MapLocation location_possible_land_mark_type(LANDMARK, true, NONE); // Initialize to unknown block
-    location_possible_land_mark_type.possible_land_mark = true;
+    // location_possible_land_mark_type.possible_land_mark = true;
+    location_possible_land_mark_type.searched = false;
+    location_possible_land_mark_type.land_mark_spot = true;
+
+    //TODO: add land_mark_spot
+
     // Should return closest possible landmark location
     Orientation finish_ori = DONTCARE;
     Coord possible_land_mark_block;
@@ -790,8 +795,7 @@ void Main::travelToBlock(MapLocation map[][GLOBAL_COL], Pose start_pose, Pose fi
 
     // Handle Invalid Path errors
     if (shortest_path.size() == 1 &&
-        shortest_path.top().row == -1 &&
-        shortest_path.top().col == -1) {
+        !isValid(shortest_path.top())) {
         Serial.println("No Path Found");
         return;
     }
@@ -1204,9 +1208,35 @@ void Main::turnRight(Orientation target_orientation) {
 //     m_motor_pair.stop();
 // }
 
-// void Main::travelToFireExtinguishLocation() {
-//
-// }
+void Main::travelToFireExtinguishLocation() {
+    // Mark fire extinguished locations as (2,2) (2,3), (3,2), (3,3)
+
+    Coord fire_extinguished_locs[4];
+    fire_extinguished_locs[0] = Coord(2,2);
+    fire_extinguished_locs[1] = Coord(2,3);
+    fire_extinguished_locs[2] = Coord(3,2);
+    fire_extinguished_locs[3] = Coord(3,3);
+
+    bool can_travel_to_fire_extinguish_locations = false;
+    Coord fire_extinguish_loc;
+    for (int i = 0; i < 4; i++) {
+        // findShortestPath (?)
+        Stack<Coord> possible_path = PathPlanning::findShortestPath(m_global_map, m_current_pose.coord, fire_extinguished_locs[i]);
+
+        if (isValid(possible_path.top())) {
+            can_travel_to_fire_extinguish_locations = true;
+            fire_extinguish_loc = fire_extinguished_locs[i];
+        }
+    }
+
+    // If there is a path to a fire extinguish location, then travel to it, otherwise, just explore
+    if (can_travel_to_fire_extinguish_locations) {
+        travelToBlock(m_global_map, m_current_pose, Pose(fire_extinguish_loc, DONTCARE));
+        findFire();
+    } else {
+        engageExploreMode();
+    }
+}
 
 void Main::findFire() {
     Serial.println("Finding Fire");
