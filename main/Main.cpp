@@ -303,7 +303,7 @@ void Main::setCorrectMap(MapLocation map[][GLOBAL_COL]) {
 bool Main::isLandmarkAhead() {
     double distance = m_ultrasonic_front.getDistance();
     Serial.println(distance);
-    if (distance < 44 || distance > 160)
+    if (distance < 44)
         return true;
     else
         return false;
@@ -356,57 +356,81 @@ void Main::getPossibleLandmarks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL
     double front_distance = 0, left_distance = 0, right_distance = 0, back_distance = 0;
 
     double left_ultrasonic_distance = m_ultrasonic_left.getDistance() / 30.3;
-    Serial.print("left: "); Serial.println(left_ultrasonic_distance);
     delay(500);
     double right_ultrasonic_distance = m_ultrasonic_right.getDistance() / 30.3;
-    Serial.print("right: "); Serial.println(right_ultrasonic_distance);
     delay(500);
     double front_ultrasonic_distance = m_ultrasonic_front.getDistance() / 30.3;
-    Serial.print("front: "); Serial.println(front_ultrasonic_distance);
     delay(500);
     double back_ultrasonic_distance = m_ultrasonic_back.getDistance() / 30.3;
-    Serial.print("back: "); Serial.println(back_ultrasonic_distance);
-
-    Serial.print("row: "); Serial.println(pose.coord.row);
-    Serial.print("col: "); Serial.println(pose.coord.col);
 
     switch (pose.orientation) {
     case NORTH:
-        double front_distance = front_ultrasonic_distance;
-        double back_distance = back_ultrasonic_distance;
-        double right_distance = right_ultrasonic_distance;
-        double left_distance = left_ultrasonic_distance;
+        front_distance = front_ultrasonic_distance;
+        back_distance = back_ultrasonic_distance;
+        right_distance = right_ultrasonic_distance;
+        left_distance = left_ultrasonic_distance;
         break;
     case SOUTH:
-        double front_distance = back_ultrasonic_distance;
-        double back_distance = front_ultrasonic_distance;
-        double right_distance = left_ultrasonic_distance;
-        double left_distance = right_ultrasonic_distance;
+        front_distance = back_ultrasonic_distance;
+        back_distance = front_ultrasonic_distance;
+        right_distance = left_ultrasonic_distance;
+        left_distance = right_ultrasonic_distance;
         break;
     case EAST:
-        double front_distance = left_ultrasonic_distance;
-        double back_distance = right_ultrasonic_distance;
-        double right_distance = front_ultrasonic_distance;
-        double left_distance = back_ultrasonic_distance;
+        front_distance = left_ultrasonic_distance;
+        back_distance = right_ultrasonic_distance;
+        right_distance = front_ultrasonic_distance;
+        left_distance = back_ultrasonic_distance;
         break;
     case WEST:
-        double front_distance = right_ultrasonic_distance;
-        double back_distance = left_ultrasonic_distance;
-        double right_distance = back_ultrasonic_distance;
-        double left_distance = front_ultrasonic_distance;
+        front_distance = right_ultrasonic_distance;
+        back_distance = left_ultrasonic_distance;
+        right_distance = back_ultrasonic_distance;
+        left_distance = front_ultrasonic_distance;
         break;
     default:
         Serial.println("UNKNOWN ORIENTATION");
     }
 
-    if(floor(front_distance) != pose.coord.row)
-        global_map[pose.coord.row - (int)floor(front_distance)][pose.coord.col].land_mark_spot = true;
-    if(5 - floor(back_distance) != pose.coord.row)
+    if(floor(front_distance) != pose.coord.row) {
+        global_map[pose.coord.row - (int)ceil(front_distance)][pose.coord.col].land_mark_spot = true;
+
+        for(int i = (int)ceil(front_distance); i < pose.coord.row; i++) {
+            global_map[i][pose.coord.col].searched = true;
+        }
+    } else {
+        for(int i = 0; i < pose.coord.row; i++) {
+            global_map[i][pose.coord.col].searched = true;
+        }
+    }
+    if(5 - floor(back_distance) != pose.coord.row) {
         global_map[(int)ceil(back_distance) + pose.coord.row][pose.coord.col].land_mark_spot = true;
-    if(floor(left_distance) != pose.coord.col)
-        global_map[pose.coord.row][pose.coord.col - (int)floor(left_distance)].land_mark_spot = true;
-    if(5 - floor(right_distance) != pose.coord.col)
+
+        for(int i = (int)ceil(back_distance); i > pose.coord.row; i--) {
+            global_map[i][pose.coord.col].searched = true;
+        }
+    } else {
+        for(int i = 5; i > pose.coord.row; i--) {
+            global_map[i][pose.coord.col].searched = true;
+    }
+    if(floor(left_distance) != pose.coord.col) {
+        global_map[pose.coord.row][pose.coord.col - (int)ceil(left_distance)].land_mark_spot = true;
+        for(int i = (int)ceil(left_distance); i < pose.coord.col; i++) {
+            global_map[pose.coord.row][i].searched = true;
+        }
+    } else {
+        for(int i = 0; i < pose.coord.row; i++) {
+            global_map[pose.coord.row][i].searched = true;
+    }
+    if(5 - floor(right_distance) != pose.coord.col) {
         global_map[pose.coord.row][(int)ceil(right_distance) + pose.coord.col].land_mark_spot = true;
+        for(int i = (int)ceil(right_distance); i > pose.coord.row; i--) {
+            global_map[pose.coord.row][i].searched = true;
+        }
+    } else {
+        for(int i = 5; i > pose.coord.row; i--) {
+            global_map[pose.coord.row][i].searched = true;
+    }
 }
 
 void Main::mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose start_pose) {
