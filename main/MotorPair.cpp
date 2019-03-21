@@ -34,10 +34,15 @@ MotorPair::MotorPair(Imu imu_sensor) {
 	m_imu_sensor = imu_sensor;
 }
 
-// MotorPair::MotorPair(Imu imu_sensor, Ultrasonic ultrasonic_front) {
-// 	m_imu_sensor = imu_sensor;
-// 	m_ultrasonic_front = ultrasonic_front;
-// }
+/* Max PWM for both motors to provide the same torque:
+	MAX: Motor A: 255, Motor B: 223
+	MIN: Motor A: 180, MOTOR B: 155
+	MIN: Motor A: 160, Motor B: 130
+	MIN: Motor A: 135, Motor B: 120
+
+	Right Turns are pretty garbage
+	Left Turns are pretty good at 255, 223 speed
+*/
 
 void MotorPair::setupMotorPair() {
 	m_orientation = m_imu_sensor.getEuler().x();

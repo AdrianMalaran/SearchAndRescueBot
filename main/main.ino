@@ -169,19 +169,6 @@ void setup() {
     // main_engine.turnLeft();
     // motor_pair.stop();
 
-    // test
-
-    /* Max PWM for both motors to provide the same torque:
-        MAX: Motor A: 255, Motor B: 223
-        MIN: Motor A: 180, MOTOR B: 155
-        MIN: Motor A: 160, Motor B: 130
-        MIN: Motor A: 135, Motor B: 120
-
-        Right Turns are garbage
-        Left Turns are pretty good at 255, 223 speed
-        Right Turns
-    */
-
     // Orientation orientation;
     // Queue<Instruction> ins;
     // ins.push(MOVE_FORWARD);

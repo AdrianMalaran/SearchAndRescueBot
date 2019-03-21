@@ -84,7 +84,7 @@ class Main {
         void mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose start_pose);
         bool isUnexplored(MapLocation global_map[][GLOBAL_COL], Coord coord);
         void mapBlockTerrainInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose, double start_mag, Coord block_to_map);
-        void mapBlockLandmarksInfront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL]);
+        void mapBlockLandMarkInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose, double start_mag, Coord block_to_map);;
         // void mapLandMarkInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose, double start_mag, Coord block_to_map);
         bool isFood(double mag);
         Landmark identifyLandMark();
@@ -160,10 +160,12 @@ class Main {
         bool m_deliver_food_to_group;
 
         bool m_food_mapped;
+        bool m_fire_mapped; // May not be necessary
         bool m_group_mapped;
         bool m_survivor_mapped;
 
         Coord m_food_location;
+        Coord m_fire_location; // May not be necessary
         Coord m_people_location;
         Coord m_survivor_location;
 

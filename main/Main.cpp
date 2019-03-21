@@ -75,11 +75,11 @@ void Main::init() {
 
     // START COORDINATE
     m_global_map[m_start_coord.row][m_start_coord.col].block_type = PARTICLE;
-    m_global_map[m_start_coord.row][m_start_coord.col].searched = PARTICLE;
+    m_global_map[m_start_coord.row][m_start_coord.col].searched = true;
 
     // BLOCK IMMEDIATELY NORTH - Assume these 2 blocks are unsearched
     m_global_map[m_start_coord.row-1][m_start_coord.col].block_type = PARTICLE;
-    m_global_map[m_start_coord.row][m_start_coord.col].searched = PARTICLE;
+    m_global_map[m_start_coord.row][m_start_coord.col].searched = true;
 
     // initialize global headings
     m_global_north_heading = m_imu_sensor.getEuler().x();
@@ -126,7 +126,7 @@ Task Main::getNextTask() {
     if (!m_map_discovered)
         return DISCOVER_MAP;
 
-    if (!m_extinguished_fire)
+    if (!m_extinguished_fire) // Should we take out the fire out immediately ?
         return EXTINGUISH_FIRE;
 
     //TODO: must take care of the case where we find the people first
@@ -166,6 +166,7 @@ void Main::engageExploreMode() {
     MapLocation unsearched_type_location(PARTICLE, false , NONE, false);
 
     Orientation finish_ori = DONTCARE;
+    //TODO: this is returning a closest_block_to_inteserest that returns a don't care orientation
     Coord explore_block = findClosestBlockToInterest(m_global_map, unsearched_type_location, m_current_pose.coord, finish_ori);
 
     if (!isValid(explore_block)) { // No Path Found
@@ -292,6 +293,8 @@ void Main::setCorrectMap(MapLocation map[][GLOBAL_COL]) {
     for (int i = 0; i < GLOBAL_ROW; i ++) {
         for (int j = 0; j < GLOBAL_COL; j++) {
             m_global_map[i][j].block_type = map[i][j].block_type;
+            if (m_global_map[i][j].block_type != PARTICLE)
+                m_global_map[i][j].searched = true;
         }
     }
 }
@@ -303,6 +306,8 @@ void Main::setCorrectMap(MapLocation map[][GLOBAL_COL]) {
 bool Main::isLandmarkAhead() {
     double distance = m_ultrasonic_front.getDistance();
     Serial.println(distance);
+    // First condition: Object directly in front
+    // Second condition: Object that is not diagonally
     if (distance < 44 || distance > 160)
         return true;
     else
@@ -439,6 +444,7 @@ void Main::mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], 
 
             // TODO: add mapLandMarksAhead();
             // mapBlockTerrainInFront(global_map, current_pose, start_mag, adjacent_blocks[i].coord);
+            mapBlockLandMarkInFront(global_map, current_pose, start_mag, adjacent_blocks[i].coord);
         }
 
     }
@@ -478,8 +484,56 @@ void Main::checkForLandMark(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL],
     if (map_location.land_mark_spot) {
         map_location.landmark = identifyLandMark();
 
-        // Mark Task as finished
-        m_deliver_food_to_group = false;
+        // SET block type as untraversable i.e. landmark
+        if (map_location.landmark == SURVIVOR) {
+            m_survivor_location = block_to_map;
+
+            // Mark Landmark location complete
+            m_survivor_mapped = true;
+            m_found_survivor = true;
+        }
+        else if (map_location.landmark == PEOPLE) {
+            m_people_location = block_to_map;
+
+            m_group_mapped = true;
+            m_found_people = true;
+
+            m_deliver_food_to_group = false;
+            Serial.print("Location of People: "); printCoord(m_people_location); Serial.println("");
+
+        }
+        else { // Marking Landmark as FIRE
+            m_fire_mapped = true;
+            m_fire_location = block_to_map;
+        }
+
+    }
+}
+
+void Main::mapBlockLandMarkInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose, double start_mag, Coord block_to_map) {
+    MapLocation testGrid[GLOBAL_ROW][GLOBAL_COL] =
+    {
+    //    0, 1, 2, 3, 4, 5
+        { MP, MP, MP, MG, MP, MP}, // 0
+        { MP, MS, MP, MP, MW, MP}, // 1
+        { MW, MP, MP, MS, MP, MP}, // 2
+        { MP, MP, MP, MP, MP, MG}, // 3
+        { MP, MG, MP, MP, MS, MP}, // 4
+        { MP, MP, MW, MP, MP, MP}  // 5
+    };
+    delay(2000);
+    Serial.println("Mapped Block: "); printCoord(block_to_map);
+
+    global_map[block_to_map.row][block_to_map.col] = testGrid[block_to_map.row][block_to_map.col];
+    global_map[block_to_map.row][block_to_map.col].searched = true;
+    Serial.println("New Map:");
+    printMap(global_map);
+    Serial.println("");
+    printSearchedMap(global_map);
+    return;
+
+    if(isLandmarkAhead()) {
+        // Set the global_map to that block
     }
 }
 
@@ -506,8 +560,7 @@ void Main::mapBlockTerrainInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_C
     //  { MP, MLS, MW, MP, MP, MP}};// 5
 
     MapLocation testGrid[GLOBAL_ROW][GLOBAL_COL] =
-    {
-    //    0, 1, 2, 3, 4, 5
+    {//    0, 1, 2, 3, 4, 5
         { MP, MP, MP, MG, MP, MP}, // 0
         { MP, MS, MP, MP, MW, MP}, // 1
         { MW, MP, MP, MS, MP, MP}, // 2
@@ -519,6 +572,7 @@ void Main::mapBlockTerrainInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_C
     Serial.println("Mapped Block: "); printCoord(block_to_map);
 
     global_map[block_to_map.row][block_to_map.col] = testGrid[block_to_map.row][block_to_map.col];
+    global_map[block_to_map.row][block_to_map.col].searched = true;
     Serial.println("New Map:");
     printMap(global_map);
     return;
@@ -849,18 +903,23 @@ void Main::moveForwardSetDistance(double distance, Orientation orientation) {
     // m_motor_pair.setMotorAPWM(TRAVEL_SPEED);
     // m_motor_pair.setMotorBPWM(TRAVEL_SPEED);
 
-    // Track each wheel separately
-    // Map distance to number of ticks that need to be range
-    // Encoder A and B should travel the same number of ticks
-    while (abs(m_encoder_A.read() - start_tick_a) < distance_in_ticks && abs(m_encoder_B.read() - start_tick_b) < distance_in_ticks) {
-        // Serial.println(abs(m_encoder_B.read()));
-        m_controller.driveStraightController(start_heading, m_imu_sensor.getEuler().x(), 200);
-        // if (m_encoder_A.read() >= distance_in_ticks)
-        //     m_motor_pair.setMotorAPWM(0);
-        // else if (m_encoder_B.read() >= distance_in_ticks)
-        //     m_motor_pair.setMotorBPWM(0);
-        // drivestraight
-    }
+    // double relative_start_distance = Ultrasonic()
+
+    // Validate Ultrasonic readings, use a stable value
+
+    while ()
+        // Track each wheel separately
+        // Map distance to number of ticks that need to be range
+        // Encoder A and B should travel the same number of ticks
+        while (abs(m_encoder_A.read() - start_tick_a) < distance_in_ticks && abs(m_encoder_B.read() - start_tick_b) < distance_in_ticks) {
+            // Serial.println(abs(m_encoder_B.read()));
+            m_controller.driveStraightController(start_heading, m_imu_sensor.getEuler().x(), 200);
+            // if (m_encoder_A.read() >= distance_in_ticks)
+            //     m_motor_pair.setMotorAPWM(0);
+            // else if (m_encoder_B.read() >= distance_in_ticks)
+            //     m_motor_pair.setMotorBPWM(0);
+            // drivestraight
+        }
 
     m_motor_pair.stop();
 
@@ -1044,24 +1103,21 @@ static void Main::executeInstructions(Queue<Instruction> instructions, Orientati
 
         if (ins == MOVE_FORWARD) {
             Serial.print("FORWARDS->");
-            //TODO:
-            // moveForwardOneBlock(30.0
-
+            // moveForwardOneBlock(30.0);
             // moveForwardSetDistance(30.0, current_orientation);
-            delay(1000);
+            delay(500);
         }
         else if (ins == MOVE_BACKWARD) {
             Serial.print("BACKWARDS->");
             // Map -> moveBackward()
             // moveBackwardOneBlock();
-            delay(1000);
+            delay(500);
         }
         else if (ins == ROTATE_RIGHT) {
             Serial.print("RIGHT->");
             current_orientation = (current_orientation + 1) % 4;
-            // m_motor_pair.turnRight();
             // turnRight(current_orientation);
-            delay(1000);
+            delay(500);
         }
         else if (ins == ROTATE_LEFT) {
             Serial.print("LEFT->");
@@ -1070,7 +1126,7 @@ static void Main::executeInstructions(Queue<Instruction> instructions, Orientati
             // turnLeft(current_orientation);
             // MotorPair::setMotorAPWM(-255);
             // MotorPair::setMotorBPWM(223);
-            delay(1000);
+            delay(500);
             // MotorPair::stop();
         }
     }
