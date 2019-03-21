@@ -306,9 +306,7 @@ void Main::setCorrectMap(MapLocation map[][GLOBAL_COL]) {
 bool Main::isLandmarkAhead() {
     double distance = m_ultrasonic_front.getDistance();
     Serial.println(distance);
-    // First condition: Object directly in front
-    // Second condition: Object that is not diagonally
-    if (distance < 44 || distance > 160)
+    if (distance < 44)
         return true;
     else
         return false;
@@ -325,13 +323,18 @@ Landmark Main::identifyLandMark() {
 
 Coord Main::getGlobalPosition(Orientation orientation) {
     double left_distance = m_ultrasonic_left.getDistance() / 30.3;
+    Serial.println(left_distance);
     delay(500);
     double right_distance = m_ultrasonic_right.getDistance() / 30.3;
+    Serial.println(right_distance);
     delay(500);
     double front_distance = m_ultrasonic_front.getDistance() / 30.3;
+    Serial.println(front_distance);
     delay(500);
     double back_distance = m_ultrasonic_back.getDistance() / 30.3;
+    Serial.println(back_distance);
 
+    Serial.println(fabs((left_distance + right_distance) - 5));
     if (fabs((left_distance + right_distance) - 5) < 1 && fabs((front_distance + back_distance) - 5) < 1) {
         switch (orientation) {
         case NORTH:
@@ -353,53 +356,86 @@ Coord Main::getGlobalPosition(Orientation orientation) {
 }
 
 void Main::getPossibleLandmarks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose) {
-    double left_distance = m_ultrasonic_left.getDistance() / 30.3;
+    double front_distance = 0, left_distance = 0, right_distance = 0, back_distance = 0;
+
+    double left_ultrasonic_distance = m_ultrasonic_left.getDistance() / 30.3;
     delay(500);
-    double right_distance = m_ultrasonic_right.getDistance() / 30.3;
+    double right_ultrasonic_distance = m_ultrasonic_right.getDistance() / 30.3;
     delay(500);
-    double front_distance = m_ultrasonic_front.getDistance() / 30.3;
+    double front_ultrasonic_distance = m_ultrasonic_front.getDistance() / 30.3;
     delay(500);
-    double back_distance = m_ultrasonic_back.getDistance() / 30.3;
+    double back_ultrasonic_distance = m_ultrasonic_back.getDistance() / 30.3;
 
     switch (pose.orientation) {
     case NORTH:
-        if(floor(front_distance) != pose.coord.row)
-            global_map[(int)floor(front_distance)][pose.coord.col].land_mark_spot = true;
-        if(ceil(back_distance) != pose.coord.row)
-            global_map[(int)ceil(front_distance)][pose.coord.col].land_mark_spot = true;
-        if(floor(left_distance) != pose.coord.col)
-            global_map[pose.coord.row][(int)floor(left_distance)].land_mark_spot = true;
-        if(ceil(right_distance) != pose.coord.col)
-            global_map[pose.coord.row][(int)ceil(right_distance)].land_mark_spot = true;
+        front_distance = front_ultrasonic_distance;
+        back_distance = back_ultrasonic_distance;
+        right_distance = right_ultrasonic_distance;
+        left_distance = left_ultrasonic_distance;
+        break;
     case SOUTH:
-        if(ceil(front_distance) != pose.coord.row)
-            global_map[(int)ceil(front_distance)][pose.coord.col].land_mark_spot = true;
-        if(floor(back_distance) != pose.coord.row)
-            global_map[(int)floor(front_distance)][pose.coord.col].land_mark_spot = true;
-        if(ceil(left_distance) != pose.coord.col)
-            global_map[pose.coord.row][(int)ceil(left_distance)].land_mark_spot = true;
-        if(floor(right_distance) != pose.coord.col)
-            global_map[pose.coord.row][(int)floor(right_distance)].land_mark_spot = true;
+        front_distance = back_ultrasonic_distance;
+        back_distance = front_ultrasonic_distance;
+        right_distance = left_ultrasonic_distance;
+        left_distance = right_ultrasonic_distance;
+        break;
     case EAST:
-        if(floor(front_distance) != pose.coord.col)
-            global_map[pose.coord.row][(int)floor(front_distance)].land_mark_spot = true;
-        if(ceil(back_distance) != pose.coord.col)
-            global_map[pose.coord.row][(int)ceil(front_distance)].land_mark_spot = true;
-        if(ceil(left_distance) != pose.coord.row)
-            global_map[(int)ceil(left_distance)][pose.coord.col].land_mark_spot = true;
-        if(floor(right_distance) != pose.coord.row)
-            global_map[(int)floor(right_distance)][pose.coord.col].land_mark_spot = true;
+        front_distance = left_ultrasonic_distance;
+        back_distance = right_ultrasonic_distance;
+        right_distance = front_ultrasonic_distance;
+        left_distance = back_ultrasonic_distance;
+        break;
     case WEST:
-        if(ceil(front_distance) != pose.coord.col)
-            global_map[pose.coord.row][(int)ceil(front_distance)].land_mark_spot = true;
-        if(floor(back_distance) != pose.coord.col)
-            global_map[pose.coord.row][(int)floor(front_distance)].land_mark_spot = true;
-        if(floor(left_distance) != pose.coord.row)
-            global_map[(int)floor(left_distance)][pose.coord.col].land_mark_spot = true;
-        if(ceil(right_distance) != pose.coord.row)
-            global_map[(int)ceil(right_distance)][pose.coord.col].land_mark_spot = true;
+        front_distance = right_ultrasonic_distance;
+        back_distance = left_ultrasonic_distance;
+        right_distance = back_ultrasonic_distance;
+        left_distance = front_ultrasonic_distance;
+        break;
     default:
         Serial.println("UNKNOWN ORIENTATION");
+    }
+
+    if(floor(front_distance) != pose.coord.row) {
+        global_map[pose.coord.row - (int)ceil(front_distance)][pose.coord.col].land_mark_spot = true;
+
+        for(int i = (int)ceil(front_distance); i < pose.coord.row; i++) {
+            global_map[i][pose.coord.col].searched = true;
+        }
+    } else {
+        for(int i = 0; i < pose.coord.row; i++) {
+            global_map[i][pose.coord.col].searched = true;
+        }
+    }
+    if(5 - floor(back_distance) != pose.coord.row) {
+        global_map[(int)ceil(back_distance) + pose.coord.row][pose.coord.col].land_mark_spot = true;
+
+        for(int i = (int)ceil(back_distance); i > pose.coord.row; i--) {
+            global_map[i][pose.coord.col].searched = true;
+        }
+    } else {
+        for(int i = 5; i > pose.coord.row; i--) {
+            global_map[i][pose.coord.col].searched = true;
+        }
+    }
+    if(floor(left_distance) != pose.coord.col) {
+        global_map[pose.coord.row][pose.coord.col - (int)ceil(left_distance)].land_mark_spot = true;
+        for(int i = (int)ceil(left_distance); i < pose.coord.col; i++) {
+            global_map[pose.coord.row][i].searched = true;
+        }
+    } else {
+        for(int i = 0; i < pose.coord.row; i++) {
+            global_map[pose.coord.row][i].searched = true;
+        }
+    }
+    if(5 - floor(right_distance) != pose.coord.col) {
+        global_map[pose.coord.row][(int)ceil(right_distance) + pose.coord.col].land_mark_spot = true;
+        for(int i = (int)ceil(right_distance); i > pose.coord.row; i--) {
+            global_map[pose.coord.row][i].searched = true;
+        }
+    } else {
+        for(int i = 5; i > pose.coord.row; i--) {
+            global_map[pose.coord.row][i].searched = true;
+        }
     }
 }
 

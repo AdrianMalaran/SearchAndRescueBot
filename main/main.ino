@@ -175,6 +175,23 @@ void setup() {
     // ins.push(ROTATE_LEFT);
     // ins.push(MOVE_FORWARD);
     // main_engine.executeInstructions(ins, orientation);
+
+    Pose our_pose(Coord(3,4), NORTH);
+    main_engine.getPossibleLandmarks(main_engine.m_global_map, our_pose);
+    for(int i = 0; i < 6; i++) {
+        for(int j = 0; j < 6; j++) {
+            Serial.print(main_engine.m_global_map[i][j].land_mark_spot); Serial.print(" ");
+        }
+        Serial.println("");
+    }
+    Serial.println("");
+
+    for(int i = 0; i < 6; i++) {
+        for(int j = 0; j < 6; j++) {
+            Serial.print(main_engine.m_global_map[i][j].searched); Serial.print(" ");
+        }
+        Serial.println("");
+    }
 }
 
 int counter = 0;
@@ -189,21 +206,8 @@ void loop() {
     }
 
     counter ++;
-    // Serial.println("Getting Possible Landmarks");
-    // Coord our_pos = Coord(2,3);
-    // main_engine.getPossibleLandmarks(main_engine.m_global_map, Pose(our_pos, NORTH));
-    // // printMap(main_engine.m_global_map);
-    //
-    // for (int i = 0; i < GLOBAL_ROW; i ++) {
-    //     for (int j = 0; j < GLOBAL_COL; j++) {
-    //         Serial.print(main_engine.m_global_map[i][j].land_mark_spot); Serial.print(" ");
-    //     }
-    //     Serial.println("");
-    //
-    // }
-    // Serial.println("");
-    // Serial.println("");
 
+    Serial.println(color_front.getStructureColor());
 
     // Serial.print("Front: "); Serial.print(ultrasonic_front.getDistance());
     // Serial.print(" Back: "); Serial.print(ultrasonic_back.getDistance());

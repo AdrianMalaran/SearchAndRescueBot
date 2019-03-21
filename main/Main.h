@@ -136,6 +136,7 @@ class Main {
         double m_global_east_heading;
         double m_global_south_heading;
         double m_global_west_heading;
+
         MapLocation m_global_map[GLOBAL_ROW][GLOBAL_COL];
 
     private:
