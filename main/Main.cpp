@@ -484,47 +484,57 @@ void Main::getPossibleLandmarks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL
     default:
         Serial.println("UNKNOWN ORIENTATION");
     }
+    if(floor(front_distance) <= 5) {
+        if(floor(front_distance) != pose.coord.row) {
+            global_map[pose.coord.row - (int)ceil(front_distance)][pose.coord.col].land_mark_spot = true;
 
-    if(floor(front_distance) != pose.coord.row && floor(front_distance) <= 5) {
-        global_map[pose.coord.row - (int)ceil(front_distance)][pose.coord.col].land_mark_spot = true;
-
-        for(int i = (pose.coord.row - (int)floor(front_distance)); i < pose.coord.row; i++) {
-            global_map[i][pose.coord.col].searched = true;
-        }
-    } else {
-        for(int i = 0; i < pose.coord.row; i++) {
-            global_map[i][pose.coord.col].searched = true;
+            for(int i = (pose.coord.row - (int)floor(front_distance)); i < pose.coord.row; i++) {
+                global_map[i][pose.coord.col].searched = true;
+            }
+        } else {
+            for(int i = 0; i < pose.coord.row; i++) {
+                global_map[i][pose.coord.col].searched = true;
+            }
         }
     }
-    if(5 - floor(back_distance) != pose.coord.row && floor(back_distance) <= 5) {
-        global_map[(int)ceil(back_distance) + pose.coord.row][pose.coord.col].land_mark_spot = true;
 
-        for(int i = pose.coord.row + (int)floor(back_distance); i > pose.coord.row; i--) {
-            global_map[i][pose.coord.col].searched = true;
-        }
-    } else {
-        for(int i = 5; i > pose.coord.row; i--) {
-            global_map[i][pose.coord.col].searched = true;
-        }
-    }
-    if(floor(left_distance) != pose.coord.col && floor(left_distance) <= 5) {
-        global_map[pose.coord.row][pose.coord.col - (int)ceil(left_distance)].land_mark_spot = true;
-        for(int i = pose.coord.col - (int)floor(left_distance); i < pose.coord.col; i++) {
-            global_map[pose.coord.row][i].searched = true;
-        }
-    } else {
-        for(int i = 0; i < pose.coord.col; i++) {
-            global_map[pose.coord.row][i].searched = true;
+    if(floor(back_distance) <= 5) {
+        if(5 - floor(back_distance) != pose.coord.row) {
+            global_map[(int)ceil(back_distance) + pose.coord.row][pose.coord.col].land_mark_spot = true;
+
+            for(int i = pose.coord.row + (int)floor(back_distance); i > pose.coord.row; i--) {
+                global_map[i][pose.coord.col].searched = true;
+            }
+        } else {
+            for(int i = 5; i > pose.coord.row; i--) {
+                global_map[i][pose.coord.col].searched = true;
+            }
         }
     }
-    if(5 - floor(right_distance) != pose.coord.col && floor(right_distance) <= 5) {
-        global_map[pose.coord.row][(int)ceil(right_distance) + pose.coord.col].land_mark_spot = true;
-        for(int i = pose.coord.col + (int)floor(right_distance); i > pose.coord.col; i--) {
-            global_map[pose.coord.row][i].searched = true;
+
+    if(floor(left_distance) <= 5) {
+        if(floor(left_distance) != pose.coord.col) {
+            global_map[pose.coord.row][pose.coord.col - (int)ceil(left_distance)].land_mark_spot = true;
+            for(int i = pose.coord.col - (int)floor(left_distance); i < pose.coord.col; i++) {
+                global_map[pose.coord.row][i].searched = true;
+            }
+        } else {
+            for(int i = 0; i < pose.coord.col; i++) {
+                global_map[pose.coord.row][i].searched = true;
+            }
         }
-    } else {
-        for(int i = 5; i > pose.coord.col; i--) {
-            global_map[pose.coord.row][i].searched = true;
+    }
+
+    if(floor(right_distance) <= 5) {
+        if(5 - floor(right_distance) != pose.coord.col) {
+            global_map[pose.coord.row][(int)ceil(right_distance) + pose.coord.col].land_mark_spot = true;
+            for(int i = pose.coord.col + (int)floor(right_distance); i > pose.coord.col; i--) {
+                global_map[pose.coord.row][i].searched = true;
+            }
+        } else {
+            for(int i = 5; i > pose.coord.col; i--) {
+                global_map[pose.coord.row][i].searched = true;
+            }
         }
     }
 }
