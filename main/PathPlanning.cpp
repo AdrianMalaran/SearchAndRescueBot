@@ -103,6 +103,7 @@ static Stack<Coord> PathPlanning::findShortestPath(MapLocation grid[][GLOBAL_COL
 
     if (!isUnblocked(grid, start) || !isUnblocked(grid, dest)) {
         Serial.println("Source is blocked!");
+        path.push(Coord(-1, -1));
         return path;
     }
 

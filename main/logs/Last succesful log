@@ -1,0 +1,919 @@
+Running Tests
+Initializing Main Engine...
+Imu Started...
+Updating Location to (5,3, NORTH)
+Enaging Objective Mode w/ Searched Map!
+Searched Block Locations
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 1 0 0
+0 0 0 1 0 0
+Discovering Correct Map ...
+Travelling from (5,3, NORTH) to (5,3, WEST)
+Executing Instructions...
+LEFT->Start Heading: 0.00 End Heading: 270.00
+
+Last Orientation: WEST
+Updating Location to (5,3, WEST)
+New Distance to travel: 8.50
+Moved forward
+9.00 cm.
+R: 122 G: 129 B: 136 C: 407
+UNKNOWN
+Terrain Type Detected:
+R: 130 G: 139 B: 149 C: 439
+UNKNOWN
+Terrain Type Detected:
+R: 117 G: 128 B: 139 C: 403
+UNKNOWN
+Terrain Type Detected:
+R: 81 G: 95 B: 108 C: 296
+SAND
+New Distance to travel: 706.90
+Travelling from (5,3, WEST) to (4,3, EAST)
+Executing Instructions...
+RIGHT->Start Heading: 272.44 End Heading: 0.00
+FORWARDS->New Distance to travel: 29.95
+New Distance to travel: 3.59
+New Distance to travel: 2.93
+New Distance to travel: 2.63
+New Distance to travel: 1.79
+New Distance to travel: 1.08
+Moved forward
+30.00 cm.
+RIGHT->Start Heading: 356.75 End Heading: 90.00
+
+Last Orientation: EAST
+Updating Location to (4,3, EAST)
+New Distance to travel: 8.31
+New Distance to travel: 5.64
+New Distance to travel: 6.02
+New Distance to travel: 5.21
+New Distance to travel: 6.02
+New Distance to travel: 6.38
+New Distance to travel: 5.90
+New Distance to travel: 5.64
+New Distance to travel: 6.39
+New Distance to travel: 5.76
+Moved forward
+9.00 cm.
+R: 132 G: 145 B: 159 C: 456
+UNKNOWN
+Terrain Type Detected:
+R: 135 G: 148 B: 160 C: 465
+UNKNOWN
+Terrain Type Detected:
+R: 135 G: 148 B: 160 C: 464
+UNKNOWN
+Terrain Type Detected:
+R: 110 G: 124 B: 138 C: 389
+UNKNOWN
+Terrain Type Detected:
+R: 86 G: 101 B: 116 C: 317
+SAND
+New Distance to travel: 715.04
+BlockType Map
+O O O X O O
+O S O O X O
+X O O O O O
+O O S O O X
+O X O O S O
+O O X O O O
+Map Set
+TASK: Extinguishing Fire
+Travelling to fire extinguishing location
+Source is blocked!
+Source is blocked!
+Source is blocked!
+Source is blocked!
+Can't travel to a fire extinguishing location
+Enaging Explore Mode!
+Printing global searched map:
+Searched Block Locations
+0 0 0 1 0 0
+0 1 0 0 1 0
+1 0 0 0 0 0
+0 0 1 0 0 1
+0 1 0 1 1 0
+0 0 1 1 0 0
+Returning a unsearched block neighbor
+(3,3)
+Neighbor matches condition!(3,3)
+Block to explore: (4,3, NORTH)
+Travelling from (4,3, EAST) to (4,3, NORTH)
+Executing Instructions...
+LEFT->Start Heading: 95.56 End Heading: 0.00
+
+Last Orientation: NORTH
+Updating Location to (4,3, NORTH)
+Mapping Adjacent Blocks...
+Mapping
+2.13 2.16 1.43 3.11
+BlockType Map
+O O O X O O
+O S O O X O
+X O O O O O
+O O S O O X
+O X O O S O
+O O X O O O
+Searched map
+Searched Block Locations
+0 0 0 1 0 0
+0 1 0 0 1 0
+1 0 0 1 0 0
+0 0 1 1 0 1
+1 1 1 1 1 1
+0 0 1 1 0 0
+Got possible landmarks
+Mapped adjacent blocks!
+End of travelToFireExtinguishLocation
+TRY TO EXTINGUISH A FIRE
+Enaging Objective Mode w/ Searched Map!
+Searched Block Locations
+0 0 0 1 0 0
+0 1 0 0 1 0
+1 0 0 1 0 0
+0 0 1 1 0 1
+1 1 1 1 1 1
+0 0 1 1 0 0
+TASK: Extinguishing Fire
+Travelling to fire extinguishing location
+Possible travel location found
+(4,3)
+CAN travel to fire
+Travelling from (4,3, NORTH) to (3,3, DONTCARE)
+Executing Instructions...
+FORWARDS->New Distance to travel: 30.43
+New Distance to travel: -0.22
+Moved forward
+30.00 cm.
+
+Last Orientation: NORTH
+Updating Location to (3,3, NORTH)
+Finding Fire
+2
+Breaking
+Fire Detected, Stop Motors
+Fire Extinguished.
+End of travelToFireExtinguishLocation
+TRY TO EXTINGUISH A FIRE
+Enaging Objective Mode w/ Searched Map!
+Searched Block Locations
+0 0 0 1 0 0
+0 1 0 0 1 0
+1 0 0 1 0 0
+0 0 1 1 0 1
+1 1 1 1 1 1
+0 0 1 1 0 0
+TASK: Extinguishing Fire
+Travelling to fire extinguishing location
+Possible travel location found
+(3,3)
+CAN travel to fire
+Travelling from (3,3, NORTH) to (3,3, DONTCARE)
+Updating Location to (3,3, NORTH)
+Finding Fire
+Fire Detected, Stop Motors
+Fire Extinguished.
+End of travelToFireExtinguishLocation
+Given task is unspecified
+Exploring
+Enaging Explore Mode!
+Printing global searched map:
+Searched Block Locations
+0 0 0 1 0 0
+0 1 0 0 1 0
+1 0 0 1 0 0
+0 0 1 1 0 1
+1 1 1 1 1 1
+0 0 1 1 0 0
+Returning a unsearched block neighbor
+(2,3)
+Returning a unsearched block neighbor
+(4,3)
+Returning a unsearched block neighbor
+(3,2)
+Returning a unsearched block neighbor
+(3,4)
+Neighbor matches condition!(3,4)
+Block to explore: (3,3, EAST)
+Travelling from (3,3, NORTH) to (3,3, EAST)
+Executing Instructions...
+RIGHT->Start Heading: 348.81 End Heading: 90.00
+
+Last Orientation: EAST
+Updating Location to (3,3, EAST)
+Mapping Adjacent Blocks...
+Mapping
+2.32 1.94 3.05 1.66
+BlockType Map
+O O O X O O
+O S O O X O
+X O O O O O
+O O S O O X
+O X O O S O
+O O X O O O
+Searched map
+Searched Block Locations
+0 0 0 1 0 0
+0 1 0 0 1 0
+1 0 0 1 0 0
+1 1 1 1 1 1
+1 1 1 1 1 1
+0 0 1 1 0 0
+Got possible landmarks
+Mapped adjacent blocks!
+Given task is unspecified
+Exploring
+Enaging Explore Mode!
+Printing global searched map:
+Searched Block Locations
+0 0 0 1 0 0
+0 1 0 0 1 0
+1 0 0 1 0 0
+1 1 1 1 1 1
+1 1 1 1 1 1
+0 0 1 1 0 0
+Returning a unsearched block neighbor
+(2,3)
+Returning a unsearched block neighbor
+(4,3)
+Returning a unsearched block neighbor
+(3,2)
+Returning a unsearched block neighbor
+(3,4)
+Returning a unsearched block neighbor
+(1,3)
+Neighbor matches condition!(1,3)
+Block to explore: (2,3, NORTH)
+Travelling from (3,3, EAST) to (2,3, NORTH)
+Executing Instructions...
+LEFT->Start Heading: 87.94 End Heading: 0.00
+FORWARDS->New Distance to travel: 30.67
+New Distance to travel: 0.60
+New Distance to travel: 0.54
+New Distance to travel: -0.34
+Moved forward
+30.00 cm.
+
+Last Orientation: NORTH
+Updating Location to (2,3, NORTH)
+Mapping Adjacent Blocks...
+Mapping
+0.34 2.19 3.20 3.06
+BlockType Map
+O O O X O O
+O S O O X O
+X O O O O O
+O O S O O X
+O X O O S O
+O O X O O O
+Searched map
+Searched Block Locations
+0 0 0 1 0 0
+0 1 0 0 1 0
+1 1 1 1 1 1
+1 1 1 1 1 1
+1 1 1 1 1 1
+0 0 1 1 0 0
+Got possible landmarks
+Checking Orientation: NORTH
+already in position
+Mapping Block in front
+Map block landmark in front...
+Dist to travel: -0.78
+Moved forward
+-0.78 cm.
+checkForLandMark()
+10.06
+H: 181.06 S: 0.26 V: 0.0024
+H: 201.22 S: 0.29 V: 0.0027
+Location of People: (1,3)
+checkForLandMark() end
+end of map block landmark in front. New Map:
+BlockType Map
+O O O X O O
+O S O L X O
+X O O O O O
+O O S O O X
+O X O O S O
+O O X O O O
+Mapped adjacent blocks!
+Given task is unspecified
+Exploring
+Enaging Explore Mode!
+Printing global searched map:
+Searched Block Locations
+0 0 0 1 0 0
+0 1 0 1 1 0
+1 1 1 1 1 1
+1 1 1 1 1 1
+1 1 1 1 1 1
+0 0 1 1 0 0
+Returning a unsearched block neighbor
+(1,3)
+Returning a unsearched block neighbor
+(3,3)
+Returning a unsearched block neighbor
+(2,2)
+Returning a unsearched block neighbor
+(2,4)
+Returning a unsearched block neighbor
+(2,3)
+Returning a unsearched block neighbor
+(4,3)
+Returning a unsearched block neighbor
+(3,2)
+Returning a unsearched block neighbor
+(3,4)
+Returning a unsearched block neighbor
+(1,2)
+Neighbor matches condition!(1,2)
+Block to explore: (2,2, NORTH)
+Travelling from (2,3, NORTH) to (2,2, NORTH)
+Executing Instructions...
+LEFT->Start Heading: 358.44 End Heading: 270.00
+FORWARDS->New Distance to travel: 29.66
+New Distance to travel: 0.12
+New Distance to travel: -0.56
+New Distance to travel: -0.36
+Moved forward
+30.00 cm.
+RIGHT->Start Heading: 269.31 End Heading: 0.00
+
+Last Orientation: NORTH
+Updating Location to (2,2, NORTH)
+Mapping Adjacent Blocks...
+Mapping
+2.31 3.20 3.05 2.05
+BlockType Map
+O O O X O O
+O S O L X O
+X O O O O O
+O O S O O X
+O X O O S O
+O O X O O O
+Searched map
+Searched Block Locations
+0 0 1 1 0 0
+0 1 1 1 1 0
+1 1 1 1 1 1
+1 1 1 1 1 1
+1 1 1 1 1 1
+0 0 1 1 0 0
+Got possible landmarks
+Mapped adjacent blocks!
+Given task is unspecified
+Exploring
+Enaging Explore Mode!
+Printing global searched map:
+Searched Block Locations
+0 0 1 1 0 0
+0 1 1 1 1 0
+1 1 1 1 1 1
+1 1 1 1 1 1
+1 1 1 1 1 1
+0 0 1 1 0 0
+Returning a unsearched block neighbor
+(1,2)
+Returning a unsearched block neighbor
+(3,2)
+Returning a unsearched block neighbor
+(2,1)
+Returning a unsearched block neighbor
+(2,3)
+Returning a unsearched block neighbor
+(0,2)
+Returning a unsearched block neighbor
+(2,2)
+Returning a unsearched block neighbor
+(1,1)
+Returning a unsearched block neighbor
+(1,3)
+Returning a unsearched block neighbor
+(1,1)
+Returning a unsearched block neighbor
+(3,1)
+Returning a unsearched block neighbor
+(2,0)
+Returning a unsearched block neighbor
+(2,2)
+Returning a unsearched block neighbor
+(1,3)
+Returning a unsearched block neighbor
+(3,3)
+Returning a unsearched block neighbor
+(2,2)
+Returning a unsearched block neighbor
+(2,4)
+Returning a unsearched block neighbor
+(1,2)
+Returning a unsearched block neighbor
+(0,1)
+Neighbor matches condition!(0,1)
+Block to explore: (0,2, WEST)
+Travelling from (2,2, NORTH) to (0,2, WEST)
+Executing Instructions...
+FORWARDS->New Distance to travel: 30.00
+New Distance to travel: 1.55
+New Distance to travel: 1.75
+New Distance to travel: 1.48
+New Distance to travel: 0.18
+Moved forward
+30.00 cm.
+FORWARDS->New Distance to travel: 30.03
+New Distance to travel: 7.99
+New Distance to travel: 7.91
+New Distance to travel: 7.39
+New Distance to travel: 7.03
+New Distance to travel: 6.36
+New Distance to travel: 6.23
+New Distance to travel: 5.59
+New Distance to travel: 5.16
+New Distance to travel: 4.87
+New Distance to travel: 4.43
+New Distance to travel: 4.07
+New Distance to travel: 3.57
+New Distance to travel: 3.33
+New Distance to travel: 2.15
+New Distance to travel: 1.41
+New Distance to travel: 1.70
+New Distance to travel: 0.28
+New Distance to travel: -0.36
+Moved forward
+30.00 cm.
+LEFT->Start Heading: 356.19 End Heading: 270.00
+
+Last Orientation: WEST
+Updating Location to (0,2, WEST)
+Mapping Adjacent Blocks...
+Mapping
+1.89 0.15 3.48 4.45
+BlockType Map
+O O O X O O
+O S O L X O
+X O O O O O
+O O S O O X
+O X O O S O
+O O X O O O
+Searched map
+Searched Block Locations
+0 1 1 1 1 1
+0 1 1 1 1 0
+1 1 1 1 1 1
+1 1 1 1 1 1
+1 1 1 1 1 1
+0 0 1 1 0 0
+Got possible landmarks
+Mapped adjacent blocks!
+Given task is unspecified
+Exploring
+Enaging Explore Mode!
+Printing global searched map:
+Searched Block Locations
+0 1 1 1 1 1
+0 1 1 1 1 0
+1 1 1 1 1 1
+1 1 1 1 1 1
+1 1 1 1 1 1
+0 0 1 1 0 0
+Returning a unsearched block neighbor
+(1,2)
+Returning a unsearched block neighbor
+(0,1)
+Returning a unsearched block neighbor
+(0,3)
+Returning a unsearched block neighbor
+(0,2)
+Returning a unsearched block neighbor
+(2,2)
+Returning a unsearched block neighbor
+(1,1)
+Returning a unsearched block neighbor
+(1,3)
+Returning a unsearched block neighbor
+(1,1)
+Returning a unsearched block neighbor
+(0,0)
+Neighbor matches condition!(0,0)
+Block to explore: (0,1, WEST)
+Travelling from (0,2, WEST) to (0,1, WEST)
+Executing Instructions...
+FORWARDS->New Distance to travel: 30.17
+New Distance to travel: 1.19
+New Distance to travel: 1.19
+New Distance to travel: 0.52
+New Distance to travel: -0.25
+Moved forward
+30.00 cm.
+
+Last Orientation: WEST
+Updating Location to (0,1, WEST)
+Mapping Adjacent Blocks...
+Mapping
+0.83 0.18 4.52 4.18
+BlockType Map
+O O O X O O
+O S O L X O
+X O O O O O
+O O S O O X
+O X O O S O
+O O X O O O
+Searched map
+Searched Block Locations
+0 1 1 1 1 1
+0 1 1 1 1 0
+1 1 1 1 1 1
+1 1 1 1 1 1
+1 1 1 1 1 1
+0 0 1 1 0 0
+Got possible landmarks
+Checking Orientation: WEST
+already in position
+Mapping Block in front
+Map block landmark in front...
+Dist to travel: 14.16
+New Distance to travel: 14.08
+New Distance to travel: 0.98
+New Distance to travel: 0.62
+New Distance to travel: -0.18
+New Distance to travel: -1.04
+Moved forward
+14.16 cm.
+checkForLandMark()
+8.54
+H: 194.34 S: 0.17 V: 0.0032
+H: 193.71 S: 0.16 V: 0.0034
+Location of People: (0,0)
+checkForLandMark() end
+New Distance to travel: 1100.58
+end of map block landmark in front. New Map:
+BlockType Map
+L O O X O O
+O S O L X O
+X O O O O O
+O O S O O X
+O X O O S O
+O O X O O O
+Mapped adjacent blocks!
+Given task is unspecified
+Exploring
+Enaging Explore Mode!
+Printing global searched map:
+Searched Block Locations
+1 1 1 1 1 1
+0 1 1 1 1 0
+1 1 1 1 1 1
+1 1 1 1 1 1
+1 1 1 1 1 1
+0 0 1 1 0 0
+Returning a unsearched block neighbor
+(1,1)
+Returning a unsearched block neighbor
+(0,0)
+Returning a unsearched block neighbor
+(0,2)
+Returning a unsearched block neighbor
+(1,2)
+Returning a unsearched block neighbor
+(0,1)
+Returning a unsearched block neighbor
+(0,3)
+Returning a unsearched block neighbor
+(0,2)
+Returning a unsearched block neighbor
+(2,2)
+Returning a unsearched block neighbor
+(1,1)
+Returning a unsearched block neighbor
+(1,3)
+Returning a unsearched block neighbor
+(1,2)
+Returning a unsearched block neighbor
+(3,2)
+Returning a unsearched block neighbor
+(2,1)
+Returning a unsearched block neighbor
+(2,3)
+Returning a unsearched block neighbor
+(1,1)
+Returning a unsearched block neighbor
+(3,1)
+Returning a unsearched block neighbor
+(2,0)
+Returning a unsearched block neighbor
+(2,2)
+Returning a unsearched block neighbor
+(1,3)
+Returning a unsearched block neighbor
+(3,3)
+Returning a unsearched block neighbor
+(2,2)
+Returning a unsearched block neighbor
+(2,4)
+Returning a unsearched block neighbor
+(2,1)
+Returning a unsearched block neighbor
+(4,1)
+Returning a unsearched block neighbor
+(3,0)
+Returning a unsearched block neighbor
+(3,2)
+Returning a unsearched block neighbor
+(2,3)
+Returning a unsearched block neighbor
+(4,3)
+Returning a unsearched block neighbor
+(3,2)
+Returning a unsearched block neighbor
+(3,4)
+Returning a unsearched block neighbor
+(1,4)
+Returning a unsearched block neighbor
+(3,4)
+Returning a unsearched block neighbor
+(2,3)
+Returning a unsearched block neighbor
+(2,5)
+Returning a unsearched block neighbor
+(2,0)
+Returning a unsearched block neighbor
+(4,0)
+Returning a unsearched block neighbor
+(3,1)
+Returning a unsearched block neighbor
+(3,3)
+Returning a unsearched block neighbor
+(5,3)
+Returning a unsearched block neighbor
+(4,2)
+Returning a unsearched block neighbor
+(4,4)
+Returning a unsearched block neighbor
+(2,4)
+Returning a unsearched block neighbor
+(4,4)
+Returning a unsearched block neighbor
+(3,3)
+Returning a unsearched block neighbor
+(3,5)
+Returning a unsearched block neighbor
+(1,5)
+Neighbor matches condition!(1,5)
+Block to explore: (2,5, NORTH)
+Travelling from (0,1, WEST) to (2,5, NORTH)
+Executing Instructions...
+LEFT->Start Heading: 270.94 End Heading: 180.00
+LEFT->Start Heading: 185.94 End Heading: 90.00
+FORWARDS->New Distance to travel: 30.45
+New Distance to travel: -6.90
+Moved forward
+30.00 cm.
+RIGHT->Start Heading: 89.94 End Heading: 180.00
+FORWARDS->New Distance to travel: 30.05
+Moved forward
+30.00 cm.
+FORWARDS->New Distance to travel: 42.15
+New Distance to travel: 10.79
+New Distance to travel: 9.72
+New Distance to travel: -5.17
+Moved forward
+30.00 cm.
+LEFT->Start Heading: 178.31 End Heading: 90.00
+FORWARDS->New Distance to travel: 29.02
+New Distance to travel: 1.36
+Moved forward
+30.00 cm.
+FORWARDS->New Distance to travel: 29.28
+Moved forward
+30.00 cm.
+FORWARDS->New Distance to travel: 29.64
+New Distance to travel: 6.09
+New Distance to travel: 6.33
+New Distance to travel: 5.99
+New Distance to travel: 4.36
+New Distance to travel: 3.33
+New Distance to travel: 2.13
+New Distance to travel: 1.14
+New Distance to travel: 0.24
+Moved forward
+30.00 cm.
+LEFT->Start Heading: 89.69 End Heading: 0.00
+
+Last Orientation: NORTH
+Updating Location to (2,5, NORTH)
+Mapping Adjacent Blocks...
+Mapping
+0.17 0.45 2.63 0.23
+BlockType Map
+L O O X O O
+O S O L X O
+X O O O O O
+O O S O O X
+O X O O S O
+O O X O O O
+Searched map
+Searched Block Locations
+1 1 1 1 1 1
+0 1 1 1 1 0
+1 1 1 1 1 1
+1 1 1 1 1 1
+1 1 1 1 1 1
+0 0 1 1 0 0
+Got possible landmarks
+Checking Orientation: NORTH
+already in position
+Mapping Block in front
+Map block landmark in front...
+Dist to travel: -4.81
+Moved forward
+-4.81 cm.
+checkForLandMark()
+55.35
+checkForLandMark() end
+New Distance to travel: -380.87
+end of map block landmark in front. New Map:
+BlockType Map
+L O O X O O
+O S O L X O
+X O O O O O
+O O S O O X
+O X O O S O
+O O X O O O
+Mapped adjacent blocks!
+Given task is unspecified
+Exploring
+Enaging Explore Mode!
+Printing global searched map:
+Searched Block Locations
+1 1 1 1 1 1
+0 1 1 1 1 1
+1 1 1 1 1 1
+1 1 1 1 1 1
+1 1 1 1 1 1
+0 0 1 1 0 0
+Returning a unsearched block neighbor
+(1,5)
+Returning a unsearched block neighbor
+(3,5)
+Returning a unsearched block neighbor
+(2,4)
+Returning a unsearched block neighbor
+(0,5)
+Returning a unsearched block neighbor
+(2,5)
+Returning a unsearched block neighbor
+(1,4)
+Returning a unsearched block neighbor
+(1,4)
+Returning a unsearched block neighbor
+(3,4)
+Returning a unsearched block neighbor
+(2,3)
+Returning a unsearched block neighbor
+(2,5)
+Returning a unsearched block neighbor
+(1,5)
+Returning a unsearched block neighbor
+(0,4)
+Returning a unsearched block neighbor
+(2,4)
+Returning a unsearched block neighbor
+(4,4)
+Returning a unsearched block neighbor
+(3,3)
+Returning a unsearched block neighbor
+(3,5)
+Returning a unsearched block neighbor
+(1,3)
+Returning a unsearched block neighbor
+(3,3)
+Returning a unsearched block neighbor
+(2,2)
+Returning a unsearched block neighbor
+(2,4)
+Returning a unsearched block neighbor
+(1,4)
+Returning a unsearched block neighbor
+(0,3)
+Returning a unsearched block neighbor
+(0,5)
+Returning a unsearched block neighbor
+(2,3)
+Returning a unsearched block neighbor
+(4,3)
+Returning a unsearched block neighbor
+(3,2)
+Returning a unsearched block neighbor
+(3,4)
+Returning a unsearched block neighbor
+(1,2)
+Returning a unsearched block neighbor
+(3,2)
+Returning a unsearched block neighbor
+(2,1)
+Returning a unsearched block neighbor
+(2,3)
+Returning a unsearched block neighbor
+(3,3)
+Returning a unsearched block neighbor
+(5,3)
+Returning a unsearched block neighbor
+(4,2)
+Returning a unsearched block neighbor
+(4,4)
+Returning a unsearched block neighbor
+(0,2)
+Returning a unsearched block neighbor
+(2,2)
+Returning a unsearched block neighbor
+(1,1)
+Returning a unsearched block neighbor
+(1,3)
+Returning a unsearched block neighbor
+(1,1)
+Returning a unsearched block neighbor
+(3,1)
+Returning a unsearched block neighbor
+(2,0)
+Returning a unsearched block neighbor
+(2,2)
+Returning a unsearched block neighbor
+(4,3)
+Returning a unsearched block neighbor
+(5,2)
+Returning a unsearched block neighbor
+(5,4)
+Neighbor matches condition!(5,4)
+Block to explore: (5,3, EAST)
+Travelling from (2,5, NORTH) to (5,3, EAST)
+Executing Instructions...
+LEFT->Start Heading: 0.88 End Heading: 270.00
+FORWARDS->Moved forward
+30.00 cm.
+LEFT->Start Heading: 272.00 End Heading: 180.00
+FORWARDS->New Distance to travel: 30.27
+Moved forward
+30.00 cm.
+RIGHT->Start Heading: 178.94 End Heading: 270.00
+FORWARDS->New Distance to travel: 29.33
+Moved forward
+30.00 cm.
+LEFT->Start Heading: 267.38 End Heading: 180.00
+FORWARDS->New Distance to travel: 30.14
+New Distance to travel: 8.08
+New Distance to travel: 7.49
+New Distance to travel: 7.73
+New Distance to travel: 6.00
+New Distance to travel: 4.94
+New Distance to travel: 3.84
+New Distance to travel: 2.20
+New Distance to travel: 1.44
+New Distance to travel: -0.32
+Moved forward
+30.00 cm.
+FORWARDS->New Distance to travel: 30.29
+New Distance to travel: 10.05
+New Distance to travel: 10.75
+New Distance to travel: 9.67
+New Distance to travel: 9.45
+New Distance to travel: 9.09
+New Distance to travel: 9.09
+New Distance to travel: 9.72
+New Distance to travel: 9.00
+New Distance to travel: 9.26
+New Distance to travel: 9.16
+New Distance to travel: 9.26
+New Distance to travel: 9.11
+New Distance to travel: 9.26
+New Distance to travel: 8.99
+New Distance to travel: 9.26
+New Distance to travel: 9.12
+New Distance to travel: 9.09
+New Distance to travel: 9.23
+New Distance to travel: 9.41
+New Distance to travel: 9.43
+New Distance to travel: 9.43
+New Distance to travel: 9.26
+New Distance to travel: 9.16
+New Distance to travel: 9.52
+New Distance to travel: 9.16
+New Distance to travel: 9.35
+New Distance to travel: 9.16
+New Distance to travel: 9.43
+New Distance to travel: 9.16
+New Distance to travel: 9.43
+New Distance to travel: 9.33
+New Distance to travel: 9.74
+New Distance to travel: 9.16
+New Distance to travel: 9.52
+New Distance to travel: 9.89
+New Distance to travel: 9.96
+New Distance to travel: 10.00
+New Distance to travel: 10.37
+New Distance to travel: 9.91
+New Distance to travel: 9.83
+New Distance to travel: 9.91
+N

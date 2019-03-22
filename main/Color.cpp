@@ -325,7 +325,7 @@ int Color::getStructureColor() {
   Serial.print(" V: "); Serial.println(v_tot, 4);
 
   // TODO: All of these values need to be calibrated
-  if (h_tot > 40 && h_tot < 150 && s_tot > 0.1 && s_tot < 0.7 && v_tot > 0.003 && v_tot < 0.04)
+  if (h_tot > 40 && h_tot < 150 && s_tot > 0.1 && s_tot < 0.7 && v_tot > 0.002 && v_tot < 0.04)
     return 1; // Yellow House
   else if (h_tot > 190 && h_tot < 300 && s_tot > 0.07 && s_tot < 0.55 && v_tot > 0.002 && v_tot < 0.013)
     return 2; // Red House

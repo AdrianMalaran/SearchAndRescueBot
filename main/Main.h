@@ -124,8 +124,6 @@ class Main {
         // Using Encoder readings
         void moveForwardSetDistance(double distance, Orientation orientation);
         void moveBackwardSetDistance(double distance, Orientation orientation);
-        // Using Speed Control
-        void moveForwardSpeedControl();
 
         // Debuggic Function
         void moveMotorB(int speed);
