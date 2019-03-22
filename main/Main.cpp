@@ -466,7 +466,7 @@ void Main::getPossibleLandmarks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL
     if(floor(front_distance) != pose.coord.row) {
         global_map[pose.coord.row - (int)ceil(front_distance)][pose.coord.col].land_mark_spot = true;
 
-        for(int i = 0 + (pose.coord.row - (int)floor(front_distance)); i < pose.coord.row; i++) {
+        for(int i = (pose.coord.row - (int)floor(front_distance)); i < pose.coord.row; i++) {
             global_map[i][pose.coord.col].searched = true;
         }
     } else {
@@ -477,7 +477,7 @@ void Main::getPossibleLandmarks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL
     if(5 - floor(back_distance) != pose.coord.row) {
         global_map[(int)ceil(back_distance) + pose.coord.row][pose.coord.col].land_mark_spot = true;
 
-        for(int i = (int)ceil(back_distance); i > pose.coord.row; i--) {
+        for(int i = pose.coord.row + (int)floor(back_distance); i > pose.coord.row; i--) {
             global_map[i][pose.coord.col].searched = true;
         }
     } else {
@@ -487,7 +487,7 @@ void Main::getPossibleLandmarks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL
     }
     if(floor(left_distance) != pose.coord.col) {
         global_map[pose.coord.row][pose.coord.col - (int)ceil(left_distance)].land_mark_spot = true;
-        for(int i = (int)ceil(left_distance); i < pose.coord.col; i++) {
+        for(int i = pose.coord.col - (int)floor(left_distance); i < pose.coord.col; i++) {
             global_map[pose.coord.row][i].searched = true;
         }
     } else {
@@ -497,7 +497,7 @@ void Main::getPossibleLandmarks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL
     }
     if(5 - floor(right_distance) != pose.coord.col) {
         global_map[pose.coord.row][(int)ceil(right_distance) + pose.coord.col].land_mark_spot = true;
-        for(int i = (int)ceil(right_distance); i > pose.coord.col; i--) {
+        for(int i = pose.coord.col + (int)floor(right_distance); i > pose.coord.col; i--) {
             global_map[pose.coord.row][i].searched = true;
         }
     } else {
