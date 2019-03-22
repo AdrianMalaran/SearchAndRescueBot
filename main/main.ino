@@ -122,16 +122,25 @@ void setup() {
         { MP, MW, MP, MP, MS, MP}, // 4
         { MP, MP, MG, MP, MP, MP}  // 5
     };
-    Serial.println("Unmapped block: ");
-    main_engine.setCorrectMap(testgrid);
-    printMap(main_engine.m_global_map);
-    printSearchedMap(main_engine.m_global_map);
-    main_engine.m_global_map[3][3].searched = true;
-    main_engine.getPossibleLandmarks(main_engine.m_global_map, Pose(Coord(3,3), NORTH));
-    main_engine.updateLocation(Pose(Coord(3,3), NORTH));
-    printSearchedMap(main_engine.m_global_map);
-    // main_engine.engageExploreMode();
-    main_engine.checkClosestSandBlock();
+    // Serial.println("Unmapped block: ");
+    // main_engine.setCorrectMap(testgrid);
+    // printMap(main_engine.m_global_map);
+    // printSearchedMap(main_engine.m_global_map);
+    // main_engine.m_global_map[3][3].searched = true;
+    // main_engine.getPossibleLandmarks(main_engine.m_global_map, Pose(Coord(3,3), NORTH));
+    // main_engine.updateLocation(Pose(Coord(3,3), NORTH));
+    // printSearchedMap(main_engine.m_global_map);
+    // // main_engine.engageExploreMode();
+    // main_engine.checkClosestSandBlock();
+
+    // main_engine.mapBlockLandmarkInFront(testgrid, Pose(Coord(0,0), NORTH), Coord(2,3));
+
+    // main_engine.moveForwardSetDistance(60.0, NORTH);
+
+    double start_mag = imu_sensor.getMag().z();
+    main_engine.checkForFood(testgrid, Coord(3,2), start_mag);
+
+
     // main_engine.run();
 
     // main_engine.moveForwardSetDistance(30.0, NORTH);
