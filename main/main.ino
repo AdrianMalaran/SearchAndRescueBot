@@ -108,16 +108,42 @@ void setup() {
                      ultrasonic_front, ultrasonic_right, ultrasonic_left,
                      ultrasonic_back, controller, encoderA, encoderB);
 
+    // Testing individual functions
+    MapLocation testgrid[GLOBAL_ROW][GLOBAL_COL] =
+    {
+    //    0, 1, 2, 3, 4, 5
+        { MP, MP, MP, MW, MP, MP}, // 0
+        { MP, MS, MP, MP, MG, MP}, // 1
+        { MG, MP, MP, MP, MP, MP}, // 2
+        { MP, MP, MS, MP, MP, MW}, // 3
+        { MP, MW, MP, MP, MS, MP}, // 4
+        { MP, MP, MG, MP, MP, MP}  // 5
+    };
+
+    Serial.println("Before: ");
+    main_engine.setCorrectMap(testgrid);
+    printMap(main_engine.m_global_map);
+
+    printSearchedMap(main_engine.m_global_map);
+
+    main_engine.m_global_map[3][3].searched = true;
+
+    main_engine.getPossibleLandmarks(main_engine.m_global_map, Pose(Coord(3,3), NORTH));
+
+    printSearchedMap(main_engine.m_global_map);
+
+    main_engine.engageExploreMode();
     // main_engine.run();
+
 
     // main_engine.findFire();
 
 //  WORKING COMBINATIONS
     // main_engine.moveBackwardSetDistance(2.0, NORTH);
     // delay(1000);
-    main_engine.turnLeft(WEST); //
-    delay(1000);
-    main_engine.moveBackwardSetDistance(4.0, WEST);
+    // main_engine.turnLeft(WEST); //
+    // delay(1000);
+    // main_engine.moveBackwardSetDistance(4.0, WEST);
     // main_engine.moveBackwardSetDistance(4.0, WEST);
     // main_engine.turnLeft(SOUTH); //
     // main_engine.moveBackwardSetDistance(5.0, SOUTH);
@@ -190,6 +216,8 @@ void loop() {
         // Serial.println(encoderA.read());
         counter = 0;
     }
+
+    Serial.println(ultrasonic_right.getDistance());
 
     counter ++;
 }
