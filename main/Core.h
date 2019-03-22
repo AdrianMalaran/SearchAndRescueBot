@@ -17,6 +17,8 @@ const double TURN_SPEED = 160;
 
 const int FRONT_ARM_LENGTH = 6.5;
 
+const int JITTER_DISTANCE = 2;
+
 // const double distance_per_tick = ((3.14*8)/1905)*(16.0/21.0);
 // const double distance_per_tick = ((3.14*8)/1905)*(0.60);
 const double distance_per_tick = ((3.14*8)/1514.8)*(16.0/21.0);

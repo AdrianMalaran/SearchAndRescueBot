@@ -247,12 +247,18 @@ void Main::findCorrectMap() {
     Coord west_block = Coord(m_current_pose.coord.row,m_current_pose.coord.col - 1);
     Coord north_east_block = Coord(m_current_pose.coord.row - 1,m_current_pose.coord.col + 1);
 
-    double start_mag = m_imu_sensor.getMag().z();
+
 
     travelToBlock(m_global_map, m_current_pose, Pose(m_current_pose.coord, WEST));
+
+    moveForwardSetDistance(JITTER_DISTANCE, WEST);
+    moveBackwardSetDistance(JITTER_DISTANCE, WEST);
+    double start_mag = m_imu_sensor.getMag().z();
     mapBlockTerrainInFront(m_global_map, m_current_pose, start_mag, west_block);
     west_location = m_global_map[west_block.row][west_block.col];
 
+    moveForwardSetDistance(JITTER_DISTANCE, EAST);
+    moveBackwardSetDistance(JITTER_DISTANCE, EAST);
     start_mag = m_imu_sensor.getMag().z();
 
     travelToBlock(m_global_map, m_current_pose, Pose(Coord(m_current_pose.coord.row - 1, m_current_pose.coord.col), EAST));
@@ -365,10 +371,11 @@ bool Main::checkClosestSandBlock() {
 
     travelToBlock(m_global_map, m_current_pose, Pose(closest_sand_block_adjacent, finish_ori));
 
-    delay(2500);
+    moveForwardSetDistance(JITTER_DISTANCE, finish_ori);
+    moveBackwardSetDistance(JITTER_DISTANCE, finish_ori);
     double start_mag = m_imu_sensor.getMag().z();
 
-    checkForFood(m_global_map, sand_block, start_mag);
+    checkForFood(m_global_map, sand_block, start_mag, finish_ori);
 
     return true;
 }
@@ -573,7 +580,6 @@ void Main::mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], 
     Serial.println("Searched map");
     printSearchedMap(global_map);
     Serial.println("Got possible landmarks");
-    double start_mag = m_imu_sensor.getMag().z();
 
     Pose adjacent_blocks[4];
     adjacent_blocks[0] = Pose(Coord(start_pose.coord.row - 1, start_pose.coord.col), NORTH);
@@ -621,7 +627,8 @@ void Main::mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], 
 
 void Main::checkForFood(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL],
                         Coord block_to_map,
-                        double start_mag) {
+                        double start_mag,
+                        Orientation orientation) {
     MapLocation& map_location = global_map[block_to_map.row][block_to_map.col];
 
     // //TODO: remove before demo
@@ -630,12 +637,15 @@ void Main::checkForFood(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL],
     Serial.println("Checking for food at "); printCoord(block_to_map);
     map_location.food_searched = true;
 
-    moveForwardSetDistance(10.0, m_current_pose.orientation);
+    moveForwardSetDistance(7.0, m_current_pose.orientation);
+
+    moveForwardSetDistance(JITTER_DISTANCE, orientation);
+    moveBackwardSetDistance(JITTER_DISTANCE, orientation);
     Serial.print("Start mag: "); Serial.println(start_mag);
     Serial.print(" Mag value "); Serial.println(m_imu_sensor.getMag().z());
 
     Serial.println(map_location.block_type == SAND);
-    if (map_location.block_type == SAND && isFood(start_mag)) {
+    if (map_location.block_type == SAND && isFood(start_mag, orientation)) {
         Serial.print("FOOD FOUND @ "); printCoord(block_to_map); Serial.println("!!!!");
         m_found_food = true;
         m_food_location = block_to_map;
@@ -779,8 +789,10 @@ void Main::mapBlockTerrainInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_C
     moveBackwardSetDistance(9.0, m_current_pose.orientation);
 }
 
-bool Main::isFood(double current_mag) {
-    delay(2500);
+bool Main::isFood(double current_mag, Orientation orientation) {
+    moveForwardSetDistance(JITTER_DISTANCE, orientation);
+    moveBackwardSetDistance(JITTER_DISTANCE, orientation);
+
     double new_mag = m_imu_sensor.getMag().z();
 
     return (fabs(fabs(new_mag) - fabs(current_mag)) > 15);
