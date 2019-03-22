@@ -474,7 +474,7 @@ void Main::getPossibleLandmarks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL
     if(floor(front_distance) != pose.coord.row) {
         global_map[pose.coord.row - (int)ceil(front_distance)][pose.coord.col].land_mark_spot = true;
 
-        for(int i = 0 + (pose.coord.row - (int)floor(front_distance)); i < pose.coord.row; i++) {
+        for(int i = (pose.coord.row - (int)floor(front_distance)); i < pose.coord.row; i++) {
             global_map[i][pose.coord.col].searched = true;
         }
     } else {
@@ -485,7 +485,7 @@ void Main::getPossibleLandmarks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL
     if(5 - floor(back_distance) != pose.coord.row) {
         global_map[(int)ceil(back_distance) + pose.coord.row][pose.coord.col].land_mark_spot = true;
 
-        for(int i = (int)ceil(back_distance); i > pose.coord.row; i--) {
+        for(int i = pose.coord.row + (int)floor(back_distance); i > pose.coord.row; i--) {
             global_map[i][pose.coord.col].searched = true;
         }
     } else {
@@ -495,7 +495,7 @@ void Main::getPossibleLandmarks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL
     }
     if(floor(left_distance) != pose.coord.col) {
         global_map[pose.coord.row][pose.coord.col - (int)ceil(left_distance)].land_mark_spot = true;
-        for(int i = (int)ceil(left_distance); i < pose.coord.col; i++) {
+        for(int i = pose.coord.col - (int)floor(left_distance); i < pose.coord.col; i++) {
             global_map[pose.coord.row][i].searched = true;
         }
     } else {
@@ -505,7 +505,7 @@ void Main::getPossibleLandmarks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL
     }
     if(5 - floor(right_distance) != pose.coord.col) {
         global_map[pose.coord.row][(int)ceil(right_distance) + pose.coord.col].land_mark_spot = true;
-        for(int i = (int)ceil(right_distance); i > pose.coord.col; i--) {
+        for(int i = pose.coord.col + (int)floor(right_distance); i > pose.coord.col; i--) {
             global_map[pose.coord.row][i].searched = true;
         }
     } else {
@@ -1073,21 +1073,21 @@ void Main::moveBackwardSetDistance(double distance, Orientation orientation) {
     // m_motor_pair.setMotorAPWM(TRAVEL_SPEED);
     // m_motor_pair.setMotorBPWM(TRAVEL_SPEED);
 
-    double relative_start_distance = m_ultrasonic_front.getDistance();
+    double relative_start_distance = m_ultrasonic_back.getDistance();
     double end_distance = relative_start_distance - distance;
 
     // Validate Ultrasonic readings, use a stable value
 
     while (abs(end_distance - m_ultrasonic_back.getDistance()) >= 1.5) {
-        double dist_to_travel = (m_ultrasonic_front.getDistance() - end_distance)/distance_per_tick;
-    //     Serial.print("New Distance to travel: "); Serial.println(dist_to_travel);
+        double dist_to_travel = (m_ultrasonic_back.getDistance() - end_distance)/distance_per_tick;
+        Serial.print("New Distance to travel: "); Serial.println(dist_to_travel);
         // Track each wheel separately
         // Map distance to number of ticks that need to be range
         // Encoder A and B should travel the same number of ticks
         while (abs(m_encoder_A.read() - start_tick_a) < distance_in_ticks && abs(m_encoder_B.read() - start_tick_b) < distance_in_ticks) {
             // Serial.println(abs(m_encoder_A.read() - start_tick_a));
             // Serial.println(abs(m_encoder_B.read()));
-            m_controller.driveStraightController(start_heading, m_imu_sensor.getEuler().x(), -190);
+            m_controller.driveStraightController(start_heading, m_imu_sensor.getEuler().x(), -220);
         }
         break;
         Serial.print("Error: ");Serial.println(m_global_north_heading - m_imu_sensor.getEuler().x());
