@@ -361,6 +361,8 @@ bool Main::checkClosestSandBlock() {
     }
 
     travelToBlock(m_global_map, m_current_pose, Pose(closest_sand_block_adjacent, finish_ori));
+
+    delay(2500);
     double start_mag = m_imu_sensor.getMag().z();
 
     checkForFood(m_global_map, sand_block, start_mag);
@@ -762,12 +764,10 @@ void Main::mapBlockTerrainInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_C
 }
 
 bool Main::isFood(double current_mag) {
-    double mag_sum = 0;
-    for(int i = 0; i < 1000; i++) {
-        mag_sum+=m_imu_sensor.getMag().z();
-    }
-    Serial.print("Mag Value: ");Serial.print(mag_sum/1000.0);
-    return (fabs(fabs(mag_sum/1000.0) - fabs(current_mag)) > 15);
+    delay(2500);
+    double new_mag = m_imu_sensor.getMag().z();
+
+    return (fabs(fabs(new_mag) - fabs(current_mag)) > 15);
 }
 
 /***********************
