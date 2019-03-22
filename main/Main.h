@@ -87,7 +87,7 @@ class Main {
         void mapBlockLandmarkInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose, Coord block_to_map);
         void runSearchInPlace();
         // void mapLandMarkInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose, double start_mag, Coord block_to_map);
-        bool isFood(double mag);
+        bool isFood(double mag, Orientation orientation);
         Landmark identifyLandMark();
 
         bool isStabilized(double& last_heading, double current_heading, double end_heading);
@@ -102,7 +102,7 @@ class Main {
         void investigateClosestLandmark();
         bool checkClosestSandBlock();
         bool gotoClosestPossibleLandmark();
-        void checkForFood(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Coord block_to_map, double start_mag);
+        void checkForFood(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Coord block_to_map, double start_mag, Orientation orientation);
 
         void travelToFireExtinguishLocation();
         void findFire();
