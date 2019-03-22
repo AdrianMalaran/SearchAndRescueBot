@@ -84,6 +84,7 @@ void Main::init() {
     m_global_south_heading = m_global_north_heading + 180;
     m_global_west_heading = m_global_north_heading + 270;
 
+    m_sand_blocks_searched = 0;
     // hardcode the start location
     m_map_discovered = true;
     setCorrectMap(potential_map3);
@@ -181,7 +182,7 @@ void Main::engageExploreMode() {
         return;
     }
 
-    travelToBlock(m_global_map, m_current_pose, Pose(explore_block, finish_ori));
+    travelToBlock(m_global_map, m_current_pose, Pose(explore_block, DONTCARE));
     Serial.println("Mapping Adjacent Blocks...");
     mapAdjacentBlocks(m_global_map, m_current_pose);
 }
@@ -315,10 +316,14 @@ void Main::setCorrectMap(MapLocation map[][GLOBAL_COL]) {
 //TODO: Decide if this function is needed
 void Main::investigateClosestLandmark() {
     // Look for closest sandblock
+    Serial.println("Investigating closest landmark");
 
     // Try to find the food first
     // then try to find the peoples, that'll be most efficient
     bool can_travel_to_possible_food = false;
+
+    if (m_sand_blocks_searched >= 3)
+        m_found_food = true;
 
     // If the fire was not yet extinguished, extinguish fire
     if (!m_found_food) {
@@ -565,8 +570,11 @@ void Main::mapAdjacentBlocks(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], 
     Pose current_pose = start_pose;
     Pose desired_pose;
 
+    LED::on();
     //TODO: Check if this works, possibly move getPossibleLandmarks, in the
     getPossibleLandmarks(global_map, m_current_pose);
+    LED::off();
+
     printMap(global_map);
     Serial.println("Searched map");
     printSearchedMap(global_map);
@@ -624,9 +632,10 @@ void Main::checkForFood(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL],
 
     // //TODO: remove before demo
     // m_found_food = true;
-
+    
     Serial.println("Checking for food at "); printCoord(block_to_map);
     map_location.food_searched = true;
+    m_sand_blocks_searched ++;
 
     moveForwardSetDistance(10.0, m_current_pose.orientation);
     Serial.print("Start mag: "); Serial.println(start_mag);
@@ -1386,7 +1395,7 @@ static void Main::executeInstructions(Queue<Instruction> instructions, Orientati
     // Validate instructions
     if (instructions.empty())
         return;
-    delay(3000);
+    delay(1000);
     Orientation current_orientation = orientation;
 
     Serial.println("Executing Instructions...");

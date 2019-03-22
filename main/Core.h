@@ -127,7 +127,7 @@ struct Pose {
     Coord coord;
     Orientation orientation;
 
-    Pose () {};
+    Pose () : coord(Coord(-1, -1)), orientation(DONTCARE) {};
     Pose (Coord c, Orientation o) : coord(c), orientation(o) {};
 
     bool operator==(Pose p1) {

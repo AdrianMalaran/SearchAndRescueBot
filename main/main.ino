@@ -148,11 +148,13 @@ void setup() {
     // main_engine.checkForFood(testgrid, Coord(3,2), start_mag);
 
 
-    // main_engine.run();
+    main_engine.run();
 
     // main_engine.moveForwardSetDistance(30.0, NORTH);
 
     // main_engine.findFire();
+
+    // testMoveForward(255, 255);
 
 //  WORKING COMBINATIONS
     // main_engine.moveBackwardSetDistance(2.0, NORTH);
@@ -189,13 +191,13 @@ void setup() {
     // motor_pair.stop();
 
     //// EXECUTE INSTRUCTIONS TEST ////
-    Orientation finish_ori = NORTH;
-    Queue<Instruction> ins;
-    ins.push(ROTATE_LEFT);
-    ins.push(ROTATE_RIGHT);
-    ins.push(MOVE_FORWARD);
-    ins.push(ROTATE_RIGHT);
-    main_engine.executeInstructions(ins, finish_ori);
+    // Orientation finish_ori = NORTH;
+    // Queue<Instruction> ins;
+    // ins.push(ROTATE_LEFT);
+    // ins.push(ROTATE_RIGHT);
+    // ins.push(MOVE_FORWARD);
+    // ins.push(ROTATE_RIGHT);
+    // main_engine.executeInstructions(ins, finish_ori);
     // main_engine.mapBlockTerrainInFront(main_engine.m_global_map, Pose(Coord(4,3), EAST), 0.0, Coord(4,4));
 
     //// TEST LANDMARK DETECTION ////

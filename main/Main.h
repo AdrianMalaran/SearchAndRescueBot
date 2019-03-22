@@ -171,6 +171,8 @@ class Main {
         bool m_group_mapped;
         bool m_survivor_mapped;
 
+        int m_sand_blocks_searched;
+
         Coord m_food_location;
         Coord m_fire_location; // May not be necessary
         Coord m_people_location;
