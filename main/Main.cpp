@@ -327,7 +327,6 @@ void Main::investigateClosestLandmark() {
         if (!can_travel_to_possible_food) {
             Serial.println("No possible path to food");
         }
-        engageExploreMode();
     }
     // TODO: Test closest possible landmark
     Serial.println("Checking to see closest possible landmark");
@@ -335,7 +334,6 @@ void Main::investigateClosestLandmark() {
     //POSSIBLY SWITCH The ordering of these states, may not need go to closest possible landmark
     bool can_travel_to_closest_landmark = gotoClosestPossibleLandmark();
     if (!can_travel_to_closest_landmark) {
-        engageExploreMode();
         //TODO: Test this next
         Serial.println("No path to possible landmark");
     }
