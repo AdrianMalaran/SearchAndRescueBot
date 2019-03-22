@@ -83,6 +83,10 @@ void Main::init() {
     m_global_east_heading = m_global_north_heading + 90;
     m_global_south_heading = m_global_north_heading + 180;
     m_global_west_heading = m_global_north_heading + 270;
+
+    // hardcode the start location
+    m_map_discovered = true;
+    setCorrectMap(potential_map3);
 }
 
 // TODO: Add possible fail-safe that saves the last image of the main member function
@@ -124,8 +128,8 @@ Task Main::getNextTask() {
     //TODO: must take care of the case where we find the people first
     // but have not found the food yet
     // In this case when, we find the food then we should find the people
-    if (m_deliver_food_to_group)
-        return DELIVER_FOOD;
+    // if (m_deliver_food_to_group)
+    //     return DELIVER_FOOD;
 
     Serial.println("INVESTIGATING CLOSEST LANDMARK");
     return INVESTIGATE_CLOSEST_LANDMARK;
@@ -147,8 +151,8 @@ bool Main::taskIsMapped(Task task) {
         return m_group_mapped;
     if (task == FIND_SURVIVOR)
         return m_survivor_mapped;
-    if (task == DELIVER_FOOD)
-        return m_group_mapped;
+    // if (task == DELIVER_FOOD)
+    //     return m_group_mapped;
 
     Serial.println("Given task is unspecified");
     return false;
@@ -200,11 +204,11 @@ void Main::engageObjectiveMode(Task task) {
             Serial.println("TASK: INVESTIGATING CLOSEST LANDMARK");
             investigateClosestLandmark(); //TODO: Possibly remove
             break;
-        case DELIVER_FOOD:
-            Serial.println("TASK: Delivering Food");
-            // TODO: Implement this to
-            deliverFoodToGroup(); // Map a path to the group of people
-            break;
+        // case DELIVER_FOOD:
+        //     Serial.println("TASK: Delivering Food");
+        //     // TODO: Implement this to
+        //     deliverFoodToGroup(); // Map a path to the group of people
+        //     break;
         // TODO: Don't need these specific tasks, they will be discovered
         // May be needed if we have it pre-mapped and stuff, hehehehehehe
         // case FIND_GROUP_OF_PEOPLE:
@@ -227,14 +231,14 @@ void Main::returnToStart(MapLocation global_map[][GLOBAL_COL], Pose current_pose
     stopProgram();
 }
 
-void Main::deliverFoodToGroup() {
-    MapLocation interestlocation(PARTICLE, true, PEOPLE);
-    Orientation finish_ori;
-    Coord group_block;
-    Coord block = findClosestBlockToInterest(m_global_map, group_block, interestlocation, m_current_pose.coord, finish_ori);
-    travelToBlock(m_global_map, m_current_pose, Pose(block, finish_ori));
-    // Indicate that its been found
-}
+// void Main::deliverFoodToGroup() {
+//     MapLocation interestlocation(PARTICLE, true, PEOPLE);
+//     Orientation finish_ori;
+//     Coord group_block;
+//     Coord block = findClosestBlockToInterest(m_global_map, group_block, interestlocation, m_current_pose.coord, finish_ori);
+//     travelToBlock(m_global_map, m_current_pose, Pose(block, finish_ori));
+//     // Indicate that its been found
+// }
 
 void Main::findCorrectMap() {
     MapLocation west_location(UNKNOWN);
@@ -326,22 +330,21 @@ void Main::investigateClosestLandmark() {
         engageExploreMode();
     }
     // TODO: Test closest possible landmark
-    else if (!m_found_people || !m_found_survivor) {
-        Serial.println("Checking to see closest possible landmark");
-        // Try to find closest possible landmark
-        //POSSIBLY SWITCH The ordering of these states, may not need go to closest possible landmark
-        bool can_travel_to_closest_landmark = gotoClosestPossibleLandmark();
-        if (!can_travel_to_closest_landmark) {
-            engageExploreMode();
-            //TODO: Test this next
-            Serial.println("No path to possible landmark");
-        }
-    } else {
-        Serial.println("Engaging Explore mode");
-
-        // Engage Explore mode otherwise
+    Serial.println("Checking to see closest possible landmark");
+    // Try to find closest possible landmark
+    //POSSIBLY SWITCH The ordering of these states, may not need go to closest possible landmark
+    bool can_travel_to_closest_landmark = gotoClosestPossibleLandmark();
+    if (!can_travel_to_closest_landmark) {
         engageExploreMode();
+        //TODO: Test this next
+        Serial.println("No path to possible landmark");
     }
+
+    Serial.println("Engaging Explore mode");
+
+    // Engage Explore mode otherwise
+    engageExploreMode();
+
 }
 
 // Returns false if there are no possible paths to any sandblocks as of right now
@@ -611,6 +614,9 @@ void Main::checkForFood(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL],
                         double start_mag) {
     MapLocation& map_location = global_map[block_to_map.row][block_to_map.col];
 
+    // //TODO: remove before demo
+    // m_found_food = true;
+
     Serial.println("Checking for food at "); printCoord(block_to_map);
     map_location.food_searched = true;
 
@@ -745,7 +751,7 @@ void Main::mapBlockTerrainInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_C
 
     // TODO: Implement distance based
     double distance_to_edge_block = start_distance - 7.0; //TODO: add an arbitrary distance
-    moveForwardSetDistance(9.0, m_current_pose.orientation); // Need to calculate this distance based off of ultrasonic readings
+    moveForwardSetDistance(8.0, m_current_pose.orientation); // Need to calculate this distance based off of ultrasonic readings
     m_motor_pair.stop();
 
     delay(500);
@@ -1372,7 +1378,7 @@ static void Main::executeInstructions(Queue<Instruction> instructions, Orientati
     // Validate instructions
     if (instructions.empty())
         return;
-    delay(4000);
+    delay(3000);
     Orientation current_orientation = orientation;
 
     Serial.println("Executing Instructions...");
@@ -1407,15 +1413,25 @@ static void Main::executeInstructions(Queue<Instruction> instructions, Orientati
             // if (temp_ori < 0) temp_ori = 3;
             // turnLeft(temp_ori);
 
+            moveForwardSetDistance(4.0, current_orientation);
+            delay(400);
             current_orientation = (current_orientation + 1) % 4;
             turnRight(current_orientation);
             delay(1000);
         }
         else if (ins == ROTATE_LEFT) {
             Serial.print("LEFT->");
+            // Tuned compensation
+            // main_engine.moveBackwardSetDistance(3.5, NORTH);
+            // main_engine.turnLeft(WEST);
+            // main_engine.moveBackwardSetDistance(6.8, WEST);
+            moveBackwardSetDistance(3.5, current_orientation);
+            delay(400);
             current_orientation = (current_orientation - 1);
             if (current_orientation < 0) current_orientation = 3;
             turnLeft(current_orientation);
+            delay(400);
+            moveBackwardSetDistance(6.8, current_orientation);
             // MotorPair::setMotorAPWM(-255);
             // MotorPair::setMotorBPWM(223);
             delay(1000);

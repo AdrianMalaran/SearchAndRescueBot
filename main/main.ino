@@ -112,16 +112,16 @@ void setup() {
                      ultrasonic_back, controller, encoderA, encoderB);
 
     // Testing individual functions
-    MapLocation testgrid[GLOBAL_ROW][GLOBAL_COL] =
-    {
-    //    0, 1, 2, 3, 4, 5
-        { MP, MP, MP, MW, MP, MP}, // 0
-        { MP, MS, MP, MP, MG, MP}, // 1
-        { MG, MP, MP, MP, MP, MP}, // 2
-        { MP, MP, MS, MP, MP, MW}, // 3
-        { MP, MW, MP, MP, MS, MP}, // 4
-        { MP, MP, MG, MP, MP, MP}  // 5
-    };
+    // MapLocation testgrid[GLOBAL_ROW][GLOBAL_COL] =
+    // {
+    // //    0, 1, 2, 3, 4, 5
+    //     { MP, MP, MP, MW, MP, MP}, // 0
+    //     { MP, MS, MP, MP, MG, MP}, // 1
+    //     { MG, MP, MP, MP, MP, MP}, // 2
+    //     { MP, MP, MS, MP, MP, MW}, // 3
+    //     { MP, MW, MP, MP, MS, MP}, // 4
+    //     { MP, MP, MG, MP, MP, MP}  // 5
+    // };
     // Serial.println("Unmapped block: ");
     // main_engine.setCorrectMap(testgrid);
     // printMap(main_engine.m_global_map);
@@ -132,13 +132,20 @@ void setup() {
     // printSearchedMap(main_engine.m_global_map);
     // // main_engine.engageExploreMode();
     // main_engine.checkClosestSandBlock();
+    // main_engine.moveBackwardSetDistance(3.5, NORTH);
+    // main_engine.turnLeft(WEST);
+    // main_engine.moveBackwardSetDistance(6.8, WEST);
+    //
+    // main_engine.moveForwardSetDistance(4.0, NORTH);
+    // main_engine.turnRight(EAST);
+
 
     // main_engine.mapBlockLandmarkInFront(testgrid, Pose(Coord(0,0), NORTH), Coord(2,3));
 
     // main_engine.moveForwardSetDistance(60.0, NORTH);
 
-    double start_mag = imu_sensor.getMag().z();
-    main_engine.checkForFood(testgrid, Coord(3,2), start_mag);
+    // double start_mag = imu_sensor.getMag().z();
+    // main_engine.checkForFood(testgrid, Coord(3,2), start_mag);
 
 
     // main_engine.run();
@@ -182,13 +189,13 @@ void setup() {
     // motor_pair.stop();
 
     //// EXECUTE INSTRUCTIONS TEST ////
-    // Orientation finish_ori = NORTH;
-    // Queue<Instruction> ins;
-    // ins.push(ROTATE_LEFT);
-    // ins.push(ROTATE_RIGHT);
-    // ins.push(MOVE_FORWARD);
-    // ins.push(ROTATE_RIGHT);
-    // main_engine.executeInstructions(ins, finish_ori);
+    Orientation finish_ori = NORTH;
+    Queue<Instruction> ins;
+    ins.push(ROTATE_LEFT);
+    ins.push(ROTATE_RIGHT);
+    ins.push(MOVE_FORWARD);
+    ins.push(ROTATE_RIGHT);
+    main_engine.executeInstructions(ins, finish_ori);
     // main_engine.mapBlockTerrainInFront(main_engine.m_global_map, Pose(Coord(4,3), EAST), 0.0, Coord(4,4));
 
     //// TEST LANDMARK DETECTION ////
