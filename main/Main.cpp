@@ -1052,23 +1052,22 @@ void Main::moveBackwardSetDistance(double distance, Orientation orientation) {
     // m_motor_pair.setMotorAPWM(TRAVEL_SPEED);
     // m_motor_pair.setMotorBPWM(TRAVEL_SPEED);
 
-    double relative_start_distance = m_ultrasonic_front.getDistance();
+    double relative_start_distance = m_ultrasonic_back.getDistance();
     double end_distance = relative_start_distance - distance;
 
     // Validate Ultrasonic readings, use a stable value
 
     while (abs(end_distance - m_ultrasonic_back.getDistance()) >= 1.5) {
-        double dist_to_travel = (m_ultrasonic_front.getDistance() - end_distance)/distance_per_tick;
-    //     Serial.print("New Distance to travel: "); Serial.println(dist_to_travel);
+        double dist_to_travel = (m_ultrasonic_back.getDistance() - end_distance)/distance_per_tick;
+        Serial.print("New Distance to travel: "); Serial.println(dist_to_travel);
         // Track each wheel separately
         // Map distance to number of ticks that need to be range
         // Encoder A and B should travel the same number of ticks
         while (abs(m_encoder_A.read() - start_tick_a) < distance_in_ticks && abs(m_encoder_B.read() - start_tick_b) < distance_in_ticks) {
             // Serial.println(abs(m_encoder_A.read() - start_tick_a));
             // Serial.println(abs(m_encoder_B.read()));
-            m_controller.driveStraightController(start_heading, m_imu_sensor.getEuler().x(), -190);
+            m_controller.driveStraightController(start_heading, m_imu_sensor.getEuler().x(), -220);
         }
-        Serial.print("Error: ");Serial.println(m_global_north_heading - m_imu_sensor.getEuler().x());
     }
 
     m_motor_pair.stop();

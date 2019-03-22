@@ -115,9 +115,9 @@ void setup() {
 //  WORKING COMBINATIONS
     // main_engine.moveBackwardSetDistance(2.0, NORTH);
     // delay(1000);
-    main_engine.turnLeft(WEST); //
-    delay(1000);
-    main_engine.moveBackwardSetDistance(4.0, WEST);
+    //main_engine.turnLeft(WEST); //
+    //delay(1000);
+    main_engine.moveBackwardSetDistance(10.0, NORTH);
     // main_engine.moveBackwardSetDistance(4.0, WEST);
     // main_engine.turnLeft(SOUTH); //
     // main_engine.moveBackwardSetDistance(5.0, SOUTH);
