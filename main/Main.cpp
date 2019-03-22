@@ -159,7 +159,7 @@ void Main::engageExploreMode() {
     Coord closest_block;
     //TODO: this is returning a closest_block_to_inteserest that returns a don't care orientation
     Coord explore_block = findClosestBlockToInterest(m_global_map, closest_block, unsearched_type_location, m_current_pose.coord, finish_ori);
-    Serial.print("Block to explore: "); printCoord(explore_block); Serial.println("");
+    Serial.print("Block to explore: "); printPose(Pose(explore_block, finish_ori)); Serial.println("");
 
     if (!isValid(explore_block)) { // No Path Found
         Serial.println("No other blocks can be explored. RETURNING TO START");

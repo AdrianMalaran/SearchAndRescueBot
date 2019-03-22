@@ -217,7 +217,7 @@ void loop() {
         counter = 0;
     }
 
-    Serial.println(ultrasonic_right.getDistance());
+    // Serial.println(ultrasonic_right.getDistance());
 
     counter ++;
 }
