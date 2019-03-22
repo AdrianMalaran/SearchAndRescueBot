@@ -659,7 +659,9 @@ void Main::mapBlockLandmarkInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_
     // return;
 
     double dist_to_possible_landmark = m_ultrasonic_front.getDistance();
-    double dist_to_travel = dist_to_possible_landmark - (FRONT_ARM_LENGTH);
+    double dist_to_travel = dist_to_possible_landmark - (2 + FRONT_ARM_LENGTH);
+
+    delay(1000);
 
     moveForwardSetDistance(dist_to_travel, pose.orientation);
 

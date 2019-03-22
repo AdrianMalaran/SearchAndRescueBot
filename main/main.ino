@@ -89,7 +89,7 @@ void testRightTurn(double PWM1, double PWM2) {
 /*
 TEST PRIORITY:
 - [o] leftturn control
-- [] mapBlockLandmarkInFront()
+- [x] mapBlockLandmarkInFront()
 - [x] findFire()
 - [] moveToPossibleFireLocation
 - [] moveForwardSetDistance w/ Ultrasonic feedback
