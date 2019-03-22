@@ -584,9 +584,10 @@ void Main::checkForLandMark(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL],
                             Coord block_to_map,
                             Pose pose) {
 
+    Serial.println("checkForLandMark");
     MapLocation& map_location = global_map[block_to_map.row][block_to_map.col];
 
-    map_location.land_mark_spot = isLandmarkAhead();
+    map_location.land_mark_spot = isLandmarkAhead(); // TODO: is this needed
     map_location.searched = true;
     // TODO: Need to identify what type of landmark it is
     if (map_location.land_mark_spot) {
@@ -609,13 +610,11 @@ void Main::checkForLandMark(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL],
 
             m_deliver_food_to_group = false;
             Serial.print("Location of People: "); printCoord(m_people_location); Serial.println("");
-
         }
         else { // Marking Landmark as FIRE
             m_fire_mapped = true;
             m_fire_location = block_to_map;
         }
-
     }
 }
 
@@ -643,7 +642,9 @@ void Main::mapBlockLandmarkInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_
     // return;
 
     double dist_to_possible_landmark = m_ultrasonic_front.getDistance();
-    double dist_to_travel = dist_to_possible_landmark - (3 + FRONT_ARM_LENGTH);
+    double dist_to_travel = dist_to_possible_landmark - (2 + FRONT_ARM_LENGTH);
+
+    delay(1000);
 
     moveForwardSetDistance(dist_to_travel, pose.orientation);
 

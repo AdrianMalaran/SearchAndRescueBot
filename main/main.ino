@@ -88,8 +88,8 @@ void testRightTurn(double PWM1, double PWM2) {
 }
 /*
 TEST PRIORITY:
-- [] leftturn control
-- [] mapBlockLandmarkInFront()
+- [o] leftturn control
+- [x] mapBlockLandmarkInFront()
 - [x] findFire()
 - [] moveToPossibleFireLocation
 - [] moveForwardSetDistance w/ Ultrasonic feedback
@@ -109,27 +109,8 @@ void setup() {
                      ultrasonic_back, controller, encoderA, encoderB);
 
     // main_engine.run();
+
     // main_engine.findFire();
-
-    // motor_pair.setupMotorPair();
-
-    // Coord current_position = main_engine.getGlobalPosition(Pose(Coord(-2, -2), NORTH));
-    // printCoord(current_position);
-                     // testRightTurn(255, 223);
-                     // testLeftTurn(230, 200);
-                     // testLeftTurn(200, 200);
-    // main_engine.run();
-
-    // main_engine.moveForwardSetDistance(30.0, NORTH);
-    // delay(1000);
-    // main_engine.moveBackwardSetDistance(30.0, NORTH);
-    // delay(500);
-    // main_engine.turnRight(EAST);
-    // delay(500);
-
-    // main_engine.moveForwardSetDistance(60.0, NORTH);
-
-    // motor_pair.stop();
 
 //  WORKING COMBINATIONS
     // main_engine.moveBackwardSetDistance(2.0, NORTH);
@@ -140,15 +121,15 @@ void setup() {
     // main_engine.moveBackwardSetDistance(4.0, WEST);
     // main_engine.turnLeft(SOUTH); //
     // main_engine.moveBackwardSetDistance(5.0, SOUTH);
-    // main_engine.turnLeft(EAST); //
+    // main_engine.turnLeft(EAST);
     // main_engine.moveBackwardSetDistance(5.0, EAST);
-    // main_engine.turnLeft(NORTH); //
+    // main_engine.turnLeft(NORTH);
     // main_engine.moveBackwardSetDistance(4.0, NORTH);
 
-    // main_engine.turnLeft(SOUTH); //
+    // main_engine.turnLeft(SOUTH);
     // main_engine.moveForwardSetDistance(60.0, SOUTH);
-    // main_engine.turnLeft(EAST); //
-    // main_engine.turnLeft(NORTH); //
+    // main_engine.turnLeft(EAST);
+    // main_engine.turnLeft(NORTH);
     // main_engine.turnRight(EAST);
 
     // main_engine.turnRight(EAST);
@@ -158,7 +139,6 @@ void setup() {
     // main_engine.turnRight(NORTH);
     // main_engine.turnRight();
 
-
     // testMoveForward(180, 160);
     // testLeftTurn(255, 223);
     // testRightTurn(255, 223);
@@ -166,7 +146,7 @@ void setup() {
     // main_engine.turnLeft();
     // motor_pair.stop();
 
-    // EXECUTE INSTRUCTIONS TEST----
+    //// EXECUTE INSTRUCTIONS TEST ////
     // Orientation finish_ori = NORTH;
     // Queue<Instruction> ins;
     // ins.push(ROTATE_LEFT);
@@ -176,6 +156,7 @@ void setup() {
     // main_engine.executeInstructions(ins, finish_ori);
     // main_engine.mapBlockTerrainInFront(main_engine.m_global_map, Pose(Coord(4,3), EAST), 0.0, Coord(4,4));
 
+    //// TEST LANDMARK DETECTION ////
     // Pose our_pose(Coord(4,4), WEST);
     // main_engine.getPossibleLandmarks(main_engine.m_global_map, our_pose);
     // for(int i = 0; i < 6; i++) {
@@ -192,6 +173,11 @@ void setup() {
     //     }
     //     Serial.println("");
     // }
+
+    // Coord our_coord(Coord(4,4));
+    // Pose to_map(Coord(3,4), NORTH);
+    // main_engine.mapBlockLandmarkInFront(main_engine.m_global_map, to_map, our_coord);
+
 }
 
 int counter = 0;
@@ -206,11 +192,4 @@ void loop() {
     }
 
     counter ++;
-
-    // Serial.println(color_front.getStructureColor());
-
-    // Serial.println("Front: "); Serial.print(ultrasonic_front.getDistance());
-    // Serial.print(" Back: "); Serial.print(ultrasonic_back.getDistance());
-    // Serial.print(" Left: "); Serial.print(ultrasonic_left.getDistance());
-    // Serial.print(" Right: "); Serial.println(ultrasonic_right.getDistance());
 }
