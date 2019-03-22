@@ -38,14 +38,11 @@ Main::Main(MotorPair motor_pair, Imu imu_sensor, Color color_front, Color color_
 }
 
 void Main::init() {
-    // (0) Initialize sensors and actuators
-    // (1) Initialize map
-    // (2) Test Path Planning
-    // (3) Calibrate sensors
     Serial.println("Initializing Main Engine...");
+
     // Start the imu
     m_imu_sensor.begin();
-    Serial.println("Imu Sensor Reading");
+    Serial.println("Imu Started...");
 
     delay(1000);
 
@@ -86,25 +83,11 @@ void Main::init() {
     m_global_east_heading = m_global_north_heading + 90;
     m_global_south_heading = m_global_north_heading + 180;
     m_global_west_heading = m_global_north_heading + 270;
-
-    // Initialize timers
-    // Timer1.initialize(timer_micro_seconds); // Microseconds
-    // Timer1.attachInterrupt(updateActualSpeed);
-    /* Initialize Speed Control*/
-
-    // LED::onAndOff();
-    // LED::onAndOff();
-    // LED::onAndOff();
 }
 
-//TODO: This function will be run in the loop() function of the arduino (?)
-// OR just in the setup loop?
 // TODO: Add possible fail-safe that saves the last image of the main member function
 // and possibly reloads it based off of that value
 void Main::run() {
-
-    //TODO: Store next tasks in a different data structure than a queue,
-    // because only putting out the fire needs to be done first
     while (!allTasksCompleted()) {
         Task task = getNextTask();
 
@@ -1033,9 +1016,9 @@ void Main::moveForwardSetDistance(double distance, Orientation orientation) {
 
     // Validate Ultrasonic readings, use a stable value
 
-    // while (abs(end_distance - m_ultrasonic_front.getDistance()) >= 1.5) {
-        // double dist_to_travel = (m_ultrasonic_front.getDistance() - end_distance)/distance_per_tick;
-        long dist_to_travel = distance/distance_per_tick;
+    while (abs(end_distance - m_ultrasonic_front.getDistance()) >= 1.5) {
+        double dist_to_travel = (m_ultrasonic_front.getDistance() - end_distance)/distance_per_tick;
+        // long dist_to_travel = distance/distance_per_tick;
 
         // Serial.print("New Distance to travel: "); Serial.println(dist_to_travel);
         // Track each wheel separately
@@ -1045,7 +1028,7 @@ void Main::moveForwardSetDistance(double distance, Orientation orientation) {
             // Serial.println(abs(m_encoder_B.read()));
             m_controller.driveStraightController(start_heading, m_imu_sensor.getEuler().x(), 220);
         }
-    // }
+    }
 
     m_motor_pair.stop();
 }
@@ -1073,8 +1056,8 @@ void Main::moveBackwardSetDistance(double distance, Orientation orientation) {
 
     // Validate Ultrasonic readings, use a stable value
 
-    // while (abs(end_distance - m_ultrasonic_front.getDistance()) >= 1.5) {
-    //     double dist_to_travel = (m_ultrasonic_front.getDistance() - end_distance)/distance_per_tick;
+    while (abs(end_distance - m_ultrasonic_back.getDistance()) >= 1.5) {
+        double dist_to_travel = (m_ultrasonic_front.getDistance() - end_distance)/distance_per_tick;
     //     Serial.print("New Distance to travel: "); Serial.println(dist_to_travel);
         // Track each wheel separately
         // Map distance to number of ticks that need to be range
@@ -1085,7 +1068,7 @@ void Main::moveBackwardSetDistance(double distance, Orientation orientation) {
             m_controller.driveStraightController(start_heading, m_imu_sensor.getEuler().x(), -190);
         }
         Serial.print("Error: ");Serial.println(m_global_north_heading - m_imu_sensor.getEuler().x());
-    // }
+    }
 
     m_motor_pair.stop();
 }
