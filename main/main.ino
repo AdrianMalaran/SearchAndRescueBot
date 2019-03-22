@@ -93,6 +93,9 @@ TEST PRIORITY:
 - [x] findFire()
 - [] moveToPossibleFireLocation
 - [] moveForwardSetDistance w/ Ultrasonic feedback
+
+- [] gotoClosestPossibleLandmark()
+- [] gotoClosestPossibleFood()
 */
 
 /**************
@@ -119,22 +122,19 @@ void setup() {
         { MP, MW, MP, MP, MS, MP}, // 4
         { MP, MP, MG, MP, MP, MP}  // 5
     };
-
-    Serial.println("Before: ");
+    Serial.println("Unmapped block: ");
     main_engine.setCorrectMap(testgrid);
     printMap(main_engine.m_global_map);
-
     printSearchedMap(main_engine.m_global_map);
-
     main_engine.m_global_map[3][3].searched = true;
-
     main_engine.getPossibleLandmarks(main_engine.m_global_map, Pose(Coord(3,3), NORTH));
-
+    main_engine.updateLocation(Pose(Coord(3,3), NORTH));
     printSearchedMap(main_engine.m_global_map);
-
-    main_engine.engageExploreMode();
+    // main_engine.engageExploreMode();
+    main_engine.checkClosestSandBlock();
     // main_engine.run();
 
+    // main_engine.moveForwardSetDistance(30.0, NORTH);
 
     // main_engine.findFire();
 

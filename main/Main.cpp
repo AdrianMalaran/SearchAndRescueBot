@@ -152,10 +152,14 @@ void Main::engageExploreMode() {
     Serial.println("Enaging Explore Mode!");
 
     // MapLocation location_of_interest(UNKNOWN); // Initialize to unknown block
+    // Initialize to an "unsearched block"
     MapLocation unsearched_type_location(PARTICLE, false , NONE, false);
+    unsearched_type_location.searched = false;
 
     Orientation finish_ori = DONTCARE;
 
+    Serial.println("Printing global searched map: ");
+    printSearchedMap(m_global_map);
     Coord closest_block;
     //TODO: this is returning a closest_block_to_inteserest that returns a don't care orientation
     Coord explore_block = findClosestBlockToInterest(m_global_map, closest_block, unsearched_type_location, m_current_pose.coord, finish_ori);
@@ -305,30 +309,37 @@ void Main::investigateClosestLandmark() {
     // Try to find the food first
     // then try to find the peoples, that'll be most efficient
     bool can_travel_to_possible_food = false;
+    Serial.println("Food not found yet, FIND food");
+
     if (!m_found_food) {
-        Serial.println("No path to possible food");
+        Serial.println("No possible path to food");
         can_travel_to_possible_food = checkClosestSandBlock();
     }
 
     bool can_travel_to_closest_landmark = gotoClosestPossibleLandmark();
     if (!can_travel_to_closest_landmark) {
+        //TODO: Test this next
         Serial.println("No path to possible landmark");
     }
 
+    Serial.println("No path to possible landmarks");
     // Engage Explore mode otherwise
     engageExploreMode();
 }
 
 // Returns false if there are no possible paths to any sandblocks as of right now
 bool Main::checkClosestSandBlock() {
-    MapLocation location_sand_block_type(SAND, true, FOOD); // Initialize to unknown block
+    MapLocation location_sand_block_type(SAND, true, NONE); // Initialize to unknown block
+
     Orientation finish_ori = DONTCARE;
     Coord sand_block;
     Coord closest_sand_block_adjacent = findClosestBlockToInterest(m_global_map, sand_block, location_sand_block_type, m_current_pose.coord, finish_ori);
-    Serial.print("Closest Sand Block: "); printCoord(closest_sand_block_adjacent); Serial.println("");
+    Serial.print("Closest Sand Block: "); printCoord(sand_block); Serial.println("");
+    Serial.print(" Closest adjacent sand Block: "); printCoord(sand_block); Serial.println("");
 
     if (!isValid(closest_sand_block_adjacent)) { // No path found
         // Signal that there are no paths to the closest possible sand block
+        Serial.println("Not a valid sand block location");
         return false;
     }
 
@@ -340,6 +351,7 @@ bool Main::checkClosestSandBlock() {
     return true;
 }
 
+//
 bool Main::gotoClosestPossibleLandmark() {
     MapLocation location_possible_land_mark_type(LANDMARK, true, NONE); // Initialize to unknown block
     // location_possible_land_mark_type.possible_land_mark = true;
@@ -580,9 +592,15 @@ void Main::checkForFood(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL],
                         double start_mag) {
     MapLocation& map_location = global_map[block_to_map.row][block_to_map.col];
 
+    Serial.println("Checking for food at "); printCoord(block_to_map);
     map_location.food_searched = true;
 
+    moveForwardSetDistance(7.0, m_current_pose.orientation);
+    Serial.print("Start mag: "); Serial.println(start_mag);
+    Serial.print(" Mag value "); Serial.println(m_imu_sensor.getMag().z());
+
     if (map_location.block_type == SAND && isFood(start_mag)) {
+        Serial.print("FOOD FOUND @ "); printCoord(block_to_map); Serial.println("!!!!");
         m_found_food = true;
         m_food_location = block_to_map;
 
@@ -594,7 +612,11 @@ void Main::checkForFood(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL],
         if (m_found_people) {
             m_deliver_food_to_group = true;
         }
+    } else {
+        Serial.println("FOOD NOT FOUND, KEEP LOOKING..");
     }
+
+    moveBackwardSetDistance(7.0, m_current_pose.orientation);
 }
 
 void Main::checkForLandMark(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL],
@@ -661,7 +683,7 @@ void Main::mapBlockLandmarkInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_
     // return;
     Serial.println("Map block landmark in front...");
     double dist_to_possible_landmark = m_ultrasonic_front.getDistance();
-    double dist_to_travel = dist_to_possible_landmark - (2 + FRONT_ARM_LENGTH);
+    double dist_to_travel = dist_to_possible_landmark - (3 + FRONT_ARM_LENGTH);
 
     delay(1000);
 
@@ -722,7 +744,8 @@ bool Main::isFood(double current_mag) {
     for(int i = 0; i < 1000; i++) {
         mag_sum+=m_imu_sensor.getMag().z();
     }
-    return (fabs(fabs(mag_sum/1000) - fabs(current_mag)) > 5);
+    Serial.print("Mag Value: ");Serial.print(mag_sum/1000.0);
+    return (fabs(fabs(mag_sum/1000.0) - fabs(current_mag)) > 15);
 }
 
 /***********************
@@ -837,6 +860,7 @@ bool Main::hasMatchingNeighbors(MapLocation global_map[][GLOBAL_COL],
     for (int i = 0; i < 4; i++) {
         //TODO: Replace 2nd condition with neighborMatchesCondition
         if (neighborMatchesCondition(global_map, location_of_interest, adjacent[i].coord)) {
+            Serial.print("Neighbor matches condition!"); printCoord(adjacent[i].coord); Serial.println("");
             dir_towards = adjacent[i].orientation;
             return true;
         }
@@ -853,26 +877,31 @@ bool Main::neighborMatchesCondition(MapLocation global_map[][GLOBAL_COL],
 
     // EXPLORE MODE | Block w/ unknown neighbor
     // UPDATE: This function will almost never be used
-    if (location_of_interest.block_type == UNKNOWN)
+    if (location_of_interest.block_type == UNKNOWN) {
         return (global_map[coord.row][coord.col].block_type == UNKNOWN);
-
-    if (location_of_interest.block_type == SAND)
-        return (global_map[coord.row][coord.col].food_searched == false);
-
-    //TODO: that this check takes priority over searched flag, possibly a redundant flag
-    if (location_of_interest.possible_land_mark) {
-        return (global_map[coord.row][coord.col].possible_land_mark == true);
     }
-    // UPDATE: New mapping function to make sure that this undiscovered
-    // TODO: Possibly update the m_global_map to already have filtered the gravel/sandblocks
-    // to not have possible landmarks
-    if (location_of_interest.searched == false) {
-        return (global_map[coord.row][coord.col].searched == false);
+
+    if (location_of_interest.block_type == SAND) {
+        Serial.println("Found a sand block neighbor...");
+        return (global_map[coord.row][coord.col].food_searched == false &&
+                global_map[coord.row][coord.col].block_type == SAND);
     }
 
     // OBJECTIVE MODE | Block w/ location of interest
     if (location_of_interest.land_mark_spot) {
-        return (global_map[coord.row][coord.col].landmark == location_of_interest.landmark);
+        Serial.println("Returning a land_mark_spot block neighbor");
+        // return (global_map[coord.row][coord.col].landmark == location_of_interest.landmark);
+        return (global_map[coord.row][coord.col].land_mark_spot == location_of_interest.land_mark_spot &&
+                global_map[coord.row][coord.col].searched == false);
+    }
+
+    // UPDATE: New mapping function to make sure that this undiscovered
+    // TODO: Possibly update the m_global_map to already have filtered the gravel/sandblocks
+    // to not have possible landmarks
+    if (location_of_interest.searched == false) {
+        Serial.println("Returning a unsearched block neighbor");
+        printCoord(coord); Serial.println("");
+        return (global_map[coord.row][coord.col].searched == false);
     }
 
     return false;
@@ -1036,7 +1065,7 @@ void Main::moveForwardSetDistance(double distance, Orientation orientation) {
 
     // Validate Ultrasonic readings, use a stable value
 
-    while (abs(end_distance - m_ultrasonic_front.getDistance()) >= 1.5) {
+    while (m_ultrasonic_front.getDistance() > end_distance) {
         double dist_to_travel = (m_ultrasonic_front.getDistance() - end_distance)/distance_per_tick;
         // long dist_to_travel = distance/distance_per_tick;
 
@@ -1046,9 +1075,9 @@ void Main::moveForwardSetDistance(double distance, Orientation orientation) {
         // Encoder A and B should travel the same number of ticks
         while (abs(m_encoder_A.read() - start_tick_a) < dist_to_travel && abs(m_encoder_B.read() - start_tick_b) < dist_to_travel) {
             // Serial.println(abs(m_encoder_B.read()));
-            m_controller.driveStraightController(start_heading, m_imu_sensor.getEuler().x(), 220);
+            m_controller.driveStraightController(start_heading, m_imu_sensor.getEuler().x(), 240);
         }
-        break;
+        // break;
     }
     Serial.println("Moved forward "); Serial.print(distance); Serial.println(" cm.");
 

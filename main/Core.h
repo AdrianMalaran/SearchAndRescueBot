@@ -84,7 +84,6 @@ struct MapLocation {
 
     bool searched = false;
     bool land_mark_spot = false;
-    bool possible_land_mark = false;
     bool food_searched = false;
 
     Landmark landmark = NONE;
