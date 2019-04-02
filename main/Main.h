@@ -16,47 +16,6 @@
 #include <avr/sleep.h>
 
 #include <TimerOne.h>
-/*
-    PRIORITY LIST:
-    - Add motor encoders
-    - Get point turn working (TURN LEFT/TURN RIGHT)
-
-    PERIPHERAL
-    - Localization function
-    - Validating/Invalidating the ultra-sonic values
-
-    - Validate electrical components:
-        - Ultrasonic sensors
-        - Color sensors
-        - IMU
-        - Motors
-        - Motor Encoders
-        - LED
-
-    TODO:
-    - Add Localization (when lost, use ultrasonic sensors to reorient oneself)
-    - Add Speed Controller (requires motor encoders)
-    - Add a getHeading() to fix itself to before driving straight, and thats our desired direction
-    - Possibly add fail-safe if the current heading is necessary (TEST to see if the heading resets for some reason)
-    - Add an initialization function that orients true north, east, south, west within init() function
-    - Define locomotion to work with driveStraight(), turnLeft(), turnRight()
-    - For findClosestBlockToInterest, augment it to return the heading to where its supposed to get
-*/
-
-// const int encoderAPin1;
-// const int encoderAPin2;
-// const int encoderBPin1;
-// const int encoderBPin2;
-//
-// // Global Variables for encoders
-// extern double m_motor_speed_A;
-// extern double m_motor_speed_B;
-// extern long last_encA_value;
-// extern long last_encB_value;
-// extern long timer_micro_seconds;  // every 1 millisecond
-
-// extern Encoder m_encoder_A(19, 18);
-// extern Encoder m_encoder_B(2,3);
 
 /* Core Class */
 class Main {
@@ -76,7 +35,6 @@ class Main {
         bool taskIsMapped(Task task);
 
         double getTargetHeadingForOrientation(Orientation orientation);
-        void deliverFoodToGroup();
         bool isLandmarkAhead();
         void checkForLandMark(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Coord block_to_map, Pose pose);
         Coord getGlobalPosition(Orientation orientation);
@@ -86,7 +44,6 @@ class Main {
         void mapBlockTerrainInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose, double start_mag, Coord block_to_map);
         void mapBlockLandmarkInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose, Coord block_to_map);
         void runSearchInPlace();
-        // void mapLandMarkInFront(MapLocation (&global_map)[GLOBAL_ROW][GLOBAL_COL], Pose pose, double start_mag, Coord block_to_map);
         bool isFood(double mag, Orientation orientation);
         Landmark identifyLandMark();
 
@@ -95,7 +52,6 @@ class Main {
         void findCorrectMap();
         void setCorrectMap(MapLocation map[][GLOBAL_COL]);
 
-        //TODO: Implement these functions
         void travelToFood(MapLocation global_map[][GLOBAL_COL], Pose current_pose);
         Coord getClosestSandBlock(MapLocation global_map[][GLOBAL_COL], Coord current_loc); //TODO: Implement
 

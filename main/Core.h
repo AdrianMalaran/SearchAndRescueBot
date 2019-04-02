@@ -259,7 +259,7 @@ const MapLocation MU(UNKNOWN);
 
 const MapLocation potential_map1[GLOBAL_ROW][GLOBAL_COL] =
 {
-//    0, 1, 2, 3, 4, 5
+//    0,  1,  2,  3,  4,  5
     { MP, MP, MP, MW, MP, MP}, // 0
     { MP, MS, MP, MP, MG, MP}, // 1
     { MG, MP, MP, MP, MP, MP}, // 2

@@ -112,16 +112,16 @@ void setup() {
                      ultrasonic_back, controller, encoderA, encoderB);
 
     // Testing individual functions
-    // MapLocation testgrid[GLOBAL_ROW][GLOBAL_COL] =
-    // {
-    // //    0, 1, 2, 3, 4, 5
-    //     { MP, MP, MP, MW, MP, MP}, // 0
-    //     { MP, MS, MP, MP, MG, MP}, // 1
-    //     { MG, MP, MP, MP, MP, MP}, // 2
-    //     { MP, MP, MS, MP, MP, MW}, // 3
-    //     { MP, MW, MP, MP, MS, MP}, // 4
-    //     { MP, MP, MG, MP, MP, MP}  // 5
-    // };
+    MapLocation testgrid[GLOBAL_ROW][GLOBAL_COL] =
+    {
+    //    0,  1,  2,  3,  4,  5
+        { MP, MP, MP, MW, MP, MP}, // 0
+        { MP, MS, MP, MP, MG, MP}, // 1
+        { MG, MP, MP, MP, MP, MP}, // 2
+        { MP, MP, MS, MP, MP, MW}, // 3
+        { MP, MW, MP, MP, MS, MP}, // 4
+        { MP, MP, MG, MP, MP, MP}  // 5
+    };
     // Serial.println("Unmapped block: ");
     // main_engine.setCorrectMap(testgrid);
     // printMap(main_engine.m_global_map);
@@ -136,59 +136,44 @@ void setup() {
     // main_engine.turnLeft(WEST);
     // main_engine.moveBackwardSetDistance(6.8, WEST);
     //
-    // main_engine.moveForwardSetDistance(4.0, NORTH);
+    // main_engine.moveForwardSetDistance(40.0, NORTH);
     // main_engine.turnRight(EAST);
-
-
-    // main_engine.mapBlockLandmarkInFront(testgrid, Pose(Coord(0,0), NORTH), Coord(2,3));
-
-    // main_engine.moveForwardSetDistance(60.0, NORTH);
+    // main_engine.turnLeft(WEST);
 
     // double start_mag = imu_sensor.getMag().z();
-    // main_engine.checkForFood(testgrid, Coord(3,2), start_mag);
+    // main_engine.checkForFood(testgrid, Coord(3,2), start_mag, NORTH);
 
-
+    /*************************
+    * MAIN ENGINE RUN FUNCTION
+    **************************/
     main_engine.run();
 
-    // main_engine.moveForwardSetDistance(30.0, NORTH);
-
-    // main_engine.findFire();
-
-    // testMoveForward(255, 255);
-
-//  WORKING COMBINATIONS
-    // main_engine.moveBackwardSetDistance(2.0, NORTH);
-    // delay(1000);
-    // main_engine.turnLeft(WEST); //
-    // delay(1000);
-    // main_engine.moveBackwardSetDistance(4.0, WEST);
-    // main_engine.moveBackwardSetDistance(4.0, WEST);
-    // main_engine.turnLeft(SOUTH); //
-    // main_engine.moveBackwardSetDistance(5.0, SOUTH);
-    // main_engine.turnLeft(EAST);
-    // main_engine.moveBackwardSetDistance(5.0, EAST);
-    // main_engine.turnLeft(NORTH);
-    // main_engine.moveBackwardSetDistance(4.0, NORTH);
-
+    /*************************
+    * SHOW LOCOMOTION FUNCTIONS
+    **************************/
+    // main_engine.moveForwardSetDistance(60.0, NORTH);
+    // main_engine.turnLeft(WEST);
     // main_engine.turnLeft(SOUTH);
     // main_engine.moveForwardSetDistance(60.0, SOUTH);
     // main_engine.turnLeft(EAST);
     // main_engine.turnLeft(NORTH);
-    // main_engine.turnRight(EAST);
 
-    // main_engine.turnRight(EAST);
-    // main_engine.turnRight(SOUTH);
-    // main_engine.moveForwardSetDistance(90.0);
-    // main_engine.turnRight(WEST);
-    // main_engine.turnRight(NORTH);
-    // main_engine.turnRight();
+    /*************************
+    * FIND FIRE
+    **************************/
+    // main_engine.findFire();
 
-    // testMoveForward(180, 160);
-    // testLeftTurn(255, 223);
-    // testRightTurn(255, 223);
-    // main_engine.moveForwardOneBlock(60.0);
-    // main_engine.turnLeft();
-    // motor_pair.stop();
+    /*************************
+    * FIND FOOD
+    **************************/
+    // double start_mag = imu_sensor.getMag().z();
+    // main_engine.checkForFood(testgrid, Coord(3,2), start_mag, NORTH);
+
+    /*************************
+    * MAP LANDMARK IN FRONT
+    **************************/
+    // main_engine.mapBlockLandmarkInFront(testgrid, Pose(Coord(0,0), NORTH), Coord(2,3));
+
 
     //// EXECUTE INSTRUCTIONS TEST ////
     // Orientation finish_ori = NORTH;
@@ -199,6 +184,8 @@ void setup() {
     // ins.push(ROTATE_RIGHT);
     // main_engine.executeInstructions(ins, finish_ori);
     // main_engine.mapBlockTerrainInFront(main_engine.m_global_map, Pose(Coord(4,3), EAST), 0.0, Coord(4,4));
+
+    // testLeftTurn(255, 255);
 
     //// TEST LANDMARK DETECTION ////
     // Pose our_pose(Coord(4,4), WEST);
@@ -217,11 +204,7 @@ void setup() {
     //     }
     //     Serial.println("");
     // }
-
-    // Coord our_coord(Coord(4,4));
-    // Pose to_map(Coord(3,4), NORTH);
-    // main_engine.mapBlockLandmarkInFront(main_engine.m_global_map, to_map, our_coord);
-
+    Fan fan();
 }
 
 int counter = 0;
@@ -235,7 +218,21 @@ void loop() {
         counter = 0;
     }
 
-    // Serial.println(ultrasonic_right.getDistance());
+    if (Flame::getFireMagnitude() > 0) {
+        Serial.println(Flame::getFireMagnitude());
+        Fan::on();
+
+        delay(5000);
+
+        Fan::off();
+    }
+
+    // Serial.print("Ultrasonic Front: "); Serial.print(ultrasonic_front.getDistance()); Serial.print(" ");
+    // Serial.print("Ultrasonic Back: "); Serial.print(ultrasonic_back.getDistance()); Serial.print(" ");
+    // Serial.print("Ultrasonic Right: "); Serial.print(ultrasonic_right.getDistance()); Serial.print(" ");
+    // Serial.print("Ultrasonic Left: "); Serial.print(ultrasonic_left.getDistance()); Serial.println(" ");
+    //
+    // Serial.print("IMU: "); Serial.println(imu_sensor.getEuler().x());
 
     counter ++;
 }

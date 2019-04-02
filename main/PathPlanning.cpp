@@ -162,7 +162,6 @@ static Stack<Coord> PathPlanning::findShortestPath(MapLocation grid[][GLOBAL_COL
     }
 
     // ERROR CODE
-    // TODO: How should we handle this?
     path.push(Coord(-1, -1));
     return path;
 }
@@ -181,9 +180,6 @@ static void PathPlanning::addReorientation(Queue<Instruction>& instructions,
 
     int diff = curr_orientation - new_orientation;
     if (fabs(diff) == 2) {
-        // Opposite direction
-        // TODO: Consider having another maneuver called: turn around
-        // TODO: This is so ugly, redo this shit
         instructions.push(ROTATE_LEFT);
         instructions.push(ROTATE_LEFT);
     } else {

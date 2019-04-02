@@ -15,7 +15,7 @@ void Controller::headingControl(double &pwm_a, double &pwm_b, double desired_hea
     //     return;
     // }
 
-    double Kp = 35;
+    double Kp = 15;
     double Ki = 0.0;
 
     if (nominal_pwm < 0)

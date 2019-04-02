@@ -22,8 +22,8 @@ const int input2 = 28;
 
 // Motor B
 const int enable_b = 10;
-const int input3 = 30;
-const int input4 = 31;
+const int input3 = 31;
+const int input4 = 30;
 
 // standby pin
 const int stand_by = 34;
